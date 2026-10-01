@@ -24,6 +24,7 @@ export class ReadingListOptionsElement extends LitElement {
       h1 {
         margin: 0;
         font-size: 28px;
+        font-weight: var(--weight-heading);
         letter-spacing: -0.04em;
       }
       .lead {
@@ -40,7 +41,8 @@ export class ReadingListOptionsElement extends LitElement {
       }
       h2 {
         margin: 0 0 15px;
-        font-size: 17px;
+        font-size: 19px;
+        font-weight: var(--weight-medium);
       }
       p {
         line-height: 1.5;
@@ -66,11 +68,6 @@ export class ReadingListOptionsElement extends LitElement {
         border-radius: var(--radius-sm);
         background: var(--color-bg);
         color: var(--color-text);
-      }
-      input[type='checkbox'] {
-        accent-color: var(--color-accent);
-        width: 18px;
-        height: 18px;
       }
       button {
         display: inline-flex;
@@ -106,6 +103,9 @@ export class ReadingListOptionsElement extends LitElement {
       }
       .preview p {
         margin-top: 0;
+      }
+      .preview strong {
+        font-weight: var(--weight-heading);
       }
       .preview label {
         display: flex;
@@ -194,6 +194,8 @@ export class ReadingListOptionsElement extends LitElement {
                 ><span>Open links in a new tab</span
                 ><input
                   type="checkbox"
+                  role="switch"
+                  class="switch"
                   .checked=${this.settings.openNewTab}
                   @change=${(event: Event) =>
                     this.updateSetting(
@@ -205,6 +207,8 @@ export class ReadingListOptionsElement extends LitElement {
                 ><span>Show viewed pages</span
                 ><input
                   type="checkbox"
+                  role="switch"
+                  class="switch"
                   .checked=${this.settings.viewAll}
                   @change=${(event: Event) =>
                     this.updateSetting(
@@ -228,22 +232,23 @@ export class ReadingListOptionsElement extends LitElement {
                   <option value="title">Title</option>
                 </select></label
               >
-              <label class="row"
-                ><span>Direction</span
-                ><select
-                  .value=${this.settings.sortOrder}
-                  ?disabled=${this.settings.sortOption === 'manual'}
-                  @change=${(event: Event) =>
-                    this.updateSetting(
-                      'sortOrder',
-                      (event.target as HTMLSelectElement)
-                        .value as ReadingListSettings['sortOrder'],
-                    )}
-                >
-                  <option value="down">Descending</option>
-                  <option value="up">Ascending</option>
-                </select></label
-              >
+              ${this.settings.sortOption === 'manual'
+                ? ''
+                : html`<label class="row"
+                    ><span>Direction</span
+                    ><select
+                      .value=${this.settings.sortOrder}
+                      @change=${(event: Event) =>
+                        this.updateSetting(
+                          'sortOrder',
+                          (event.target as HTMLSelectElement)
+                            .value as ReadingListSettings['sortOrder'],
+                        )}
+                    >
+                      <option value="down">Descending</option>
+                      <option value="up">Ascending</option>
+                    </select></label
+                  >`}
             </section>
             <section>
               <h2>Storage and recovery</h2>
@@ -291,6 +296,8 @@ export class ReadingListOptionsElement extends LitElement {
                       ? html`<label
                           ><input
                             type="checkbox"
+                            role="switch"
+                            class="switch"
                             .checked=${this.restoreSettings}
                             @change=${(event: Event) =>
                               (this.restoreSettings = (
