@@ -30,6 +30,48 @@ import {
 import type { ReadingListItemElement } from './reading-list-item.js';
 import './reading-list-item.js';
 
+// Temporary review surface. Turn off after the notification wording is approved.
+const SHOW_NOTIFICATION_REVIEW = true;
+const NOTIFICATION_PREVIEWS = [
+  { id: 'live', label: 'Live notification', text: '', warning: false },
+  {
+    id: 'local',
+    label: 'Saved only here',
+    text: '1 page saved only on this device.',
+    warning: true,
+  },
+  {
+    id: 'sync',
+    label: 'Sync unavailable',
+    text: 'Chrome sync is unavailable. Your local list is shown.',
+    warning: true,
+  },
+  {
+    id: 'conflict',
+    label: 'Conflict',
+    text: '1 conflicting version kept in backup data.',
+    warning: true,
+  },
+  {
+    id: 'retry',
+    label: 'Retry result',
+    text: '0 written to Chrome sync storage; 1 saved only on this device.',
+    warning: false,
+  },
+  {
+    id: 'save-error',
+    label: 'Save error',
+    text: 'Could not save this page.',
+    warning: false,
+  },
+  {
+    id: 'restore-error',
+    label: 'Undo error',
+    text: 'Could not restore the page. Try Undo again.',
+    warning: false,
+  },
+] as const;
+
 @customElement('reading-list-app')
 export class ReadingListAppElement extends LitElement {
   static override styles = [
@@ -135,6 +177,23 @@ export class ReadingListAppElement extends LitElement {
         padding: 6px var(--content-gutter);
         color: var(--color-muted);
         font-size: var(--text-xs);
+      }
+      .review-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 6px var(--content-gutter) 0;
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+      }
+      .review-controls select {
+        max-width: 170px;
+        padding: 4px 6px;
+        border: 1px solid var(--color-line);
+        border-radius: 6px;
+        background: var(--color-surface);
+        color: var(--color-text);
       }
       .list-head {
         position: relative;
@@ -638,6 +697,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private sortOpen = false;
   @state() private sortClosing = false;
   @state() private message = '';
+  @state() private reviewChoice = 'live';
   @state() private justSaved = false;
   @state() private recentlySavedUrl: string | null = null;
   @state() private loadError = false;
@@ -694,7 +754,15 @@ export class ReadingListAppElement extends LitElement {
   }
   private onSystemTheme = () => this.applyTheme();
   private onKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.searchOpen) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.closeSearch();
+      return;
+    }
     if (event.key === 'Escape' && this.sortOpen) {
+      event.preventDefault();
+      event.stopPropagation();
       this.closeSort();
       this.focusSort();
     }
@@ -829,6 +897,25 @@ export class ReadingListAppElement extends LitElement {
       );
     return parts.join(' ');
   }
+  private get reviewNotice(): { text: string; warning: boolean } {
+    const sample = NOTIFICATION_PREVIEWS.find(
+      (item) => item.id === this.reviewChoice,
+    );
+    if (sample && sample.id !== 'live') return sample;
+    if (this.message) return { text: this.message, warning: false };
+    if (this.infoToast) return { text: this.infoToast, warning: false };
+    if (this.deleted)
+      return {
+        text: `${this.hostname(this.deleted.url)} deleted`,
+        warning: false,
+      };
+    if (this.justSaved) return { text: 'Page saved', warning: false };
+    if (this.warningText) return { text: this.warningText, warning: true };
+    return {
+      text: 'No active notification. Choose an example or use the popup.',
+      warning: false,
+    };
+  }
   private get sortLabel() {
     const mode = { manual: 'Manual', date: 'Date', title: 'Title' }[
       this.settings.sortOption
@@ -866,7 +953,34 @@ export class ReadingListAppElement extends LitElement {
             ><button @click=${this.retrySync}>Retry</button>
           </div>`
         : ''}
-      ${this.message
+      ${SHOW_NOTIFICATION_REVIEW
+        ? html`
+            <div class="review-controls">
+              <span>Notification review</span
+              ><select
+                aria-label="Preview notification"
+                .value=${this.reviewChoice}
+                @change=${(event: Event) =>
+                  (this.reviewChoice = (
+                    event.target as HTMLSelectElement
+                  ).value)}
+              >
+                ${NOTIFICATION_PREVIEWS.map(
+                  (item) =>
+                    html`<option value=${item.id}>${item.label}</option>`,
+                )}
+              </select>
+            </div>
+            ${this.reviewNotice.warning
+              ? html`<div class="warning review-notice" role="status">
+                  <span>${this.reviewNotice.text}</span>
+                </div>`
+              : html`<p class="feedback review-notice" role="status">
+                  ${this.reviewNotice.text}
+                </p>`}
+          `
+        : ''}
+      ${!SHOW_NOTIFICATION_REVIEW && this.message
         ? html`<p class="feedback" role="status">${this.message}</p>`
         : ''}
       ${this.items !== null && this.items.length
@@ -1286,6 +1400,7 @@ export class ReadingListAppElement extends LitElement {
   }
   private searchKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
+      event.preventDefault();
       event.stopPropagation();
       this.closeSearch();
     }

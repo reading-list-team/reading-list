@@ -99,6 +99,18 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   assert.match(root.textContent, /Save your first page/);
   app.items = initial;
   await update();
+  const preview = root.querySelector('.review-controls select');
+  assert.equal(preview.options.length, 7);
+  preview.value = 'local';
+  preview.dispatchEvent(new window.Event('change', { bubbles: true }));
+  await update();
+  assert.match(
+    root.querySelector('.review-notice').textContent,
+    /saved only on this device/,
+  );
+  preview.value = 'live';
+  preview.dispatchEvent(new window.Event('change', { bubbles: true }));
+  await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
   assert.equal(
     root.querySelector('reading-list-item').hasAttribute('last'),
@@ -149,13 +161,14 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   field.dispatchEvent(new window.InputEvent('input', { bubbles: true }));
   await update();
   assert.match(root.textContent, /No pages found/);
-  field.dispatchEvent(
-    new window.KeyboardEvent('keydown', {
-      key: 'Escape',
-      bubbles: true,
-      composed: true,
-    }),
-  );
+  const escapeSearch = new window.KeyboardEvent('keydown', {
+    key: 'Escape',
+    bubbles: true,
+    composed: true,
+    cancelable: true,
+  });
+  field.dispatchEvent(escapeSearch);
+  assert.equal(escapeSearch.defaultPrevented, true);
   await update();
   assert.equal(app.searchOpen, false);
   assert.equal(app.searchClosing, true);
@@ -289,7 +302,7 @@ test('Enter saves an inline edit and Undo restores one deleted page', async () =
   await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
   assert.equal(root.querySelector('reading-list-item').name, 'Updated title');
-  assert.equal(root.querySelector('.feedback'), null);
+  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
   assert.equal(
     app.constructor.styles[0].cssText.includes('prefers-reduced-motion'),
     true,
@@ -395,7 +408,7 @@ test('A saves the current page but does not fire while editing text', async () =
     root.querySelector('reading-list-item[recently-saved]')?.href,
     scrolledUrl,
   );
-  assert.equal(root.querySelector('.feedback'), null);
+  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
   assert.equal(root.querySelector('.save').classList.contains('saved'), true);
   assert.match(
     root.querySelector('.visually-hidden[role="status"]').textContent,
@@ -438,7 +451,8 @@ test('Undo toast overlays the footer, pauses on hover, and dismisses with X', as
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   assert.match(root.querySelector('.info').textContent, /URL copied/);
-  assert.equal(root.querySelector('.feedback'), null);
+  assert.match(root.querySelector('.review-notice').textContent, /URL copied/);
+  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
   row.shadowRoot.querySelector('[title="Delete"]').click();
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
