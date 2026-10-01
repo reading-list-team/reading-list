@@ -257,6 +257,9 @@ export class ReadingListAppElement extends LitElement {
   importPreview: ImportPreview | null = null;
 
   @state()
+  importSettingsSelected = false;
+
+  @state()
   localOnlyCount = 0;
 
   @state()
@@ -379,6 +382,14 @@ export class ReadingListAppElement extends LitElement {
               ${this.importPreview.skipped} other or invalid records skipped.
               Existing pages will be kept.
             </p>
+            ${this.importPreview.settings
+              ? html`<label>
+                  <input type="checkbox" .checked=${this.importSettingsSelected}
+                    @change=${(event: Event) => {
+                      this.importSettingsSelected = (event.target as HTMLInputElement).checked;
+                    }} />Also restore settings from this backup
+                </label>`
+              : ''}
             <div class="backup-actions">
               <button type="button" @click=${this._confirmImport}>Import pages</button>
               <button type="button" @click=${this._cancelImport}>Cancel</button>
@@ -421,6 +432,7 @@ export class ReadingListAppElement extends LitElement {
     if (!file) return;
     try {
       this.importPreview = parseBackup(await file.text());
+      this.importSettingsSelected = false;
       this.statusText = '';
     } catch (error) {
       console.error(error);
@@ -437,9 +449,21 @@ export class ReadingListAppElement extends LitElement {
       const result = await rl.importItems(this.importPreview.items);
       this._listItems = await rl.getListItems();
       this.localOnlyCount = rl.localOnlyCount;
+      let settingsMessage = '';
+      if (this.importSettingsSelected && this.importPreview.settings) {
+        try {
+          await rl.saveSettings(this.importPreview.settings);
+          this.settings = this.importPreview.settings;
+          this.dataset.theme = this.settings.theme;
+          settingsMessage = ' Settings restored.';
+        } catch (error) {
+          console.error('Could not restore Reading List settings', error);
+          settingsMessage = ' Settings could not be restored.';
+        }
+      }
       this.statusText = `${result.imported} pages imported; ${result.alreadyPresent} already present. ${
         result.synced ? '' : 'Imported pages are saved on this device; Chrome sync is full or unavailable.'
-      }`;
+      }${settingsMessage}`;
       this.importPreview = null;
     } catch (error) {
       console.error(error);
