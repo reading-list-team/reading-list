@@ -40,3 +40,17 @@ export function mergeItem(
 ): StoredItem {
   return existing ? { ...existing, ...incoming } : { ...incoming };
 }
+
+export interface DeletionMarker {
+  url: string;
+  deletedAt: number;
+}
+
+export function isDeletionMarker(key: string, value: unknown): value is DeletionMarker {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const marker = value as Record<string, unknown>;
+  return marker.url === key &&
+    typeof marker.deletedAt === 'number' &&
+    Number.isFinite(marker.deletedAt) &&
+    !('addedAt' in marker);
+}

@@ -59,7 +59,7 @@ test('a failed remote deletion stays deleted after restart', async () => {
   const list = new RL();
   await list.getListItems();
 
-  sync.failRemove = true;
+  sync.failSet = true;
   assert.equal(await list.removeReadingItem(url), false);
   assert.deepEqual(await new RL().getListItems(), []);
   assert.deepEqual(sync.values[url], legacy);
@@ -93,6 +93,38 @@ test('remote updates reconcile, while missing sync entries cannot erase local da
   delete sync.values[url];
   assert.equal((await new RL().getListItems())[0].title, 'Remote title');
   assert.equal(local.values[`rl:v1:deleted:${url}`], undefined);
+});
+
+test('explicit v3.1 sync deletion hides an unchanged mirrored item', async () => {
+  const local = memoryArea();
+  const otherLocal = memoryArea();
+  const sync = memoryArea({ [url]: legacy });
+  globalThis.chrome = { storage: { local, sync } };
+  await new RL().getListItems();
+
+  globalThis.chrome = { storage: { local: otherLocal, sync } };
+  const deletingDevice = new RL();
+  await deletingDevice.getListItems();
+  assert.equal(await deletingDevice.removeReadingItem(url), true);
+  assert.deepEqual(sync.values[url].url, url);
+  assert.ok(sync.values[url].deletedAt);
+  assert.equal('addedAt' in sync.values[url], false);
+  globalThis.chrome = { storage: { local, sync } };
+  assert.deepEqual(await new RL().getListItems(), []);
+});
+
+test('remote deletion does not hide a newer local-only edit', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+  sync.failSet = true;
+  await list.updateTitle(url, 'Local edit');
+  sync.failSet = false;
+  sync.values[url] = { url, deletedAt: 300 };
+
+  assert.equal((await new RL().getListItems())[0].title, 'Local edit');
 });
 
 test('export keeps raw local and sync records; import merges without overwriting', async () => {
@@ -134,6 +166,17 @@ test('v2 settings migrate and edits keep their legacy sync shape', async () => {
   assert.equal(await list.saveSettings({ ...settings, sortOption: 'manual' }), true);
   assert.equal(sync.values.settings.sortOption, '');
   assert.equal(sync.values.settings.custom, 'keep');
+});
+
+test('a remote settings change updates an unchanged local copy', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ settings: { theme: 'light' } });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  assert.equal((await list.getSettings()).theme, 'light');
+
+  sync.values.settings = { theme: 'dark' };
+  assert.equal((await new RL().getSettings()).theme, 'dark');
 });
 
 test('manual movement and viewed status persist while retaining metadata', async () => {

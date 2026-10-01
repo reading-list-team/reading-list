@@ -209,7 +209,38 @@ export class ReadingListAppElement extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     document.title = i18n.getMessage('appName', 'Reading List');
+    chrome.storage.onChanged.addListener(this._onStorageChanged);
   }
+
+  override disconnectedCallback(): void {
+    chrome.storage.onChanged.removeListener(this._onStorageChanged);
+    if (this.syncRefreshTimer !== null) window.clearTimeout(this.syncRefreshTimer);
+    super.disconnectedCallback();
+  }
+
+  private syncRefreshTimer: number | null = null;
+
+  private _onStorageChanged = (
+    _changes: Record<string, chrome.storage.StorageChange>,
+    areaName: string,
+  ) => {
+    if (areaName !== 'sync') return;
+    if (this.syncRefreshTimer !== null) window.clearTimeout(this.syncRefreshTimer);
+    this.syncRefreshTimer = window.setTimeout(() => {
+      this.syncRefreshTimer = null;
+      void rl.refresh().then(async (items) => {
+        this._listItems = items;
+        this.settings = await rl.getSettings();
+        this.dataset.theme = this.settings.theme;
+        if (rl.localOnlyCount > 0 && !this.statusText) {
+          this.statusText = `${rl.localOnlyCount} pages are saved only on this device.`;
+        }
+      }).catch((error) => {
+        console.error('Could not refresh Reading List after sync change', error);
+        this.statusText = 'Chrome sync changed, but the list could not refresh.';
+      });
+    }, 100);
+  };
 
   @state()
   _listItems: ListItemData[] | null = null;

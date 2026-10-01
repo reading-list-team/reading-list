@@ -1,6 +1,7 @@
 import {
   classifyLegacySnapshot,
   isStoredItem,
+  isDeletionMarker,
   mergeItem,
   StoredItem,
 } from './storage-model.js';
@@ -31,6 +32,7 @@ const DELETED_PREFIX = 'rl:v1:deleted:';
 const SHADOW_PREFIX = 'rl:v1:sync-shadow:';
 const CONFLICT_PREFIX = 'rl:v1:conflict:';
 const SETTINGS_KEY = 'rl:v1:settings';
+const SETTINGS_SHADOW_KEY = 'rl:v1:settings-shadow';
 
 function sameItem(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -65,19 +67,35 @@ export class RL {
 
     const legacy = classifyLegacySnapshot(synced);
     this.syncRecords = synced;
+    if (this.syncAvailable && synced.settings) {
+      const remoteSettings = normalizeSettings(synced.settings, true);
+      const currentSettings = local[SETTINGS_KEY];
+      const settingsShadow = local[SETTINGS_SHADOW_KEY];
+      if (!currentSettings ||
+        (settingsShadow && sameItem(currentSettings, settingsShadow)) ||
+        (!settingsShadow && sameItem(currentSettings, DEFAULT_SETTINGS))) {
+        await chrome.storage.local.set({ [SETTINGS_KEY]: remoteSettings });
+      }
+      await chrome.storage.local.set({ [SETTINGS_SHADOW_KEY]: remoteSettings });
+    }
     for (const item of legacy.items) {
       const shadow = local[SHADOW_PREFIX + item.url];
       const current = items.get(item.url);
-      if (!local[DELETED_PREFIX + item.url]) {
+      const deletedAt = local[DELETED_PREFIX + item.url];
+      if (typeof deletedAt === 'number' && item.addedAt > deletedAt) {
+        await chrome.storage.local.set({
+          [ITEM_PREFIX + item.url]: item,
+          [DELETED_PREFIX + item.url]: false,
+        });
+        items.set(item.url, item);
+      }
+      if (!deletedAt) {
         if (!current || (shadow && sameItem(current, shadow))) {
           // A migration/reconciliation is complete only after the copy succeeds.
           await chrome.storage.local.set({ [ITEM_PREFIX + item.url]: item });
           items.set(item.url, item);
-        } else if (
-          shadow &&
-          !sameItem(item, shadow) &&
-          !sameItem(current, item)
-        ) {
+        } else if (current && !sameItem(current, item) &&
+          (!shadow || !sameItem(item, shadow))) {
           // Both devices changed the item. Keep the local version visible and
           // archive the remote version for export instead of discarding it.
           await chrome.storage.local.set({
@@ -86,6 +104,18 @@ export class RL {
         }
       }
       await chrome.storage.local.set({ [SHADOW_PREFIX + item.url]: item });
+    }
+
+    for (const [url, value] of Object.entries(synced)) {
+      if (!isDeletionMarker(url, value)) continue;
+      const current = items.get(url);
+      const shadow = local[SHADOW_PREFIX + url];
+      if (current && shadow && sameItem(current, shadow)) {
+        // This device has not edited the item since it last synced, so the
+        // explicit remote deletion can be applied without losing a local edit.
+        await chrome.storage.local.set({ [DELETED_PREFIX + url]: value.deletedAt });
+        items.delete(url);
+      }
     }
 
     for (const key of Object.keys(local)) {
@@ -116,6 +146,11 @@ export class RL {
     return [...this.list];
   }
 
+  async refresh(): Promise<ListItemData[]> {
+    this.loading = null;
+    return this.getListItems();
+  }
+
   async getSettings(): Promise<ReadingListSettings> {
     await this.ensureLoaded();
     const local = await chrome.storage.local.get(SETTINGS_KEY);
@@ -139,6 +174,7 @@ export class RL {
     try {
       await chrome.storage.sync.set({ settings: merged });
       this.syncRecords.settings = merged;
+      await chrome.storage.local.set({ [SETTINGS_SHADOW_KEY]: settings });
       return true;
     } catch (error) {
       console.error('Reading List settings saved locally but not synced', error);
@@ -242,11 +278,12 @@ export class RL {
     this.list = this.list.filter((item) => item.url !== url);
     let synced = false;
     try {
-      await chrome.storage.sync.remove(url);
+      const marker = { url, deletedAt: Date.now() };
+      await chrome.storage.sync.set({ [url]: marker });
       await chrome.storage.local.remove(SHADOW_PREFIX + url);
       synced = true;
       this.syncAvailable = true;
-      delete this.syncRecords[url];
+      this.syncRecords[url] = marker;
     } catch (error) {
       this.syncAvailable = false;
       console.error('Reading List deleted locally but could not sync', error);
