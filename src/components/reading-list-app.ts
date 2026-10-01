@@ -130,13 +130,27 @@ export class ReadingListAppElement extends LitElement {
     reading-list-item:not(:first-child) {
       margin-top: 0.5rem;
     }
+
+    .status {
+      margin: 0 0 0.5rem;
+      color: #555;
+    }
   `;
 
   constructor() {
     super();
-    rl.getListItems().then((listItems) => {
-      this._listItems = listItems;
-    });
+    rl.getListItems().then(
+      (listItems) => {
+        this._listItems = listItems;
+        if (!rl.isSyncAvailable) {
+          this.statusText = 'Chrome sync is unavailable. Your local list is shown.';
+        }
+      },
+      (error) => {
+        console.error(error);
+        this.statusText = 'Could not load your list. Please reopen Reading List.';
+      },
+    );
   }
 
   override connectedCallback(): void {
@@ -149,6 +163,9 @@ export class ReadingListAppElement extends LitElement {
 
   @state()
   searchQuery = '';
+
+  @state()
+  statusText = '';
 
   override render() {
     return html`
@@ -163,6 +180,10 @@ export class ReadingListAppElement extends LitElement {
           +
         </button>
       </header>
+
+      ${this.statusText
+        ? html`<p class="status" role="status">${this.statusText}</p>`
+        : ''}
 
       <search class="search">
         <label class="visually-hidden" for="list-search"
@@ -206,8 +227,16 @@ export class ReadingListAppElement extends LitElement {
   private async _onDeleteItemClicked(event: Event) {
     if (!this._listItems) return;
     const url = (event.target as ReadingListItemElement).href;
-    await rl.removeReadingItem(url);
-    this._listItems = this._listItems.filter((item) => item.url !== url);
+    try {
+      const synced = await rl.removeReadingItem(url);
+      this._listItems = this._listItems.filter((item) => item.url !== url);
+      this.statusText = synced
+        ? ''
+        : 'Removed on this device. Chrome sync is unavailable.';
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Could not remove this page. Please try again.';
+    }
   }
 
   private async _addReadingItem(url: string, title: string) {
@@ -215,16 +244,19 @@ export class ReadingListAppElement extends LitElement {
       const listItem: ListItemData = { url, title, addedAt: Date.now() };
 
       try {
-        await rl.addReadingItem(listItem);
+        const result = await rl.addReadingItem(listItem);
+        this._listItems = [
+          result.item,
+          ...this._listItems.filter((item) => item.url !== url),
+        ];
+        this.statusText = result.synced
+          ? 'Saved in Chrome sync storage.'
+          : 'Saved on this device. Chrome sync is unavailable or full.';
       } catch (e) {
         console.error(e);
+        this.statusText = 'Could not save this page. Please try again.';
         return;
       }
-
-      this._listItems = [
-        listItem,
-        ...this._listItems.filter((item) => item.url !== url),
-      ];
     }
   }
 

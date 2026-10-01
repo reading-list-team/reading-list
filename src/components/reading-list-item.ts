@@ -181,7 +181,12 @@ export class ReadingListItemElement extends LitElement {
   newtab = false;
 
   private get url() {
-    return this.href ? new URL(this.href) : null;
+    if (!this.href) return null;
+    try {
+      return new URL(this.href);
+    } catch {
+      return null;
+    }
   }
 
   /**
