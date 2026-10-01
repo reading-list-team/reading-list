@@ -417,3 +417,31 @@ test('A saves the current page but does not fire while editing text', async () =
     window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
   else delete window.HTMLElement.prototype.scrollIntoView;
 });
+
+test('Undo toast overlays the footer, pauses on hover, and dismisses with X', async () => {
+  const row = root.querySelector('reading-list-item');
+  row.shadowRoot.querySelector('[title="Delete"]').click();
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  const toast = root.querySelector('.undo');
+  assert.ok(toast);
+  assert.ok(app.undoAutoTimer);
+  assert.ok(toast.querySelector('.dismiss[aria-label="Dismiss Undo"]'));
+  toast.dispatchEvent(new window.PointerEvent('pointerenter'));
+  assert.equal(app.undoAutoTimer, null);
+  toast.querySelector('.dismiss').click();
+  await update();
+  assert.equal(root.querySelector('.undo.closing') !== null, true);
+  await new Promise((resolve) => setTimeout(resolve, 170));
+  await update();
+  assert.equal(root.querySelector('.undo'), null);
+
+  app.deleted = saved;
+  app.scheduleUndoDismiss(15);
+  await update();
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(app.undoClosing, true);
+  await new Promise((resolve) => setTimeout(resolve, 170));
+  await update();
+  assert.equal(root.querySelector('.undo'), null);
+});

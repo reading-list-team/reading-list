@@ -39,6 +39,7 @@ export class ReadingListAppElement extends LitElement {
         --footer-height: 52px;
         display: flex;
         flex-direction: column;
+        position: relative;
         width: 360px;
         height: 520px;
         max-height: 600px;
@@ -324,7 +325,7 @@ export class ReadingListAppElement extends LitElement {
         height: var(--footer-height);
         display: flex;
         align-items: center;
-        padding: 6px var(--content-gutter);
+        padding: 6px var(--content-gutter) 12px var(--content-gutter);
         background: var(--color-bg);
       }
       footer::before {
@@ -410,25 +411,70 @@ export class ReadingListAppElement extends LitElement {
       }
       .undo {
         position: absolute;
-        bottom: calc(var(--footer-height) + 8px);
+        z-index: 3;
+        bottom: 6px;
         left: var(--content-gutter);
         right: var(--content-gutter);
-        background: var(--color-text);
-        color: var(--color-bg);
+        min-height: 40px;
+        background: var(--color-surface);
+        color: var(--color-text);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 9px 12px;
+        padding: 5px 7px 5px 12px;
+        border: 1px solid var(--color-line);
         border-radius: var(--radius-sm);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
         font-size: var(--text-sm);
+        animation: undo-in var(--motion-smooth) cubic-bezier(0.22, 1, 0.36, 1)
+          both;
+      }
+      .undo.closing {
+        pointer-events: none;
+        animation: undo-out var(--motion-fast) ease-in both;
+      }
+      @keyframes undo-in {
+        from {
+          opacity: 0;
+          transform: translateY(7px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes undo-out {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(7px);
+        }
+      }
+      .undo-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
       }
       .undo button {
         border: 0;
         background: transparent;
-        color: inherit;
+        color: var(--color-accent);
         font-weight: var(--weight-medium);
-        padding: 4px;
+        padding: 6px;
+        border-radius: 6px;
+      }
+      .undo button:hover {
+        background: var(--color-bg);
+      }
+      .undo .dismiss {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        color: var(--color-muted);
       }
       dialog {
         width: 100%;
@@ -578,6 +624,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private syncUnavailable = false;
   @state() private conflicts = 0;
   @state() private deleted: ListItemData | null = null;
+  @state() private undoClosing = false;
   @state() private draggedUrl: string | null = null;
   @state() private dragInsertIndex: number | null = null;
   private dragHeight = 68;
@@ -587,6 +634,8 @@ export class ReadingListAppElement extends LitElement {
   private sheetCloseTimer: number | null = null;
   private saveFeedbackTimer: number | null = null;
   private savedHighlightTimer: number | null = null;
+  private undoAutoTimer: number | null = null;
+  private undoCloseTimer: number | null = null;
   private reordering = false;
   private themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -612,6 +661,8 @@ export class ReadingListAppElement extends LitElement {
     if (this.sheetCloseTimer) clearTimeout(this.sheetCloseTimer);
     if (this.saveFeedbackTimer) clearTimeout(this.saveFeedbackTimer);
     if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
+    if (this.undoAutoTimer) clearTimeout(this.undoAutoTimer);
+    if (this.undoCloseTimer) clearTimeout(this.undoCloseTimer);
     super.disconnectedCallback();
   }
   private onSystemTheme = () => this.applyTheme();
@@ -963,9 +1014,27 @@ export class ReadingListAppElement extends LitElement {
         </button>
       </footer>
       ${this.deleted
-        ? html`<div class="undo" role="status">
-            <span>Page deleted</span
-            ><button @click=${this.undoDelete}>Undo</button>
+        ? html`<div
+            class=${`undo ${this.undoClosing ? 'closing' : ''}`}
+            role="status"
+            ?inert=${this.undoClosing}
+            @pointerenter=${this.pauseUndoDismiss}
+            @pointerleave=${this.resumeUndoDismiss}
+            @focusin=${this.pauseUndoDismiss}
+            @focusout=${this.resumeUndoDismiss}
+          >
+            <span>Page deleted</span>
+            <div class="undo-actions">
+              <button @click=${this.undoDelete}>Undo</button
+              ><button
+                class="dismiss"
+                aria-label="Dismiss Undo"
+                title="Dismiss"
+                @click=${this.dismissUndo}
+              >
+                ${icon(X, 16)}
+              </button>
+            </div>
           </div>`
         : ''}
       <dialog
@@ -1279,13 +1348,52 @@ export class ReadingListAppElement extends LitElement {
       this.message = 'Chrome sync is unavailable. Your local pages are safe.';
     }
   }
+  private scheduleUndoDismiss(delay = 6000) {
+    this.pauseUndoDismiss();
+    this.undoAutoTimer = window.setTimeout(() => this.dismissUndo(), delay);
+  }
+  private pauseUndoDismiss() {
+    if (this.undoAutoTimer) clearTimeout(this.undoAutoTimer);
+    this.undoAutoTimer = null;
+  }
+  private resumeUndoDismiss(event: Event) {
+    const toast = this.shadowRoot?.querySelector('.undo');
+    const related = (event as FocusEvent).relatedTarget;
+    if (related && toast?.contains(related as Node)) return;
+    queueMicrotask(() => {
+      if (!this.deleted || this.undoClosing) return;
+      const focused = this.shadowRoot?.activeElement;
+      if ((focused && toast?.contains(focused)) || toast?.matches(':hover'))
+        return;
+      this.scheduleUndoDismiss(3000);
+    });
+  }
+  private clearUndo() {
+    this.pauseUndoDismiss();
+    if (this.undoCloseTimer) clearTimeout(this.undoCloseTimer);
+    this.undoCloseTimer = null;
+    this.deleted = null;
+    this.undoClosing = false;
+  }
+  private dismissUndo() {
+    if (!this.deleted || this.undoClosing) return;
+    this.pauseUndoDismiss();
+    this.undoClosing = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.clearUndo();
+      return;
+    }
+    this.undoCloseTimer = window.setTimeout(() => this.clearUndo(), 150);
+  }
   private async deleteItem(event: CustomEvent<{ url: string }>) {
     const item = this.items?.find((entry) => entry.url === event.detail.url);
     if (!item) return;
     try {
       const synced = await rl.removeReadingItem(item.url);
       this.items = (this.items ?? []).filter((entry) => entry.url !== item.url);
+      this.clearUndo();
       this.deleted = item;
+      this.scheduleUndoDismiss();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
       this.message = synced
@@ -1306,14 +1414,15 @@ export class ReadingListAppElement extends LitElement {
   }
   private async undoDelete() {
     const item = this.deleted;
-    if (!item) return;
+    if (!item || this.undoClosing) return;
+    this.pauseUndoDismiss();
     try {
       const result = await rl.addReadingItem(item);
       this.items = [
         result.item,
         ...(this.items ?? []).filter((entry) => entry.url !== item.url),
       ];
-      this.deleted = null;
+      this.clearUndo();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
       this.message = result.synced
