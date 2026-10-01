@@ -169,12 +169,24 @@ export class ReadingListAppElement extends LitElement {
         animation: menu-out var(--motion-fast) ease-in both;
       }
       @keyframes menu-in {
-        from { opacity: 0; transform: translateY(-5px) scale(0.97); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from {
+          opacity: 0;
+          transform: translateY(-5px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
       @keyframes menu-out {
-        from { opacity: 1; transform: translateY(0) scale(1); }
-        to { opacity: 0; transform: translateY(-5px) scale(0.97); }
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-5px) scale(0.97);
+        }
       }
       .menu-label {
         color: var(--color-muted);
@@ -205,18 +217,46 @@ export class ReadingListAppElement extends LitElement {
       .list {
         flex: 1;
         overflow-y: auto;
-        padding: 0 var(--content-gutter);
+        padding: 0 var(--content-gutter) 28px;
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          #000 0,
+          #000 calc(100% - 28px),
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          #000 0,
+          #000 calc(100% - 28px),
+          transparent 100%
+        );
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
-      .list:hover, .list:focus-within, .sheet-body:hover, .sheet-body:focus-within {
+      .list:hover,
+      .list:focus-within,
+      .sheet-body:hover,
+      .sheet-body:focus-within {
         scrollbar-color: var(--color-muted) transparent;
       }
-      .list::-webkit-scrollbar, .sheet-body::-webkit-scrollbar { width: 6px; }
-      .list::-webkit-scrollbar-track, .sheet-body::-webkit-scrollbar-track { background: transparent; }
-      .list::-webkit-scrollbar-thumb, .sheet-body::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
-      .list:hover::-webkit-scrollbar-thumb, .list:focus-within::-webkit-scrollbar-thumb,
-      .sheet-body:hover::-webkit-scrollbar-thumb, .sheet-body:focus-within::-webkit-scrollbar-thumb { background: var(--color-muted); }
+      .list::-webkit-scrollbar,
+      .sheet-body::-webkit-scrollbar {
+        width: 6px;
+      }
+      .list::-webkit-scrollbar-track,
+      .sheet-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .list::-webkit-scrollbar-thumb,
+      .sheet-body::-webkit-scrollbar-thumb {
+        background: transparent;
+        border-radius: 999px;
+      }
+      .list:hover::-webkit-scrollbar-thumb,
+      .list:focus-within::-webkit-scrollbar-thumb,
+      .sheet-body:hover::-webkit-scrollbar-thumb,
+      .sheet-body:focus-within::-webkit-scrollbar-thumb {
+        background: var(--color-muted);
       }
       .empty {
         height: 100%;
@@ -240,55 +280,84 @@ export class ReadingListAppElement extends LitElement {
         line-height: 1.5;
       }
       footer {
+        position: relative;
         flex: none;
         min-height: 58px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 8px;
         padding: 8px var(--content-gutter);
         background: var(--color-bg);
-        border-top: 1px solid var(--color-line);
       }
       .search-box {
         display: flex;
         align-items: center;
         gap: 4px;
         min-width: 0;
-        flex: 1;
+        flex: 0 1 auto;
+        transition: flex-grow var(--motion-smooth)
+          cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .search-box.open,
+      .search-box.closing {
+        flex-grow: 1;
+        padding-right: 40px;
       }
       .search-field {
         min-width: 0;
-        width: 0;
-        opacity: 0;
+        flex: 1;
         border: 0;
-        padding: 0;
+        padding: 6px;
         color: var(--color-text);
         background: transparent;
         font-size: var(--text-md);
-        transition:
-          width var(--motion-smooth) ease,
-          opacity var(--motion-smooth) ease;
-      }
-      .search-box.open .search-field {
-        width: 100%;
-        opacity: 1;
-        padding: 6px;
       }
       .search-field:focus {
         outline: 0;
-        box-shadow: inset 0 -2px var(--color-accent);
       }
-      .search-box.open {
-        flex: 1;
+      .close-search,
+      .settings-toggle {
+        position: absolute;
+        right: var(--content-gutter);
+        top: 13px;
       }
-      .search-box.open .close-search { margin-left: auto; }
-      .search-box:not(.open) {
-        flex: 0;
+      .settings-toggle {
+        transition:
+          opacity var(--motion-smooth) ease,
+          transform var(--motion-smooth) ease;
       }
-      .search-box:not(.open) .search-field,
-      .search-box:not(.open) .close-search {
-        display: none;
+      footer.search-active .settings-toggle {
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+      }
+      .search-box.open .search-field,
+      .search-box.open .close-search {
+        animation: search-rise 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .search-box.closing .search-field,
+      .search-box.closing .close-search {
+        animation: search-fall var(--motion-smooth) cubic-bezier(0.4, 0, 1, 1)
+          both;
+      }
+      @keyframes search-rise {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes search-fall {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(8px);
+        }
       }
       .undo {
         position: absolute;
@@ -329,18 +398,31 @@ export class ReadingListAppElement extends LitElement {
       }
       dialog[open] {
         display: flex;
-        animation: sheet-in var(--motion-smooth) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        animation: sheet-in var(--motion-smooth) cubic-bezier(0.2, 0.8, 0.2, 1)
+          both;
       }
       dialog[open].closing {
         animation: sheet-out var(--motion-smooth) ease-in both;
       }
       @keyframes sheet-in {
-        from { opacity: 0; transform: translateY(100%); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       @keyframes sheet-out {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(100%); }
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(100%);
+        }
       }
       dialog::backdrop {
         background: rgba(17, 25, 39, 0.32);
@@ -350,9 +432,26 @@ export class ReadingListAppElement extends LitElement {
       dialog.closing::backdrop {
         animation: backdrop-out var(--motion-smooth) ease-in both;
       }
-      @keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes backdrop-out { from { opacity: 1; } to { opacity: 0; } }
-      .sheet-head, .sheet-foot { flex: none; }
+      @keyframes backdrop-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes backdrop-out {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+      .sheet-head,
+      .sheet-foot {
+        flex: none;
+      }
       .sheet-head {
         display: flex;
         align-items: center;
@@ -418,6 +517,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private items: ListItemData[] | null = null;
   @state() private settings: ReadingListSettings = DEFAULT_SETTINGS;
   @state() private searchOpen = false;
+  @state() private searchClosing = false;
   @state() private query = '';
   @state() private sortOpen = false;
   @state() private sortClosing = false;
@@ -431,6 +531,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private dragInsertIndex: number | null = null;
   private dragHeight = 68;
   private refreshTimer: number | null = null;
+  private searchCloseTimer: number | null = null;
   private sortCloseTimer: number | null = null;
   private sheetCloseTimer: number | null = null;
   private reordering = false;
@@ -451,6 +552,7 @@ export class ReadingListAppElement extends LitElement {
     document.removeEventListener('pointerdown', this.onOutsidePointer);
     this.themeMedia.removeEventListener('change', this.onSystemTheme);
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    if (this.searchCloseTimer) clearTimeout(this.searchCloseTimer);
     if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
     if (this.sheetCloseTimer) clearTimeout(this.sheetCloseTimer);
     super.disconnectedCallback();
@@ -696,13 +798,14 @@ export class ReadingListAppElement extends LitElement {
                 : repeat(
                     visible,
                     (item) => item.url,
-                    (item) =>
+                    (item, index) =>
                       html`<reading-list-item
                         .name=${item.title}
                         .href=${item.url}
                         .newtab=${this.settings.openNewTab}
                         .reorderable=${this.settings.sortOption === 'manual'}
                         .viewed=${!!item.viewed}
+                        .last=${index === visible.length - 1}
                         style=${`--drag-offset: ${this.dragOffset(item.url, visible)}px`}
                         ?drag-active=${this.draggedUrl === item.url}
                         data-theme=${resolvedTheme(this.settings.theme)}
@@ -719,43 +822,50 @@ export class ReadingListAppElement extends LitElement {
                       ></reading-list-item>`,
                   )}
       </div>
-      <footer>
-        <div class=${`search-box ${this.searchOpen ? 'open' : ''}`}>
+      <footer
+        class=${this.searchOpen || this.searchClosing ? 'search-active' : ''}
+      >
+        <div
+          class=${`search-box ${this.searchOpen ? 'open' : this.searchClosing ? 'closing' : ''}`}
+        >
           <button
             class="footer-button search-toggle"
             aria-label=${this.searchOpen ? 'Search pages' : 'Open search'}
             title="Search"
             @click=${this.openSearch}
           >
-            ${icon(Search, 20)}</button
-          ><input
-            class="search-field"
-            type="search"
-            aria-label="Search saved pages"
-            placeholder="Find a page"
-            .value=${this.query}
-            @input=${(event: Event) =>
-              (this.query = (event.target as HTMLInputElement).value)}
-            @keydown=${this.searchKeydown}
-          /><button
-            class="footer-button close-search"
-            aria-label="Close search"
-            title="Close search"
-            @click=${() => this.closeSearch()}
-          >
-            ${icon(X, 18)}
+            ${icon(Search, 20)}
           </button>
+          ${this.searchOpen || this.searchClosing
+            ? html`<input
+                  class="search-field"
+                  type="search"
+                  aria-label="Search saved pages"
+                  placeholder="Find a page"
+                  .value=${this.query}
+                  @input=${(event: Event) =>
+                    (this.query = (event.target as HTMLInputElement).value)}
+                  @keydown=${this.searchKeydown}
+                /><button
+                  class="footer-button close-search"
+                  aria-label="Close search"
+                  title="Close search"
+                  @click=${() => this.closeSearch()}
+                >
+                  ${icon(X, 18)}
+                </button>`
+            : ''}
         </div>
-        ${this.searchOpen
-          ? ''
-          : html`<button
-              class="footer-button settings-toggle"
-              aria-label="Open settings"
-              title="Settings"
-              @click=${this.openSettings}
-            >
-              ${icon(Settings, 20)}
-            </button>`}
+        <button
+          class="footer-button settings-toggle"
+          aria-label="Open settings"
+          aria-hidden=${this.searchOpen || this.searchClosing}
+          tabindex=${this.searchOpen || this.searchClosing ? -1 : 0}
+          title="Settings"
+          @click=${this.openSettings}
+        >
+          ${icon(Settings, 20)}
+        </button>
       </footer>
       ${this.deleted
         ? html`<div class="undo" role="status">
@@ -919,6 +1029,9 @@ export class ReadingListAppElement extends LitElement {
         ?.focus();
       return;
     }
+    if (this.searchCloseTimer) clearTimeout(this.searchCloseTimer);
+    this.searchCloseTimer = null;
+    this.searchClosing = false;
     this.searchOpen = true;
     void this.updateComplete.then(() =>
       this.shadowRoot
@@ -927,14 +1040,24 @@ export class ReadingListAppElement extends LitElement {
     );
   }
   private closeSearch(restoreFocus = true) {
-    this.query = '';
+    if (!this.searchOpen) return;
     this.searchOpen = false;
-    if (restoreFocus)
-      void this.updateComplete.then(() =>
-        this.shadowRoot
-          ?.querySelector<HTMLButtonElement>('.search-toggle')
-          ?.focus(),
-      );
+    const finish = () => {
+      this.query = '';
+      this.searchClosing = false;
+      this.searchCloseTimer = null;
+      if (restoreFocus)
+        void this.updateComplete.then(() =>
+          this.shadowRoot
+            ?.querySelector<HTMLButtonElement>('.search-toggle')
+            ?.focus(),
+        );
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+    else {
+      this.searchClosing = true;
+      this.searchCloseTimer = window.setTimeout(finish, 220);
+    }
   }
   private searchKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {

@@ -98,6 +98,10 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   app.items = initial;
   await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
+  assert.equal(
+    root.querySelector('reading-list-item').hasAttribute('last'),
+    true,
+  );
   app.items = Array.from({ length: 40 }, (_, index) => ({
     ...saved,
     url: `https://example.com/${index}`,
@@ -127,7 +131,10 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   await update();
   const field = root.querySelector('.search-field');
   assert.equal(root.activeElement, field);
-  assert.equal(root.querySelector('.settings-toggle'), null);
+  assert.equal(
+    root.querySelector('.settings-toggle').getAttribute('aria-hidden'),
+    'true',
+  );
   assert.match(
     app.constructor.styles.at(-1).cssText,
     /font-size: var\(--text-md\)/,
@@ -145,7 +152,21 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   );
   await update();
   assert.equal(app.searchOpen, false);
+  assert.equal(app.searchClosing, true);
+  assert.ok(root.querySelector('.search-box.closing .close-search'));
+  await new Promise((resolve) => setTimeout(resolve, 230));
+  await update();
+  assert.equal(root.querySelector('.search-field'), null);
   assert.equal(root.activeElement, search);
+  search.click();
+  await update();
+  root.querySelector('.close-search').click();
+  await update();
+  assert.equal(app.searchClosing, true);
+  assert.ok(root.querySelector('.search-box.closing .close-search'));
+  await new Promise((resolve) => setTimeout(resolve, 230));
+  await update();
+  assert.equal(root.querySelector('.settings-toggle').getAttribute('aria-hidden'), 'false');
   search.click();
   await update();
   root

@@ -29,6 +29,9 @@ export class ReadingListItemElement extends LitElement {
         border-bottom: 1px solid var(--color-line);
         position: relative;
       }
+      :host([last]) .row {
+        border-bottom: 0;
+      }
       .drag-handle {
         flex: 0 0 18px;
         width: 18px;
@@ -176,6 +179,7 @@ export class ReadingListItemElement extends LitElement {
   @property({ type: Boolean }) newtab = false;
   @property({ type: Boolean }) reorderable = false;
   @property({ type: Boolean, reflect: true }) viewed = false;
+  @property({ type: Boolean, reflect: true }) last = false;
   @state() private editing = false;
   @state() private draft = '';
   @state() private faviconFailed = false;
