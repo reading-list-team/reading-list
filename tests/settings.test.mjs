@@ -21,3 +21,8 @@ test('manual order uses saved indexes before date', () => {
     { title: 'Old', addedAt: 100, index: 1 },
   ], settings).map((item) => item.title), ['Old', 'New']);
 });
+
+test('system theme survives settings normalization', () => {
+  assert.equal(normalizeSettings({ theme: 'system' }).theme, 'system');
+  assert.equal(toLegacySettings(normalizeSettings({ theme: 'system' })).theme, 'system');
+});
