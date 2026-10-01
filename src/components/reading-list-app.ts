@@ -76,6 +76,31 @@ export class ReadingListAppElement extends LitElement {
         opacity: 0.55;
         cursor: default;
       }
+      .save.saved svg {
+        animation: save-pop var(--motion-smooth) cubic-bezier(0.22, 1, 0.36, 1)
+          both;
+      }
+      @keyframes save-pop {
+        from {
+          opacity: 0;
+          transform: scale(0.65);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
       .warning {
         display: flex;
         align-items: center;
@@ -528,6 +553,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private sortOpen = false;
   @state() private sortClosing = false;
   @state() private message = '';
+  @state() private justSaved = false;
   @state() private loadError = false;
   @state() private localOnly = 0;
   @state() private syncUnavailable = false;
@@ -540,6 +566,7 @@ export class ReadingListAppElement extends LitElement {
   private searchCloseTimer: number | null = null;
   private sortCloseTimer: number | null = null;
   private sheetCloseTimer: number | null = null;
+  private saveFeedbackTimer: number | null = null;
   private reordering = false;
   private themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -563,6 +590,7 @@ export class ReadingListAppElement extends LitElement {
     if (this.searchCloseTimer) clearTimeout(this.searchCloseTimer);
     if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
     if (this.sheetCloseTimer) clearTimeout(this.sheetCloseTimer);
+    if (this.saveFeedbackTimer) clearTimeout(this.saveFeedbackTimer);
     super.disconnectedCallback();
   }
   private onSystemTheme = () => this.applyTheme();
@@ -717,16 +745,19 @@ export class ReadingListAppElement extends LitElement {
       <header>
         <h1>Reading List</h1>
         <button
-          class="save"
+          class=${`save ${this.justSaved ? 'saved' : ''}`}
           aria-label="Save current page"
           aria-keyshortcuts="A"
           title="Save current page (A)"
           ?disabled=${this.items === null}
           @click=${this.saveCurrent}
         >
-          ${icon(Plus, 23)}
+          ${icon(this.justSaved ? Check : Plus, 23)}
         </button>
       </header>
+      <div class="visually-hidden" role="status">
+        ${this.justSaved ? 'Page saved' : ''}
+      </div>
       ${this.localOnly || this.syncUnavailable || this.conflicts
         ? html`<div class="warning" role="status">
             <span>${this.warningText}</span
@@ -1154,6 +1185,14 @@ export class ReadingListAppElement extends LitElement {
   private changeTheme(theme: ReadingListSettings['theme']) {
     void this.saveSettings({ ...this.settings, theme });
   }
+  private showSavedFeedback() {
+    if (this.saveFeedbackTimer) clearTimeout(this.saveFeedbackTimer);
+    this.justSaved = true;
+    this.saveFeedbackTimer = window.setTimeout(() => {
+      this.justSaved = false;
+      this.saveFeedbackTimer = null;
+    }, 1400);
+  }
   private async saveCurrent() {
     try {
       const [tab] = await chrome.tabs.query({
@@ -1175,9 +1214,8 @@ export class ReadingListAppElement extends LitElement {
       ];
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = result.synced
-        ? 'Saved on this device and written to Chrome sync storage.'
-        : 'Saved only on this device.';
+      this.message = '';
+      this.showSavedFeedback();
     } catch (error) {
       console.error(error);
       this.message = 'Could not save this page.';

@@ -377,6 +377,12 @@ test('A saves the current page but does not fire while editing text', async () =
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   assert.equal(app.items.length, before + 1);
+  assert.equal(root.querySelector('.feedback'), null);
+  assert.equal(root.querySelector('.save').classList.contains('saved'), true);
+  assert.match(
+    root.querySelector('.visually-hidden[role="status"]').textContent,
+    /Page saved/,
+  );
 
   const row = root.querySelector('reading-list-item');
   row.shadowRoot.querySelector('[title="Edit title"]').click();
