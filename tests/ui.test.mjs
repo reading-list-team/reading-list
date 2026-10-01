@@ -91,7 +91,9 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   app.items = null;
   app.loadError = false;
   await update();
-  assert.match(root.textContent, /Loading your pages/);
+  const loading = root.querySelector('.loading[role="status"]');
+  assert.equal(loading.getAttribute('aria-label'), 'Loading your pages');
+  assert.ok(loading.querySelector('svg'));
   app.items = [];
   await update();
   assert.match(root.textContent, /Save your first page/);

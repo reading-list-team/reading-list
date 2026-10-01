@@ -9,6 +9,7 @@ import {
   CalendarArrowUp,
   Check,
   ChevronDown,
+  LoaderCircle,
   Monitor,
   Moon,
   Plus,
@@ -246,23 +247,8 @@ export class ReadingListAppElement extends LitElement {
         flex: 1;
         overflow-y: auto;
         padding: 0 var(--content-gutter) 28px;
-        -webkit-mask-image: linear-gradient(
-          to bottom,
-          #000 0,
-          #000 calc(100% - 28px),
-          transparent 100%
-        );
-        mask-image: linear-gradient(
-          to bottom,
-          #000 0,
-          #000 calc(100% - 28px),
-          transparent 100%
-        );
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
-      }
-      .list reading-list-item:last-of-type {
-        margin-bottom: 28px;
       }
       .list:hover,
       .list:focus-within,
@@ -310,14 +296,45 @@ export class ReadingListAppElement extends LitElement {
         font-size: var(--text-md);
         line-height: 1.5;
       }
+      .loading {
+        height: 100%;
+        min-height: 235px;
+        display: grid;
+        place-items: center;
+        color: var(--color-muted);
+      }
+      .loading svg {
+        animation: loader-spin 850ms linear infinite;
+      }
+      @keyframes loader-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .loading svg {
+          animation: none !important;
+        }
+      }
       footer {
         position: relative;
+        z-index: 1;
         flex: none;
         height: var(--footer-height);
         display: flex;
         align-items: center;
         padding: 6px var(--content-gutter);
         background: var(--color-bg);
+      }
+      footer::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        right: 0;
+        height: 32px;
+        background: linear-gradient(to bottom, transparent, var(--color-bg));
+        pointer-events: none;
       }
       .search-box {
         display: flex;
@@ -851,7 +868,13 @@ export class ReadingListAppElement extends LitElement {
               <p>Try reopening Reading List.</p>
             </div>`
           : this.items === null
-            ? html`<div class="empty"><p>Loading your pages…</p></div>`
+            ? html`<div
+                class="loading"
+                role="status"
+                aria-label="Loading your pages"
+              >
+                ${icon(LoaderCircle, 24)}
+              </div>`
             : !this.items.length
               ? html`<div class="empty">
                   <h2>Save your first page</h2>
