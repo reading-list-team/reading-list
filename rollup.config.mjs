@@ -29,6 +29,10 @@ export default {
       rootDir: 'extension',
       patterns: ['icons/**/*', 'manifest.json', '_locales/**/*'],
     }),
+    copy({
+      rootDir: 'node_modules/@fontsource-variable/inter',
+      patterns: ['files/inter-latin-wght-normal.woff2', 'LICENSE'],
+    }),
   ],
   output: {
     dir: 'build',

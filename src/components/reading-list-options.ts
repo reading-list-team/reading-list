@@ -15,7 +15,7 @@ export class ReadingListOptionsElement extends LitElement {
       :host {
         display: block;
         min-height: 100vh;
-        padding: 32px 20px 60px;
+        padding: 32px var(--content-gutter) 60px;
       }
       main {
         max-width: 640px;
@@ -24,8 +24,7 @@ export class ReadingListOptionsElement extends LitElement {
       h1 {
         margin: 0;
         font-size: 28px;
-        font-weight: var(--weight-heading);
-        letter-spacing: -0.04em;
+        font-weight: var(--weight-medium);
       }
       .lead {
         color: var(--color-muted);
@@ -35,7 +34,7 @@ export class ReadingListOptionsElement extends LitElement {
       section {
         border: 1px solid var(--color-line);
         border-radius: var(--radius-md);
-        padding: 20px;
+        padding: var(--content-gutter);
         margin: 16px 0;
         background: var(--color-bg);
       }
@@ -105,7 +104,7 @@ export class ReadingListOptionsElement extends LitElement {
         margin-top: 0;
       }
       .preview strong {
-        font-weight: var(--weight-heading);
+        font-weight: var(--weight-medium);
       }
       .preview label {
         display: flex;

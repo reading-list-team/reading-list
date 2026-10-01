@@ -40,21 +40,19 @@ export class ReadingListAppElement extends LitElement {
         height: 520px;
         max-height: 600px;
         overflow: hidden;
-        border-radius: 16px;
       }
       header {
         flex: none;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 22px 20px 18px;
+        padding: 22px var(--content-gutter) 18px;
         border-bottom: 1px solid var(--color-line);
       }
       h1 {
         margin: 0;
         font-size: var(--text-lg);
-        font-weight: var(--weight-heading);
-        letter-spacing: -0.035em;
+        font-weight: var(--weight-medium);
       }
       .save {
         width: 36px;
@@ -81,7 +79,7 @@ export class ReadingListAppElement extends LitElement {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 20px;
+        padding: 8px var(--content-gutter);
         background: #fef7e0;
         color: #67480c;
         font-size: var(--text-xs);
@@ -100,12 +98,12 @@ export class ReadingListAppElement extends LitElement {
         background: transparent;
         color: inherit;
         text-decoration: underline;
-        font-weight: var(--weight-heading);
+        font-weight: var(--weight-medium);
         padding: 4px;
       }
       .feedback {
         margin: 0;
-        padding: 6px 20px;
+        padding: 6px var(--content-gutter);
         color: var(--color-muted);
         font-size: var(--text-xs);
       }
@@ -113,7 +111,7 @@ export class ReadingListAppElement extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 18px 18px 8px 20px;
+        padding: 18px var(--content-gutter) 8px;
       }
       .list-label {
         display: flex;
@@ -207,7 +205,7 @@ export class ReadingListAppElement extends LitElement {
       .list {
         flex: 1;
         overflow-y: auto;
-        padding: 0 20px;
+        padding: 0 var(--content-gutter);
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
@@ -228,11 +226,10 @@ export class ReadingListAppElement extends LitElement {
         justify-content: center;
         align-items: center;
         text-align: center;
-        padding: 0 24px 34px;
+        padding: 0 var(--content-gutter) 34px;
       }
       .empty h2 {
         font-size: 18px;
-        letter-spacing: -0.03em;
         margin: 0 0 9px;
         font-weight: var(--weight-medium);
       }
@@ -249,7 +246,7 @@ export class ReadingListAppElement extends LitElement {
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 8px 16px;
+        padding: 8px var(--content-gutter);
         background: var(--color-bg);
         border-top: 1px solid var(--color-line);
       }
@@ -296,8 +293,8 @@ export class ReadingListAppElement extends LitElement {
       .undo {
         position: absolute;
         bottom: 66px;
-        left: 16px;
-        right: 16px;
+        left: var(--content-gutter);
+        right: var(--content-gutter);
         background: var(--color-text);
         color: var(--color-bg);
         display: flex;
@@ -312,7 +309,7 @@ export class ReadingListAppElement extends LitElement {
         border: 0;
         background: transparent;
         color: inherit;
-        font-weight: var(--weight-heading);
+        font-weight: var(--weight-medium);
         padding: 4px;
       }
       dialog {
@@ -360,16 +357,16 @@ export class ReadingListAppElement extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 20px;
+        padding: 20px var(--content-gutter);
         border-bottom: 1px solid var(--color-line);
       }
       .sheet-head h2 {
         margin: 0;
         font-size: 20px;
-        font-weight: var(--weight-heading);
+        font-weight: var(--weight-medium);
       }
       .sheet-body {
-        padding: 8px 20px 20px;
+        padding: 8px var(--content-gutter) 20px;
         flex: 1;
         min-height: 0;
         overflow-y: auto;
@@ -411,7 +408,7 @@ export class ReadingListAppElement extends LitElement {
         color: var(--color-accent);
       }
       .sheet-foot {
-        padding: 0 20px 20px;
+        padding: 0 var(--content-gutter) 20px;
         color: var(--color-muted);
         font-size: var(--text-xs);
       }
@@ -430,6 +427,9 @@ export class ReadingListAppElement extends LitElement {
   @state() private syncUnavailable = false;
   @state() private conflicts = 0;
   @state() private deleted: ListItemData | null = null;
+  @state() private draggedUrl: string | null = null;
+  @state() private dragInsertIndex: number | null = null;
+  private dragHeight = 68;
   private refreshTimer: number | null = null;
   private sortCloseTimer: number | null = null;
   private sheetCloseTimer: number | null = null;
@@ -523,6 +523,30 @@ export class ReadingListAppElement extends LitElement {
             .toLocaleLowerCase()
             .includes(this.query.toLocaleLowerCase())),
     );
+  }
+  private dragOffset(url: string, visible: ListItemData[]): number {
+    if (
+      !this.draggedUrl ||
+      this.dragInsertIndex === null ||
+      url === this.draggedUrl
+    )
+      return 0;
+    const source = visible.findIndex((item) => item.url === this.draggedUrl);
+    const current = visible.findIndex((item) => item.url === url);
+    if (source < 0 || current < 0) return 0;
+    if (
+      this.dragInsertIndex > source &&
+      current > source &&
+      current <= this.dragInsertIndex
+    )
+      return -this.dragHeight;
+    if (
+      this.dragInsertIndex < source &&
+      current >= this.dragInsertIndex &&
+      current < source
+    )
+      return this.dragHeight;
+    return 0;
   }
   private get warningText() {
     const parts = [];
@@ -679,10 +703,15 @@ export class ReadingListAppElement extends LitElement {
                         .newtab=${this.settings.openNewTab}
                         .reorderable=${this.settings.sortOption === 'manual'}
                         .viewed=${!!item.viewed}
+                        style=${`--drag-offset: ${this.dragOffset(item.url, visible)}px`}
+                        ?drag-active=${this.draggedUrl === item.url}
                         data-theme=${resolvedTheme(this.settings.theme)}
                         @delete-item=${this.deleteItem}
                         @update-title=${this.updateTitle}
                         @move-item=${this.moveItem}
+                        @reorder-start=${this.reorderStart}
+                        @reorder-preview=${this.reorderPreview}
+                        @reorder-end=${this.reorderEnd}
                         @reorder-drop=${this.reorderDrop}
                         @viewed-item=${this.markViewed}
                         @item-message=${(event: CustomEvent<string>) =>
@@ -1096,6 +1125,36 @@ export class ReadingListAppElement extends LitElement {
       this.reordering = false;
     }
   }
+  private reorderStart(event: CustomEvent<{ url: string }>) {
+    if (this.settings.sortOption !== 'manual' || this.reordering) return;
+    const visible = this.visibleItems;
+    this.dragHeight = Math.max(
+      (event.target as HTMLElement).getBoundingClientRect().height,
+      68,
+    );
+    this.draggedUrl = event.detail.url;
+    this.dragInsertIndex = visible.findIndex(
+      (item) => item.url === event.detail.url,
+    );
+  }
+  private reorderPreview(
+    event: CustomEvent<{ targetUrl: string; placement: 'before' | 'after' }>,
+  ) {
+    if (!this.draggedUrl || event.detail.targetUrl === this.draggedUrl) return;
+    const others = this.visibleItems.filter(
+      (item) => item.url !== this.draggedUrl,
+    );
+    const target = others.findIndex(
+      (item) => item.url === event.detail.targetUrl,
+    );
+    if (target < 0) return;
+    const next = target + (event.detail.placement === 'after' ? 1 : 0);
+    if (next !== this.dragInsertIndex) this.dragInsertIndex = next;
+  }
+  private reorderEnd() {
+    this.draggedUrl = null;
+    this.dragInsertIndex = null;
+  }
   private async reorderDrop(
     event: CustomEvent<{
       sourceUrl: string;
@@ -1105,7 +1164,64 @@ export class ReadingListAppElement extends LitElement {
   ) {
     if (this.reordering || this.settings.sortOption !== 'manual') return;
     this.reordering = true;
+    const previous = this.items;
+    const oldRects = new Map(
+      [
+        ...(this.shadowRoot?.querySelectorAll<HTMLElement>(
+          'reading-list-item',
+        ) ?? []),
+      ].map((row) => [
+        (row as HTMLElement & { href: string }).href,
+        row.getBoundingClientRect(),
+      ]),
+    );
     try {
+      const ordered = sortList(previous ?? [], {
+        ...this.settings,
+        sortOption: 'manual',
+      });
+      const from = ordered.findIndex(
+        (item) => item.url === event.detail.sourceUrl,
+      );
+      if (from < 0) return;
+      const [moved] = ordered.splice(from, 1);
+      const target = ordered.findIndex(
+        (item) => item.url === event.detail.targetUrl,
+      );
+      if (target < 0) return;
+      ordered.splice(
+        target + (event.detail.placement === 'after' ? 1 : 0),
+        0,
+        moved,
+      );
+      this.items = ordered.map((item, index) => ({
+        ...item,
+        index: index + 1,
+      }));
+      this.reorderEnd();
+      await this.updateComplete;
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        for (const row of this.shadowRoot?.querySelectorAll<HTMLElement>(
+          'reading-list-item',
+        ) ?? []) {
+          const before = oldRects.get(
+            (row as HTMLElement & { href: string }).href,
+          );
+          if (!before || typeof row.animate !== 'function') continue;
+          const delta = before.top - row.getBoundingClientRect().top;
+          if (Math.abs(delta) > 1)
+            row.animate(
+              [
+                { transform: `translateY(${delta}px)` },
+                { transform: 'translateY(0)' },
+              ],
+              {
+                duration: 180,
+                easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+              },
+            );
+        }
+      }
       const synced = await rl.reorderItem(
         event.detail.sourceUrl,
         event.detail.targetUrl,
@@ -1118,8 +1234,10 @@ export class ReadingListAppElement extends LitElement {
         : 'Order saved only on this device.';
     } catch (error) {
       console.error(error);
+      this.items = previous;
       this.message = 'Could not change the order.';
     } finally {
+      this.reorderEnd();
       this.reordering = false;
     }
   }
