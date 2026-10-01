@@ -189,6 +189,8 @@ export class ReadingListAppElement extends LitElement {
         this.localOnlyCount = rl.localOnlyCount;
         if (!rl.isSyncAvailable) {
           this.statusText = 'Chrome sync is unavailable. Your local list is shown.';
+        } else if (rl.conflictCount > 0) {
+          this.statusText = `${rl.conflictCount} conflicting versions were kept in backup data. Export a backup before making more changes.`;
         } else if (rl.localOnlyCount > 0) {
           this.statusText = `${rl.localOnlyCount} pages are saved only on this device.`;
         }
@@ -236,7 +238,9 @@ export class ReadingListAppElement extends LitElement {
         this.settings = await rl.getSettings();
         this.dataset.theme = this.settings.theme;
         document.body.dataset.theme = this.settings.theme;
-        if (rl.localOnlyCount > 0 && !this.statusText) {
+        if (rl.conflictCount > 0) {
+          this.statusText = `${rl.conflictCount} conflicting versions were kept in backup data. Export a backup before making more changes.`;
+        } else if (rl.localOnlyCount > 0 && !this.statusText) {
           this.statusText = `${rl.localOnlyCount} pages are saved only on this device.`;
         }
       }).catch((error) => {

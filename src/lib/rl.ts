@@ -58,9 +58,12 @@ export class RL {
   private loading: Promise<void> | null = null;
   private syncAvailable = true;
   private syncRecords: Record<string, unknown> = {};
+  private archivedConflicts = 0;
 
   private async load() {
     const local = await chrome.storage.local.get(null);
+    this.archivedConflicts = Object.keys(local)
+      .filter((key) => key.startsWith(CONFLICT_PREFIX)).length;
     let synced: Record<string, unknown> = {};
     try {
       synced = await chrome.storage.sync.get(null);
@@ -116,6 +119,7 @@ export class RL {
           await chrome.storage.local.set({
             [CONFLICT_PREFIX + item.url + ':' + Date.now()]: item,
           });
+          this.archivedConflicts++;
         }
       }
       await chrome.storage.local.set({ [SHADOW_PREFIX + item.url]: item });
@@ -312,6 +316,10 @@ export class RL {
 
   get localOnlyCount() {
     return this.list.filter((item) => !sameItem(this.syncRecords[item.url], item)).length;
+  }
+
+  get conflictCount() {
+    return this.archivedConflicts;
   }
 
   async updateTitle(url: string, title: string): Promise<SaveResult> {
