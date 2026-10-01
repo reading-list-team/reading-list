@@ -4,6 +4,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { i18n } from '../lib/i18n';
 import { rl, ListItemData } from '../lib/rl';
 import { ReadingListItemElement } from './reading-list-item';
+import { parseBackup, ImportPreview } from '../lib/backup';
 import './reading-list-item.js';
 
 @customElement('reading-list-app')
@@ -135,6 +136,24 @@ export class ReadingListAppElement extends LitElement {
       margin: 0 0 0.5rem;
       color: #555;
     }
+
+    .backup-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .backup-actions button {
+      padding: 0.4rem 0.65rem;
+      background: white;
+      border: 1px solid #aaa;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    .import-preview {
+      margin-top: 0.5rem;
+    }
   `;
 
   constructor() {
@@ -166,6 +185,9 @@ export class ReadingListAppElement extends LitElement {
 
   @state()
   statusText = '';
+
+  @state()
+  importPreview: ImportPreview | null = null;
 
   override render() {
     return html`
@@ -216,7 +238,98 @@ export class ReadingListAppElement extends LitElement {
             ></reading-list-item>`,
         )}
       </div>
+
+      <div class="backup-actions">
+        <button type="button" @click=${this._exportBackup}>
+          ${i18n.getMessage('export', 'Export')}
+        </button>
+        <button type="button" @click=${this._chooseImport}>
+          ${i18n.getMessage('import', 'Import')}
+        </button>
+        <input
+          class="visually-hidden"
+          type="file"
+          accept=".json,application/json"
+          id="import-file"
+          @change=${this._prepareImport}
+        />
+      </div>
+      ${this.importPreview
+        ? html`<div class="import-preview">
+            <p>
+              ${this.importPreview.items.length} valid pages found;
+              ${this.importPreview.skipped} other or invalid records skipped.
+              Existing pages will be kept.
+            </p>
+            <div class="backup-actions">
+              <button type="button" @click=${this._confirmImport}>Import pages</button>
+              <button type="button" @click=${this._cancelImport}>Cancel</button>
+            </div>
+          </div>`
+        : ''}
     `;
+  }
+
+  private async _exportBackup() {
+    try {
+      const backup = await rl.exportBackup();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `reading-list-backup-${backup.exportedAt.slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      this.statusText = backup.rawSync
+        ? 'Backup downloaded.'
+        : 'Local backup downloaded. Chrome sync data was unavailable.';
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Could not create a backup. Please try again.';
+    }
+  }
+
+  private _chooseImport() {
+    this.renderRoot.querySelector<HTMLInputElement>('#import-file')?.click();
+  }
+
+  private async _prepareImport(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      this.importPreview = parseBackup(await file.text());
+      this.statusText = '';
+    } catch (error) {
+      console.error(error);
+      this.importPreview = null;
+      this.statusText = 'This is not a supported Reading List backup.';
+    } finally {
+      input.value = '';
+    }
+  }
+
+  private async _confirmImport() {
+    if (!this.importPreview) return;
+    try {
+      const result = await rl.importItems(this.importPreview.items);
+      this._listItems = await rl.getListItems();
+      this.statusText = `${result.imported} pages imported; ${result.alreadyPresent} already present. ${
+        result.synced ? '' : 'Imported pages are saved on this device; Chrome sync is full or unavailable.'
+      }`;
+      this.importPreview = null;
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Import failed. Your existing pages were kept.';
+    }
+  }
+
+  private _cancelImport() {
+    this.importPreview = null;
   }
 
   private _onSearchInput(event: InputEvent) {

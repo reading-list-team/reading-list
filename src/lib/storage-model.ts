@@ -10,7 +10,7 @@ export interface StoredItem {
 export function isStoredItem(key: string, value: unknown): value is StoredItem {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const item = value as Record<string, unknown>;
-  if (!key || item.url !== key || typeof item.title !== 'string') return false;
+  if (typeof key !== 'string' || !key || item.url !== key || typeof item.title !== 'string') return false;
   if (typeof item.addedAt !== 'number' || !Number.isFinite(item.addedAt)) {
     return false;
   }

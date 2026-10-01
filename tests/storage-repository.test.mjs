@@ -81,7 +81,7 @@ test('a local write failure does not claim a save or change the visible item', a
   assert.deepEqual(sync.values[url], legacy);
 });
 
-test('remote updates and removals reconcile on next load', async () => {
+test('remote updates reconcile, while missing sync entries cannot erase local data', async () => {
   const local = memoryArea();
   const sync = memoryArea({ [url]: legacy });
   globalThis.chrome = { storage: { local, sync } };
@@ -91,6 +91,30 @@ test('remote updates and removals reconcile on next load', async () => {
   assert.equal((await new RL().getListItems())[0].title, 'Remote title');
 
   delete sync.values[url];
-  assert.deepEqual(await new RL().getListItems(), []);
-  assert.ok(local.values[`rl:v1:deleted:${url}`]);
+  assert.equal((await new RL().getListItems())[0].title, 'Remote title');
+  assert.equal(local.values[`rl:v1:deleted:${url}`], undefined);
+});
+
+test('export keeps raw local and sync records; import merges without overwriting', async () => {
+  const second = { url: 'https://example.com/other', title: 'Other', addedAt: 50 };
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy, odd: { source: 'v2' } });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+
+  const backup = await list.exportBackup();
+  assert.deepEqual(backup.items, [legacy]);
+  assert.deepEqual(backup.rawSync.odd, { source: 'v2' });
+  assert.deepEqual(backup.rawLocal[`rl:v1:item:${url}`], legacy);
+
+  sync.failSet = true;
+  const result = await list.importItems([
+    { ...legacy, title: 'Should not overwrite' }, second,
+  ]);
+  assert.deepEqual(result, { imported: 1, alreadyPresent: 1, synced: false });
+  assert.equal((await list.getListItems()).find((item) => item.url === url).title,
+    'Old title');
+  assert.deepEqual(local.values[`rl:v1:item:${second.url}`], second);
+  assert.deepEqual((await new RL().getListItems()).length, 2);
 });
