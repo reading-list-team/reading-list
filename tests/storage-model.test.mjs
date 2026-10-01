@@ -48,3 +48,11 @@ test('title update preserves v2 metadata and unknown fields', () => {
   assert.deepEqual(updated, { ...old, title: 'New' });
   assert.equal(old.title, 'Old');
 });
+
+test('legacy pages without a title stay visible with their URL as fallback', () => {
+  const url = 'https://example.com/untitled';
+  const result = classifyLegacySnapshot({
+    [url]: { url, addedAt: 100, viewed: false },
+  });
+  assert.deepEqual(result.items, [{ url, title: url, addedAt: 100, viewed: false }]);
+});

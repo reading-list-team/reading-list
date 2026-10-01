@@ -17,6 +17,17 @@ export function isStoredItem(key: string, value: unknown): value is StoredItem {
   return true;
 }
 
+export function normalizeLegacyItem(key: string, value: unknown): StoredItem | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const item = value as Record<string, unknown>;
+  if (typeof key !== 'string' || !key || item.url !== key ||
+    typeof item.addedAt !== 'number' || !Number.isFinite(item.addedAt)) {
+    return null;
+  }
+  return { ...item, url: key,
+    title: typeof item.title === 'string' ? item.title : key } as StoredItem;
+}
+
 export interface LegacySnapshot {
   items: StoredItem[];
   other: Record<string, unknown>;
@@ -28,7 +39,8 @@ export function classifyLegacySnapshot(
   const items: StoredItem[] = [];
   const other: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(raw)) {
-    if (isStoredItem(key, value)) items.push(value);
+    const item = normalizeLegacyItem(key, value);
+    if (item) items.push(item);
     else other[key] = value;
   }
   return { items, other };

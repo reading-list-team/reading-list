@@ -202,6 +202,7 @@ export class ReadingListAppElement extends LitElement {
       (settings) => {
         this.settings = settings;
         this.dataset.theme = settings.theme;
+        document.body.dataset.theme = settings.theme;
       },
       (error) => console.error('Could not load Reading List settings', error),
     );
@@ -234,6 +235,7 @@ export class ReadingListAppElement extends LitElement {
         this.localOnlyCount = rl.localOnlyCount;
         this.settings = await rl.getSettings();
         this.dataset.theme = this.settings.theme;
+        document.body.dataset.theme = this.settings.theme;
         if (rl.localOnlyCount > 0 && !this.statusText) {
           this.statusText = `${rl.localOnlyCount} pages are saved only on this device.`;
         }
@@ -455,6 +457,7 @@ export class ReadingListAppElement extends LitElement {
           await rl.saveSettings(this.importPreview.settings);
           this.settings = this.importPreview.settings;
           this.dataset.theme = this.settings.theme;
+          document.body.dataset.theme = this.settings.theme;
           settingsMessage = ' Settings restored.';
         } catch (error) {
           console.error('Could not restore Reading List settings', error);
@@ -498,6 +501,7 @@ export class ReadingListAppElement extends LitElement {
       const synced = await rl.saveSettings(settings);
       this.settings = settings;
       this.dataset.theme = settings.theme;
+      document.body.dataset.theme = settings.theme;
       this.statusText = synced
         ? '' : 'Settings saved on this device; Chrome sync is unavailable.';
     } catch (error) {
