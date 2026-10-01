@@ -226,3 +226,16 @@ test('retry sync does not overwrite a conflicting remote edit', async () => {
   assert.equal(sync.values[url].title, 'Remote title');
   assert.equal((await list.getListItems())[0].title, 'Local title');
 });
+
+test('single-item undo can restore the deleted record without new storage keys', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  const [saved] = await list.getListItems();
+  await list.removeReadingItem(url);
+  const restored = await list.addReadingItem(saved);
+  assert.equal(restored.synced, true);
+  assert.deepEqual(await new RL().getListItems(), [saved]);
+  assert.equal(local.values[`rl:v1:deleted:${url}`], false);
+});

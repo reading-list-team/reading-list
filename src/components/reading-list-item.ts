@@ -1,382 +1,331 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { Check, Copy, Pencil, Trash, X, ChevronUp, ChevronDown } from 'lucide';
+import { icon } from '../lib/icon.js';
 import { rl } from '../lib/rl.js';
+import { designTokens } from '../lib/design-tokens.js';
 
 @customElement('reading-list-item')
 export class ReadingListItemElement extends LitElement {
-  static override styles = css`
-    :host {
-      --base-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-      --base-font-size: 13px;
-      --base-line-height: 1.4;
-      --container-width: 360px;
-      --spacer: 15px;
-      --rl-bg-color: #f7f7f7;
-      --rl-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
-      --rl-link-color: #555;
-      --rl-link-hover-bg: #fff;
-      --primary-color: #66cc98;
-      --rl-item-gap: 0.5rem;
-
-      font-family: var(--base-font);
-      font-size: var(--base-font-size);
-      line-height: var(--base-line-height);
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    :focus-visible {
-      outline: 3px solid lightblue;
-    }
-
-    .reading-list-item {
-      border-radius: 3px;
-      padding: 0;
-      margin: 0;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.5s ease 0s;
-      color: var(--rl-link-color);
-      background-color: var(--rl-bg-color);
-      box-shadow: var(--rl-shadow);
-    }
-
-    .favicon {
-      position: absolute;
-      top: var(--rl-item-gap);
-      left: var(--rl-item-gap);
-      width: 36px;
-      height: 36px;
-      border-radius: 0.25rem;
-      border: 1px solid #ccc;
-      padding: 1px;
-    }
-
-    .favicon-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 2px;
-    }
-
-    .item-content {
-      text-decoration: none;
-      display: block;
-      width: 100%;
-      padding: 10px 50px 10px 56px;
-      min-height: 56px;
-      position: relative;
-    }
-
-    .item-content:hover,
-    .item-content:focus {
-      color: var(--primary-color);
-      background-color: var(--rl-link-hover-bg);
-    }
-
-    .item-content:hover .favicon,
-    .item-content:focus .favicon {
-      border-color: var(--primary-color);
-    }
-
-    .title,
-    .host {
-      overflow-wrap: break-word;
-      color: inherit;
-    }
-
-    @media screen and (max-width: 200px) {
-      .title,
-      .host {
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
+  static override styles = [
+    designTokens,
+    css`
+      :host {
+        display: block;
       }
-    }
+      .row {
+        min-height: 68px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: 8px 2px;
+        border-bottom: 1px solid var(--color-line);
+        position: relative;
+      }
+      .favicon {
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        object-fit: contain;
+        background: var(--color-surface);
+      }
+      .fallback {
+        display: grid;
+        place-items: center;
+        color: var(--color-accent);
+        font-weight: 700;
+      }
+      .content {
+        min-width: 0;
+        flex: 1;
+        position: relative;
+      }
+      .link {
+        display: block;
+        text-decoration: none;
+        color: var(--color-text);
+        font-size: var(--text-md);
+        font-weight: 550;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      :host([viewed]) .link {
+        font-weight: 400;
+      }
+      .link:hover {
+        color: var(--color-accent);
+      }
+      .host {
+        margin-top: 4px;
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .actions {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 1px;
+        padding-left: 18px;
+        background: linear-gradient(90deg, transparent, var(--color-bg) 16px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-fast) ease;
+      }
+      .row:hover .actions,
+      .row:focus-within .actions {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .icon-button {
+        width: 29px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--color-muted);
+      }
+      .icon-button:hover {
+        color: var(--color-text);
+        background: var(--color-surface);
+      }
+      .delete:hover {
+        color: var(--color-danger);
+      }
+      .editor {
+        min-width: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        animation: enter var(--motion-smooth) ease both;
+      }
+      .editor input {
+        width: 100%;
+        min-width: 0;
+        height: 34px;
+        padding: 0 8px;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-sm);
+        background: var(--color-bg);
+        color: var(--color-text);
+      }
+      .editor input:focus {
+        border-color: var(--color-accent);
+        box-shadow: var(--focus-ring);
+        outline: 0;
+      }
+      @keyframes enter {
+        from {
+          opacity: 0.5;
+          transform: translateY(3px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `,
+  ];
 
-    .title {
-      display: block;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 0.25rem;
-    }
+  @property() name = '';
+  @property() href = '';
+  @property({ type: Boolean }) newtab = false;
+  @property({ type: Boolean }) reorderable = false;
+  @property({ type: Boolean, reflect: true }) viewed = false;
+  @state() private editing = false;
+  @state() private draft = '';
+  @state() private faviconFailed = false;
 
-    .title::after {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 1;
-      content: '';
-    }
-
-    .host {
-      display: block;
-    }
-
-    .delete-button {
-      position: absolute;
-      text-align: center;
-      font-weight: bold;
-      top: 0;
-      right: 0;
-      padding: 0;
-      border-radius: 0;
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 0;
-      background: transparent;
-      z-index: 2;
-    }
-
-    .item-actions {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      z-index: 2;
-      display: flex;
-    }
-
-    .item-actions button {
-      border: 0;
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
-      padding: 0.3rem;
-    }
-
-    .title-editor {
-      display: flex;
-      gap: 0.25rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    .title-editor input { min-width: 0; flex: 1; }
-
-    :host([data-theme='dark']) {
-      --rl-bg-color: #30343b;
-      --rl-link-color: #eee;
-      --rl-link-hover-bg: #454b55;
-    }
-
-    :host([viewed]) .title { font-weight: normal; }
-
-    .delete-button-content {
-      color: #ccc;
-      border-radius: 9999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      transform: rotateZ(0) scale(1);
-      background: transparent;
-      transition:
-        transform 0.3s ease,
-        box-shadow 0.5s ease;
-    }
-
-    .delete-button:focus-visible {
-      outline: none;
-    }
-
-    .delete-button:focus-visible .delete-button-content {
-      outline: 3px solid lightblue;
-    }
-
-    .delete-button:focus-visible .delete-button-content,
-    .delete-button:hover .delete-button-content {
-      color: #fff;
-      transform: rotateZ(90deg) scale(2);
-      box-shadow: 1px 0 1px rgba(0, 0, 0, 0.15);
-      background: #ccc;
-    }
-  `;
-
-  /**
-   * The URL title text.
-   */
-  @property()
-  name = '';
-
-  /**
-   * The URL to link to.
-   */
-  @property({ type: String })
-  href = '';
-
-  @property({ type: Boolean })
-  newtab = false;
-
-  @property({ type: Boolean })
-  reorderable = false;
-
-  @property({ type: Boolean, reflect: true })
-  viewed = false;
-
-  private get url() {
-    if (!this.href) return null;
+  private get hostname(): string {
     try {
-      return new URL(this.href);
+      return new URL(this.href).hostname;
     } catch {
-      return null;
+      return this.href;
     }
   }
-
-  /**
-   * The src for the favicon image.
-   */
-  private get favicon() {
-    return this.url
-      ? `https://icons.duckduckgo.com/ip2/${this.url.hostname}.ico`
-      : null;
-  }
-
-  @state()
-  faviconError = false;
-
-  @state()
-  editingTitle = false;
-
-  @state()
-  draftTitle = '';
 
   override render() {
-    return html`
-      <div class="reading-list-item">
-        <div class="item-content">
-          ${this.editingTitle
-            ? html`<div class="title-editor">
-                <input aria-label="Page title" .value=${this.draftTitle}
-                  @input=${this._onTitleInput} @keydown=${this._onTitleKeydown} />
-                <button type="button" @click=${this._saveTitle}>Save</button>
-                <button type="button" @click=${this._cancelTitle}>Cancel</button>
-              </div>`
-            : html`<a class="title" href=${this.href} @click=${this._onLinkClick}
-                >${this.name}</a>`}
-          <div class="host">${this.url?.hostname ?? this.href}</div>
-          <div class="favicon">
-            ${this.favicon && !this.faviconError
-              ? html`<img
-                  class="favicon-img"
-                  onerror="this.onerror=null;this.hidden=true"
-                  src=${this.favicon}
-                />`
-              : ''}
-          </div>
-        </div>
-        <button class="delete-button" @click=${this._onDeleteClick}>
-          <span class="delete-button-content">&times;</span>
-        </button>
-        <div class="item-actions">
-          ${this.reorderable
-            ? html`<button aria-label="Move up" @click=${() => this._move(-1)}>↑</button>
-                <button aria-label="Move down" @click=${() => this._move(1)}>↓</button>`
-            : ''}
-          <button aria-label="Edit title" @click=${this._editTitle}>Edit</button>
-        </div>
+    return html`<div class="row">
+      ${this.faviconFailed || !this.hostname
+        ? html`<span class="favicon fallback" aria-hidden="true"
+            >${this.hostname.charAt(0).toUpperCase()}</span
+          >`
+        : html`<img
+            class="favicon"
+            alt=""
+            src=${`https://icons.duckduckgo.com/ip2/${this.hostname}.ico`}
+            @error=${() => (this.faviconFailed = true)}
+          />`}
+      <div class="content">
+        ${this.editing
+          ? html`<div class="editor">
+              <input
+                aria-label="Page title"
+                .value=${this.draft}
+                @input=${(event: Event) =>
+                  (this.draft = (event.target as HTMLInputElement).value)}
+                @keydown=${this.onEditKeydown}
+              />
+              <button
+                class="icon-button"
+                aria-label="Save title"
+                title="Save title"
+                @click=${this.saveTitle}
+              >
+                ${icon(Check, 17)}
+              </button>
+              <button
+                class="icon-button"
+                aria-label="Cancel editing"
+                title="Cancel editing"
+                @click=${this.cancelEdit}
+              >
+                ${icon(X, 17)}
+              </button>
+            </div>`
+          : html`<a
+                class="link"
+                href=${this.href}
+                title=${this.name}
+                @click=${this.openItem}
+                >${this.name}</a
+              >
+              <div class="host">${this.hostname}</div>`}
       </div>
-    `;
+      ${this.editing
+        ? ''
+        : html`<div class="actions">
+            ${this.reorderable
+              ? html`<button
+                    class="icon-button"
+                    aria-label=${`Move ${this.name} up`}
+                    title="Move up"
+                    @click=${() => this.move(-1)}
+                  >
+                    ${icon(ChevronUp, 16)}</button
+                  ><button
+                    class="icon-button"
+                    aria-label=${`Move ${this.name} down`}
+                    title="Move down"
+                    @click=${() => this.move(1)}
+                  >
+                    ${icon(ChevronDown, 16)}
+                  </button>`
+              : ''}
+            <button
+              class="icon-button"
+              aria-label=${`Edit ${this.name}`}
+              title="Edit title"
+              @click=${this.startEdit}
+            >
+              ${icon(Pencil, 16)}
+            </button>
+            <button
+              class="icon-button"
+              aria-label=${`Copy URL for ${this.name}`}
+              title="Copy URL"
+              @click=${this.copyUrl}
+            >
+              ${icon(Copy, 16)}
+            </button>
+            <button
+              class="icon-button delete"
+              aria-label=${`Delete ${this.name}`}
+              title="Delete"
+              @click=${this.deleteItem}
+            >
+              ${icon(Trash, 16)}
+            </button>
+          </div>`}
+    </div>`;
   }
 
-  private async _onLinkClick(event: MouseEvent) {
-    if (this.href) {
+  private dispatch(name: string, detail?: unknown) {
+    this.dispatchEvent(
+      new CustomEvent(name, { bubbles: true, composed: true, detail }),
+    );
+  }
+  private startEdit() {
+    this.draft = this.name;
+    this.editing = true;
+    void this.updateComplete.then(() =>
+      this.shadowRoot
+        ?.querySelector<HTMLInputElement>('.editor input')
+        ?.focus(),
+    );
+  }
+  private restoreEditFocus() {
+    void this.updateComplete.then(() =>
+      this.shadowRoot
+        ?.querySelector<HTMLButtonElement>('[title="Edit title"]')
+        ?.focus(),
+    );
+  }
+  private saveTitle() {
+    const title = this.draft.trim();
+    if (!title) return;
+    if (title !== this.name)
+      this.dispatch('update-title', { url: this.href, title });
+    this.editing = false;
+    this.restoreEditFocus();
+  }
+  private cancelEdit() {
+    this.editing = false;
+    this.restoreEditFocus();
+  }
+  private onEditKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
       event.preventDefault();
-      // If the control or meta key (⌘ on Mac, ⊞ on Windows) is pressed or if options is selected…
-      const modifierDown = event.ctrlKey || event.metaKey || this.newtab;
-      try {
-        await rl.markViewed(this.href);
-        this.dispatchEvent(new CustomEvent('viewed-item', {
-          bubbles: true,
-          composed: true,
-          detail: { url: this.href },
-        }));
-      } catch (error) {
-        console.error('Could not mark Reading List page as viewed', error);
-      }
-      openLink(this.href, modifierDown);
+      this.saveTitle();
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.cancelEdit();
     }
   }
-
-  private _onDeleteClick() {
-    this.dispatchEvent(
-      new Event('delete-item', { bubbles: true, composed: true }),
-    );
+  private async copyUrl() {
+    try {
+      await navigator.clipboard.writeText(this.href);
+      this.dispatch('item-message', 'URL copied.');
+    } catch {
+      this.dispatch('item-message', 'Could not copy the URL.');
+    }
   }
-
-  private _editTitle() {
-    this.draftTitle = this.name;
-    this.editingTitle = true;
-    void this.updateComplete.then(() => {
-      this.shadowRoot?.querySelector<HTMLInputElement>('.title-editor input')?.focus();
-    });
+  private deleteItem() {
+    this.dispatch('delete-item', { url: this.href });
   }
-
-  private _onTitleInput(event: Event) {
-    this.draftTitle = (event.target as HTMLInputElement).value;
+  private move(direction: -1 | 1) {
+    this.dispatch('move-item', { url: this.href, direction });
   }
-
-  private _onTitleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') this._saveTitle();
-    if (event.key === 'Escape') this._cancelTitle();
-  }
-
-  private _saveTitle() {
-    const title = this.draftTitle.trim();
-    if (!title) return;
-    this.dispatchEvent(new CustomEvent('update-title', {
-      bubbles: true,
-      composed: true,
-      detail: { url: this.href, title },
-    }));
-    this.editingTitle = false;
-  }
-
-  private _cancelTitle() {
-    this.editingTitle = false;
-  }
-
-  private _move(direction: -1 | 1) {
-    this.dispatchEvent(new CustomEvent('move-item', {
-      bubbles: true,
-      composed: true,
-      detail: { url: this.href, direction },
-    }));
-  }
-}
-
-function openLink(url: string, newTab: boolean) {
-  if (newTab) {
-    // Create a new tab with the URL
-    chrome?.tabs.create({ url: url, active: false });
-  } else {
-    // Query for the active tab
-    chrome?.tabs.query(
-      {
+  private async openItem(event: MouseEvent) {
+    event.preventDefault();
+    try {
+      await rl.markViewed(this.href);
+      this.dispatch('viewed-item', { url: this.href });
+    } catch (error) {
+      console.error('Could not mark page as viewed', error);
+    }
+    if (event.ctrlKey || event.metaKey || this.newtab) {
+      await chrome.tabs.create({ url: this.href, active: false });
+    } else {
+      const [tab] = await chrome.tabs.query({
         active: true,
         currentWindow: true,
-      },
-      (tabs) => {
-        const tab = tabs[0];
-
-        if (tab.id) {
-          // Update the URL of the current tab
-          chrome.tabs.update(tab.id, { url: url });
-
-          // Close the popup
-          const isPopup = document.body.classList.contains('popup-page');
-          if (isPopup) {
-            window.close();
-          }
-        }
-      },
-    );
+      });
+      if (tab?.id) await chrome.tabs.update(tab.id, { url: this.href });
+      if (document.body.classList.contains('popup-page')) window.close();
+    }
   }
 }
 
