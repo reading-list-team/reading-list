@@ -5,7 +5,8 @@ import {
   ArrowDownAZ,
   ArrowUpAZ,
   ArrowDownUp,
-  CalendarDays,
+  CalendarArrowDown,
+  CalendarArrowUp,
   Check,
   ChevronDown,
   Monitor,
@@ -39,6 +40,7 @@ export class ReadingListAppElement extends LitElement {
         height: 520px;
         max-height: 600px;
         overflow: hidden;
+        border-radius: 16px;
       }
       header {
         flex: none;
@@ -51,7 +53,7 @@ export class ReadingListAppElement extends LitElement {
       h1 {
         margin: 0;
         font-size: var(--text-lg);
-        font-weight: 650;
+        font-weight: var(--weight-heading);
         letter-spacing: -0.035em;
       }
       .save {
@@ -80,10 +82,11 @@ export class ReadingListAppElement extends LitElement {
         align-items: center;
         gap: 8px;
         padding: 8px 20px;
-        background: #fff8e9;
+        background: #fef7e0;
         color: #67480c;
         font-size: var(--text-xs);
         line-height: 1.35;
+        border-left: 3px solid var(--color-warning);
       }
       :host([data-theme='dark']) .warning {
         background: #3a321f;
@@ -97,7 +100,7 @@ export class ReadingListAppElement extends LitElement {
         background: transparent;
         color: inherit;
         text-decoration: underline;
-        font-weight: 650;
+        font-weight: var(--weight-heading);
         padding: 4px;
       }
       .feedback {
@@ -117,14 +120,14 @@ export class ReadingListAppElement extends LitElement {
         align-items: center;
         gap: 8px;
         font-size: var(--text-md);
-        font-weight: 650;
+        font-weight: var(--weight-medium);
       }
       .count {
         border-radius: var(--radius-pill);
         background: var(--color-surface);
         padding: 2px 7px;
         font-size: var(--text-xs);
-        font-weight: 600;
+        font-weight: var(--weight-medium);
       }
       .sort-wrap {
         position: relative;
@@ -160,6 +163,20 @@ export class ReadingListAppElement extends LitElement {
         border-radius: var(--radius-md);
         box-shadow: 0 12px 30px rgba(20, 30, 45, 0.16);
         padding: 6px;
+        transform-origin: top right;
+        animation: menu-in var(--motion-fast) cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .sort-menu.closing {
+        pointer-events: none;
+        animation: menu-out var(--motion-fast) ease-in both;
+      }
+      @keyframes menu-in {
+        from { opacity: 0; transform: translateY(-5px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes menu-out {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to { opacity: 0; transform: translateY(-5px) scale(0.97); }
       }
       .menu-label {
         color: var(--color-muted);
@@ -192,6 +209,16 @@ export class ReadingListAppElement extends LitElement {
         overflow-y: auto;
         padding: 0 20px;
         scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+      }
+      .list:hover, .list:focus-within, .sheet-body:hover, .sheet-body:focus-within {
+        scrollbar-color: var(--color-muted) transparent;
+      }
+      .list::-webkit-scrollbar, .sheet-body::-webkit-scrollbar { width: 6px; }
+      .list::-webkit-scrollbar-track, .sheet-body::-webkit-scrollbar-track { background: transparent; }
+      .list::-webkit-scrollbar-thumb, .sheet-body::-webkit-scrollbar-thumb { background: transparent; border-radius: 999px; }
+      .list:hover::-webkit-scrollbar-thumb, .list:focus-within::-webkit-scrollbar-thumb,
+      .sheet-body:hover::-webkit-scrollbar-thumb, .sheet-body:focus-within::-webkit-scrollbar-thumb { background: var(--color-muted); }
       }
       .empty {
         height: 100%;
@@ -207,7 +234,7 @@ export class ReadingListAppElement extends LitElement {
         font-size: 18px;
         letter-spacing: -0.03em;
         margin: 0 0 9px;
-        font-weight: 600;
+        font-weight: var(--weight-medium);
       }
       .empty p {
         margin: 0;
@@ -241,6 +268,7 @@ export class ReadingListAppElement extends LitElement {
         padding: 0;
         color: var(--color-text);
         background: transparent;
+        font-size: var(--text-md);
         transition:
           width var(--motion-smooth) ease,
           opacity var(--motion-smooth) ease;
@@ -257,6 +285,7 @@ export class ReadingListAppElement extends LitElement {
       .search-box.open {
         flex: 1;
       }
+      .search-box.open .close-search { margin-left: auto; }
       .search-box:not(.open) {
         flex: 0;
       }
@@ -283,7 +312,7 @@ export class ReadingListAppElement extends LitElement {
         border: 0;
         background: transparent;
         color: inherit;
-        font-weight: 700;
+        font-weight: var(--weight-heading);
         padding: 4px;
       }
       dialog {
@@ -298,11 +327,35 @@ export class ReadingListAppElement extends LitElement {
         background: var(--color-bg);
         color: var(--color-text);
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        flex-direction: column;
+      }
+      dialog[open] {
+        display: flex;
+        animation: sheet-in var(--motion-smooth) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      dialog[open].closing {
+        animation: sheet-out var(--motion-smooth) ease-in both;
+      }
+      @keyframes sheet-in {
+        from { opacity: 0; transform: translateY(100%); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes sheet-out {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(100%); }
       }
       dialog::backdrop {
         background: rgba(17, 25, 39, 0.32);
         backdrop-filter: blur(3px);
+        animation: backdrop-in var(--motion-smooth) ease-out both;
       }
+      dialog.closing::backdrop {
+        animation: backdrop-out var(--motion-smooth) ease-in both;
+      }
+      @keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+      .sheet-head, .sheet-foot { flex: none; }
       .sheet-head {
         display: flex;
         align-items: center;
@@ -312,10 +365,16 @@ export class ReadingListAppElement extends LitElement {
       }
       .sheet-head h2 {
         margin: 0;
-        font-size: 16px;
+        font-size: 20px;
+        font-weight: var(--weight-heading);
       }
       .sheet-body {
         padding: 8px 20px 20px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
       }
       .setting-row {
         display: flex;
@@ -344,16 +403,11 @@ export class ReadingListAppElement extends LitElement {
         background: var(--color-text);
         color: var(--color-bg);
       }
-      .setting-row input {
-        accent-color: var(--color-accent);
-        width: 17px;
-        height: 17px;
-      }
       .details {
         display: block;
         margin-top: 22px;
         font-size: var(--text-sm);
-        font-weight: 600;
+        font-weight: var(--weight-medium);
         color: var(--color-accent);
       }
       .sheet-foot {
@@ -369,6 +423,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private searchOpen = false;
   @state() private query = '';
   @state() private sortOpen = false;
+  @state() private sortClosing = false;
   @state() private message = '';
   @state() private loadError = false;
   @state() private localOnly = 0;
@@ -376,6 +431,9 @@ export class ReadingListAppElement extends LitElement {
   @state() private conflicts = 0;
   @state() private deleted: ListItemData | null = null;
   private refreshTimer: number | null = null;
+  private sortCloseTimer: number | null = null;
+  private sheetCloseTimer: number | null = null;
+  private reordering = false;
   private themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
   override connectedCallback() {
@@ -393,23 +451,33 @@ export class ReadingListAppElement extends LitElement {
     document.removeEventListener('pointerdown', this.onOutsidePointer);
     this.themeMedia.removeEventListener('change', this.onSystemTheme);
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
+    if (this.sheetCloseTimer) clearTimeout(this.sheetCloseTimer);
     super.disconnectedCallback();
   }
   private onSystemTheme = () => this.applyTheme();
   private onKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.sortOpen) {
-      this.sortOpen = false;
+      this.closeSort();
       this.focusSort();
     }
   };
   private onOutsidePointer = (event: PointerEvent) => {
+    const path = event.composedPath();
     if (
       this.sortOpen &&
-      !event
-        .composedPath()
-        .includes(this.shadowRoot?.querySelector('.sort-wrap') as EventTarget)
+      !path.includes(
+        this.shadowRoot?.querySelector('.sort-wrap') as EventTarget,
+      )
     )
-      this.sortOpen = false;
+      this.closeSort();
+    if (
+      this.searchOpen &&
+      !path.includes(
+        this.shadowRoot?.querySelector('.search-box') as EventTarget,
+      )
+    )
+      window.setTimeout(() => this.closeSearch(false), 0);
   };
   private applyTheme() {
     this.dataset.theme = resolvedTheme(this.settings.theme);
@@ -525,15 +593,18 @@ export class ReadingListAppElement extends LitElement {
                       ? ArrowUpAZ
                       : ArrowDownAZ
                     : this.settings.sortOption === 'date'
-                      ? CalendarDays
+                      ? this.settings.sortOrder === 'up'
+                        ? CalendarArrowUp
+                        : CalendarArrowDown
                       : ArrowDownUp,
                   18,
                 )}${icon(ChevronDown, 13)}</button
-              >${this.sortOpen
+              >${this.sortOpen || this.sortClosing
                 ? html`<div
-                    class="sort-menu"
+                    class=${`sort-menu ${this.sortClosing ? 'closing' : ''}`}
                     role="menu"
                     aria-label="Sort pages"
+                    ?inert=${this.sortClosing}
                     @keydown=${this.onSortMenuKeydown}
                   >
                     <div class="menu-label">Sort by</div>
@@ -554,23 +625,27 @@ export class ReadingListAppElement extends LitElement {
                             : ''}
                         </button>`,
                     )}
-                    <div class="divider"></div>
-                    <div class="menu-label">Direction</div>
-                    ${(['down', 'up'] as const).map(
-                      (order) =>
-                        html`<button
-                          class="menu-item"
-                          role="menuitemradio"
-                          aria-checked=${this.settings.sortOrder === order}
-                          ?disabled=${this.settings.sortOption === 'manual'}
-                          @click=${() => this.changeOrder(order)}
-                        >
-                          ${order === 'down' ? 'Descending' : 'Ascending'}${this
-                            .settings.sortOrder === order
-                            ? icon(Check, 15)
-                            : ''}
-                        </button>`,
-                    )}
+                    ${this.settings.sortOption === 'manual'
+                      ? ''
+                      : html` <div class="divider"></div>
+                          <div class="menu-label">Direction</div>
+                          ${(['down', 'up'] as const).map(
+                            (order) =>
+                              html`<button
+                                class="menu-item"
+                                role="menuitemradio"
+                                aria-checked=${this.settings.sortOrder ===
+                                order}
+                                @click=${() => this.changeOrder(order)}
+                              >
+                                ${order === 'down'
+                                  ? 'Descending'
+                                  : 'Ascending'}${this.settings.sortOrder ===
+                                order
+                                  ? icon(Check, 15)
+                                  : ''}
+                              </button>`,
+                          )}`}
                   </div>`
                 : ''}
             </div>
@@ -608,6 +683,7 @@ export class ReadingListAppElement extends LitElement {
                         @delete-item=${this.deleteItem}
                         @update-title=${this.updateTitle}
                         @move-item=${this.moveItem}
+                        @reorder-drop=${this.reorderDrop}
                         @viewed-item=${this.markViewed}
                         @item-message=${(event: CustomEvent<string>) =>
                           (this.message = event.detail)}
@@ -636,19 +712,21 @@ export class ReadingListAppElement extends LitElement {
             class="footer-button close-search"
             aria-label="Close search"
             title="Close search"
-            @click=${this.closeSearch}
+            @click=${() => this.closeSearch()}
           >
             ${icon(X, 18)}
           </button>
         </div>
-        <button
-          class="footer-button settings-toggle"
-          aria-label="Open settings"
-          title="Settings"
-          @click=${this.openSettings}
-        >
-          ${icon(Settings, 20)}
-        </button>
+        ${this.searchOpen
+          ? ''
+          : html`<button
+              class="footer-button settings-toggle"
+              aria-label="Open settings"
+              title="Settings"
+              @click=${this.openSettings}
+            >
+              ${icon(Settings, 20)}
+            </button>`}
       </footer>
       ${this.deleted
         ? html`<div class="undo" role="status">
@@ -656,7 +734,11 @@ export class ReadingListAppElement extends LitElement {
             ><button @click=${this.undoDelete}>Undo</button>
           </div>`
         : ''}
-      <dialog @close=${this.restoreSettingsFocus} @click=${this.onDialogClick}>
+      <dialog
+        @close=${this.restoreSettingsFocus}
+        @cancel=${this.onDialogCancel}
+        @click=${this.onDialogClick}
+      >
         <div class="sheet-head">
           <h2>Settings</h2>
           <button
@@ -703,6 +785,8 @@ export class ReadingListAppElement extends LitElement {
             ><span>Open links in a new tab</span
             ><input
               type="checkbox"
+              role="switch"
+              class="switch"
               .checked=${this.settings.openNewTab}
               @change=${(event: Event) =>
                 this.saveSettings({
@@ -713,6 +797,8 @@ export class ReadingListAppElement extends LitElement {
             ><span>Show viewed pages</span
             ><input
               type="checkbox"
+              role="switch"
+              class="switch"
               .checked=${this.settings.viewAll}
               @change=${(event: Event) =>
                 this.saveSettings({
@@ -753,23 +839,42 @@ export class ReadingListAppElement extends LitElement {
     buttons[next].focus();
   }
   private toggleSort() {
-    this.sortOpen = !this.sortOpen;
-    if (this.sortOpen)
-      void this.updateComplete.then(() =>
-        this.shadowRoot
-          ?.querySelector<HTMLButtonElement>('.sort-menu button')
-          ?.focus(),
-      );
+    if (this.sortOpen) {
+      this.closeSort();
+      return;
+    }
+    if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
+    this.sortClosing = false;
+    this.sortOpen = true;
+    void this.updateComplete.then(() =>
+      this.shadowRoot
+        ?.querySelector<HTMLButtonElement>('.sort-menu button')
+        ?.focus(),
+    );
+  }
+  private closeSort() {
+    if (!this.sortOpen) return;
+    this.sortOpen = false;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.sortClosing = false;
+      return;
+    }
+    this.sortClosing = true;
+    if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
+    this.sortCloseTimer = window.setTimeout(() => {
+      this.sortClosing = false;
+      this.sortCloseTimer = null;
+    }, 150);
   }
   private async changeSort(sortOption: ReadingListSettings['sortOption']) {
-    await this.saveSettings({ ...this.settings, sortOption });
-    this.sortOpen = false;
+    this.closeSort();
     this.focusSort();
+    await this.saveSettings({ ...this.settings, sortOption });
   }
   private async changeOrder(sortOrder: ReadingListSettings['sortOrder']) {
-    await this.saveSettings({ ...this.settings, sortOrder });
-    this.sortOpen = false;
+    this.closeSort();
     this.focusSort();
+    await this.saveSettings({ ...this.settings, sortOrder });
   }
   private focusSort() {
     void this.updateComplete.then(() =>
@@ -792,14 +897,15 @@ export class ReadingListAppElement extends LitElement {
         ?.focus(),
     );
   }
-  private closeSearch() {
+  private closeSearch(restoreFocus = true) {
     this.query = '';
     this.searchOpen = false;
-    void this.updateComplete.then(() =>
-      this.shadowRoot
-        ?.querySelector<HTMLButtonElement>('.search-toggle')
-        ?.focus(),
-    );
+    if (restoreFocus)
+      void this.updateComplete.then(() =>
+        this.shadowRoot
+          ?.querySelector<HTMLButtonElement>('.search-toggle')
+          ?.focus(),
+      );
   }
   private searchKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
@@ -808,7 +914,9 @@ export class ReadingListAppElement extends LitElement {
     }
   }
   private openSettings() {
-    this.shadowRoot?.querySelector<HTMLDialogElement>('dialog')?.showModal();
+    const dialog = this.shadowRoot?.querySelector<HTMLDialogElement>('dialog');
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
     void this.updateComplete.then(() =>
       this.shadowRoot
         ?.querySelector<HTMLButtonElement>('.sheet-head button')
@@ -816,7 +924,22 @@ export class ReadingListAppElement extends LitElement {
     );
   }
   private closeSettings() {
-    this.shadowRoot?.querySelector<HTMLDialogElement>('dialog')?.close();
+    const dialog = this.shadowRoot?.querySelector<HTMLDialogElement>('dialog');
+    if (!dialog?.open || dialog.classList.contains('closing')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      dialog.close();
+      return;
+    }
+    dialog.classList.add('closing');
+    this.sheetCloseTimer = window.setTimeout(() => {
+      dialog.close();
+      dialog.classList.remove('closing');
+      this.sheetCloseTimer = null;
+    }, 220);
+  }
+  private onDialogCancel(event: Event) {
+    event.preventDefault();
+    this.closeSettings();
   }
   private restoreSettingsFocus() {
     this.shadowRoot
@@ -954,6 +1077,8 @@ export class ReadingListAppElement extends LitElement {
   private async moveItem(
     event: CustomEvent<{ url: string; direction: -1 | 1 }>,
   ) {
+    if (this.reordering) return;
+    this.reordering = true;
     try {
       const synced = await rl.moveItem(
         event.detail.url,
@@ -961,10 +1086,41 @@ export class ReadingListAppElement extends LitElement {
       );
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
-      this.message = synced ? '' : 'Order saved only on this device.';
+      this.message = synced
+        ? 'Manual order updated.'
+        : 'Order saved only on this device.';
     } catch (error) {
       console.error(error);
       this.message = 'Could not change the order.';
+    } finally {
+      this.reordering = false;
+    }
+  }
+  private async reorderDrop(
+    event: CustomEvent<{
+      sourceUrl: string;
+      targetUrl: string;
+      placement: 'before' | 'after';
+    }>,
+  ) {
+    if (this.reordering || this.settings.sortOption !== 'manual') return;
+    this.reordering = true;
+    try {
+      const synced = await rl.reorderItem(
+        event.detail.sourceUrl,
+        event.detail.targetUrl,
+        event.detail.placement,
+      );
+      this.items = await rl.getListItems();
+      this.localOnly = rl.localOnlyCount;
+      this.message = synced
+        ? 'Manual order updated.'
+        : 'Order saved only on this device.';
+    } catch (error) {
+      console.error(error);
+      this.message = 'Could not change the order.';
+    } finally {
+      this.reordering = false;
     }
   }
   private markViewed(event: CustomEvent<{ url: string }>) {

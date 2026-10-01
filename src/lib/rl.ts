@@ -343,7 +343,31 @@ export class RL {
     const to = from + direction;
     if (from < 0 || to < 0 || to >= ordered.length) return true;
     [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
-    const updated = ordered.map((item, index) => ({ ...item, index: index + 1 }));
+    return this.persistManualOrder(ordered);
+  }
+
+  async reorderItem(
+    url: string,
+    targetUrl: string,
+    placement: 'before' | 'after',
+  ): Promise<boolean> {
+    await this.ensureLoaded();
+    if (url === targetUrl) return true;
+    const ordered = sortList(this.list, DEFAULT_SETTINGS);
+    const from = ordered.findIndex((item) => item.url === url);
+    if (from < 0 || !ordered.some((item) => item.url === targetUrl))
+      return true;
+    const [moved] = ordered.splice(from, 1);
+    const target = ordered.findIndex((item) => item.url === targetUrl);
+    ordered.splice(target + (placement === 'after' ? 1 : 0), 0, moved);
+    return this.persistManualOrder(ordered);
+  }
+
+  private async persistManualOrder(ordered: ListItemData[]): Promise<boolean> {
+    const updated = ordered.map((item, index) => ({
+      ...item,
+      index: index + 1,
+    }));
     const localWrites: Record<string, ListItemData> = {};
     const syncWrites: Record<string, ListItemData> = {};
     for (const item of updated) {

@@ -239,3 +239,37 @@ test('single-item undo can restore the deleted record without new storage keys',
   assert.deepEqual(await new RL().getListItems(), [saved]);
   assert.equal(local.values[`rl:v1:deleted:${url}`], false);
 });
+
+test('drag reorder writes one manual order while retaining item metadata', async () => {
+  const second = {
+    url: 'https://example.com/second',
+    title: 'Second',
+    addedAt: 200,
+    viewed: false,
+    index: 2,
+  };
+  const third = {
+    url: 'https://example.com/third',
+    title: 'Third',
+    addedAt: 300,
+    index: 3,
+  };
+  const local = memoryArea();
+  const sync = memoryArea({
+    [url]: legacy,
+    [second.url]: second,
+    [third.url]: third,
+  });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+  assert.equal(await list.reorderItem(url, third.url, 'after'), true);
+  assert.deepEqual(
+    (await list.getListItems())
+      .sort((a, b) => a.index - b.index)
+      .map((item) => item.url),
+    [second.url, third.url, url],
+  );
+  assert.equal(local.values[`rl:v1:item:${url}`].viewed, true);
+  assert.equal(sync.values[url].index, 3);
+});

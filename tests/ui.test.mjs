@@ -70,6 +70,7 @@ globalThis.chrome = {
   },
 };
 await import('../extension/scripts/components/reading-list-app.js');
+const { rl } = await import('../extension/scripts/lib/rl.js');
 
 const app = document.createElement('reading-list-app');
 document.body.append(app);
@@ -126,6 +127,11 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   await update();
   const field = root.querySelector('.search-field');
   assert.equal(root.activeElement, field);
+  assert.equal(root.querySelector('.settings-toggle'), null);
+  assert.match(
+    app.constructor.styles.at(-1).cssText,
+    /font-size: var\(--text-md\)/,
+  );
   field.value = 'missing';
   field.dispatchEvent(new window.InputEvent('input', { bubbles: true }));
   await update();
@@ -140,6 +146,15 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   await update();
   assert.equal(app.searchOpen, false);
   assert.equal(root.activeElement, search);
+  search.click();
+  await update();
+  root
+    .querySelector('header')
+    .dispatchEvent(
+      new window.PointerEvent('pointerdown', { bubbles: true, composed: true }),
+    );
+  await update();
+  assert.equal(app.searchOpen, false);
 
   const item = root.querySelector('reading-list-item');
   await item.updateComplete;
@@ -176,21 +191,27 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   sort.click();
   await update();
   assert.equal(
+    root.querySelector('.sort-menu').textContent.includes('Direction'),
+    false,
+  );
+  assert.equal(
     root.querySelector('.sort-menu button').getAttribute('role'),
     'menuitemradio',
   );
-  root
-    .querySelector('.sort-menu')
-    .dispatchEvent(
-      new window.KeyboardEvent('keydown', {
-        key: 'Escape',
-        bubbles: true,
-        composed: true,
-      }),
-    );
+  root.querySelector('.sort-menu').dispatchEvent(
+    new window.KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      composed: true,
+    }),
+  );
   await update();
   assert.equal(app.sortOpen, false);
+  assert.ok(root.querySelector('.sort-menu.closing'));
   assert.equal(root.activeElement, sort);
+  await new Promise((resolve) => setTimeout(resolve, 160));
+  await update();
+  assert.equal(root.querySelector('.sort-menu'), null);
 
   const settings = root.querySelector('.settings-toggle');
   settings.click();
@@ -198,8 +219,14 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   const dialog = root.querySelector('dialog');
   assert.equal(dialog.open, true);
   assert.equal(dialog.querySelectorAll('.theme-options button').length, 3);
+  assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 2);
   dialog.querySelector('.sheet-head button').click();
   await update();
+  assert.equal(dialog.open, true);
+  assert.equal(dialog.classList.contains('closing'), true);
+  await new Promise((resolve) => setTimeout(resolve, 230));
+  await update();
+  assert.equal(dialog.open, false);
   assert.equal(root.activeElement, settings);
   assert.match(
     app.constructor.styles.at(-1).cssText,
@@ -235,4 +262,76 @@ test('Enter saves an inline edit and Undo restores one deleted page', async () =
     app.constructor.styles[0].cssText.includes('prefers-reduced-motion'),
     true,
   );
+});
+
+test('manual drag and keyboard movement persist and expose one grip per row', async () => {
+  const second = {
+    url: 'https://example.com/second',
+    title: 'Second page',
+    addedAt: 200,
+    index: 2,
+  };
+  await rl.addReadingItem(second);
+  app.items = await rl.getListItems();
+  await update();
+  let rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].shadowRoot.querySelectorAll('.drag-handle').length, 1);
+  assert.equal(
+    rows[0].shadowRoot.querySelectorAll(
+      '[title="Move up"], [title="Move down"]',
+    ).length,
+    0,
+  );
+  const transfer = new window.DataTransfer();
+  const dragEvent = (type, clientY = 0) => {
+    const event = new window.DragEvent(type, { bubbles: true, clientY });
+    Object.defineProperty(event, 'dataTransfer', { value: transfer });
+    return event;
+  };
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragstart'));
+  assert.equal(
+    transfer.getData('application/x-reading-list-item'),
+    rows[0].href,
+  );
+  rows[1].shadowRoot
+    .querySelector('.row')
+    .dispatchEvent(dragEvent('dragover', 1));
+  rows[1].shadowRoot.querySelector('.row').dispatchEvent(dragEvent('drop', 1));
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[1].href, saved.url);
+  rows[1].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
+    );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[0].href, saved.url);
+});
+
+test('options page uses switches and hides manual direction', async () => {
+  globalThis.getComputedStyle = window.getComputedStyle.bind(window);
+  await import('../extension/scripts/components/reading-list-options.js');
+  const options = document.createElement('reading-list-options');
+  document.body.append(options);
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await options.updateComplete;
+  const optionsRoot = options.shadowRoot;
+  assert.equal(optionsRoot.querySelectorAll('input[role="switch"]').length, 2);
+  assert.equal(optionsRoot.textContent.includes('Direction'), false);
+  const sort = [...optionsRoot.querySelectorAll('select')].find(
+    (select) => select.value === 'manual',
+  );
+  sort.value = 'date';
+  sort.dispatchEvent(new window.Event('change', { bubbles: true }));
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await options.updateComplete;
+  assert.equal(optionsRoot.textContent.includes('Direction'), true);
+  options.remove();
 });
