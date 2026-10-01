@@ -41,7 +41,16 @@ const SETTINGS_KEY = 'rl:v1:settings';
 const SETTINGS_SHADOW_KEY = 'rl:v1:settings-shadow';
 
 function sameItem(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  const canonical = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(canonical);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, canonical(entry)]));
+    }
+    return value;
+  };
+  return JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 }
 
 export class RL {
@@ -356,8 +365,13 @@ export class RL {
     let synced = 0;
     let conflicts = 0;
     for (const item of this.list) {
-      if (sameItem(remote[item.url], item)) continue;
       const shadow = local[SHADOW_PREFIX + item.url];
+      if (sameItem(remote[item.url], item)) {
+        if (!sameItem(shadow, item)) {
+          await chrome.storage.local.set({ [SHADOW_PREFIX + item.url]: item });
+        }
+        continue;
+      }
       if (Object.prototype.hasOwnProperty.call(remote, item.url) &&
         (!shadow || !sameItem(remote[item.url], shadow))) {
         conflicts++;
