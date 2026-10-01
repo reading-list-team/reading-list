@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc && rollup -c",
     "format": "prettier --write src",
-    "test": "tsc && node --experimental-strip-types --test tests/*.test.mjs"
+    "test": "tsc && node --test tests/*.test.mjs"
   },
   "type": "module",
   "author": "",

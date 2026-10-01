@@ -3,7 +3,7 @@ import test from 'node:test';
 import {
   classifyLegacySnapshot,
   mergeItem,
-} from '../src/lib/storage-model.ts';
+} from '../extension/scripts/lib/storage-model.js';
 
 test('classifies v2 records without losing settings or unusual URLs', () => {
   const item = {
