@@ -409,31 +409,37 @@ export class ReadingListAppElement extends LitElement {
           transform: translateY(8px);
         }
       }
-      .undo {
+      .toast-stack {
         position: absolute;
         z-index: 3;
-        bottom: 6px;
+        bottom: 16px;
         left: var(--content-gutter);
         right: var(--content-gutter);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        pointer-events: none;
+      }
+      .toast {
         min-height: 40px;
-        background: var(--color-surface);
-        color: var(--color-text);
+        background: var(--color-text);
+        color: var(--color-bg);
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 5px 7px 5px 12px;
-        border: 1px solid var(--color-line);
         border-radius: var(--radius-sm);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
         font-size: var(--text-sm);
-        animation: undo-in var(--motion-smooth) cubic-bezier(0.22, 1, 0.36, 1)
+        pointer-events: auto;
+        animation: toast-in var(--motion-smooth) cubic-bezier(0.22, 1, 0.36, 1)
           both;
       }
-      .undo.closing {
+      .toast.closing {
         pointer-events: none;
-        animation: undo-out var(--motion-fast) ease-in both;
+        animation: toast-out var(--motion-fast) ease-in both;
       }
-      @keyframes undo-in {
+      @keyframes toast-in {
         from {
           opacity: 0;
           transform: translateY(7px);
@@ -443,7 +449,7 @@ export class ReadingListAppElement extends LitElement {
           transform: translateY(0);
         }
       }
-      @keyframes undo-out {
+      @keyframes toast-out {
         from {
           opacity: 1;
           transform: translateY(0);
@@ -453,28 +459,34 @@ export class ReadingListAppElement extends LitElement {
           transform: translateY(7px);
         }
       }
-      .undo-actions {
+      .toast-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .toast-actions {
         display: flex;
         align-items: center;
         gap: 2px;
       }
-      .undo button {
+      .toast button {
         border: 0;
         background: transparent;
-        color: var(--color-accent);
+        color: inherit;
         font-weight: var(--weight-medium);
         padding: 6px;
         border-radius: 6px;
       }
-      .undo button:hover {
-        background: var(--color-bg);
+      .toast button:hover {
+        background: rgba(127, 127, 127, 0.16);
       }
-      .undo .dismiss {
+      .toast .dismiss {
         width: 28px;
         height: 28px;
         display: grid;
         place-items: center;
-        color: var(--color-muted);
+        opacity: 0.65;
       }
       dialog {
         width: 100%;
@@ -625,6 +637,8 @@ export class ReadingListAppElement extends LitElement {
   @state() private conflicts = 0;
   @state() private deleted: ListItemData | null = null;
   @state() private undoClosing = false;
+  @state() private infoToast: string | null = null;
+  @state() private infoClosing = false;
   @state() private draggedUrl: string | null = null;
   @state() private dragInsertIndex: number | null = null;
   private dragHeight = 68;
@@ -636,6 +650,8 @@ export class ReadingListAppElement extends LitElement {
   private savedHighlightTimer: number | null = null;
   private undoAutoTimer: number | null = null;
   private undoCloseTimer: number | null = null;
+  private infoAutoTimer: number | null = null;
+  private infoCloseTimer: number | null = null;
   private reordering = false;
   private themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -663,6 +679,8 @@ export class ReadingListAppElement extends LitElement {
     if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
     if (this.undoAutoTimer) clearTimeout(this.undoAutoTimer);
     if (this.undoCloseTimer) clearTimeout(this.undoCloseTimer);
+    if (this.infoAutoTimer) clearTimeout(this.infoAutoTimer);
+    if (this.infoCloseTimer) clearTimeout(this.infoCloseTimer);
     super.disconnectedCallback();
   }
   private onSystemTheme = () => this.applyTheme();
@@ -963,8 +981,7 @@ export class ReadingListAppElement extends LitElement {
                         @reorder-end=${this.reorderEnd}
                         @reorder-drop=${this.reorderDrop}
                         @viewed-item=${this.markViewed}
-                        @item-message=${(event: CustomEvent<string>) =>
-                          (this.message = event.detail)}
+                        @item-message=${this.onItemMessage}
                       ></reading-list-item>`,
                   )}
       </div>
@@ -1013,28 +1030,51 @@ export class ReadingListAppElement extends LitElement {
           ${icon(Settings, 20)}
         </button>
       </footer>
-      ${this.deleted
-        ? html`<div
-            class=${`undo ${this.undoClosing ? 'closing' : ''}`}
-            role="status"
-            ?inert=${this.undoClosing}
-            @pointerenter=${this.pauseUndoDismiss}
-            @pointerleave=${this.resumeUndoDismiss}
-            @focusin=${this.pauseUndoDismiss}
-            @focusout=${this.resumeUndoDismiss}
-          >
-            <span>Page deleted</span>
-            <div class="undo-actions">
-              <button @click=${this.undoDelete}>Undo</button
-              ><button
-                class="dismiss"
-                aria-label="Dismiss Undo"
-                title="Dismiss"
-                @click=${this.dismissUndo}
-              >
-                ${icon(X, 16)}
-              </button>
-            </div>
+      ${this.deleted || this.infoToast
+        ? html`<div class="toast-stack">
+            ${this.infoToast
+              ? html`<div
+                  class=${`toast info ${this.infoClosing ? 'closing' : ''}`}
+                  role="status"
+                  ?inert=${this.infoClosing}
+                >
+                  <span class="toast-label">${this.infoToast}</span>
+                  <button
+                    class="dismiss"
+                    aria-label="Dismiss notification"
+                    title="Dismiss"
+                    @click=${this.dismissInfoToast}
+                  >
+                    ${icon(X, 16)}
+                  </button>
+                </div>`
+              : ''}
+            ${this.deleted
+              ? html`<div
+                  class=${`toast undo ${this.undoClosing ? 'closing' : ''}`}
+                  role="status"
+                  ?inert=${this.undoClosing}
+                  @pointerenter=${this.pauseUndoDismiss}
+                  @pointerleave=${this.resumeUndoDismiss}
+                  @focusin=${this.pauseUndoDismiss}
+                  @focusout=${this.resumeUndoDismiss}
+                >
+                  <span class="toast-label" title=${this.deleted.url}
+                    >${this.hostname(this.deleted.url)} deleted</span
+                  >
+                  <div class="toast-actions">
+                    <button @click=${this.undoDelete}>Undo</button
+                    ><button
+                      class="dismiss"
+                      aria-label="Dismiss Undo"
+                      title="Dismiss"
+                      @click=${this.dismissUndo}
+                    >
+                      ${icon(X, 16)}
+                    </button>
+                  </div>
+                </div>`
+              : ''}
           </div>`
         : ''}
       <dialog
@@ -1348,6 +1388,43 @@ export class ReadingListAppElement extends LitElement {
       this.message = 'Chrome sync is unavailable. Your local pages are safe.';
     }
   }
+  private hostname(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '') || url;
+    } catch {
+      return url;
+    }
+  }
+  private onItemMessage(event: CustomEvent<string>) {
+    this.message = '';
+    this.showInfoToast(
+      event.detail === 'URL copied.' ? 'URL copied' : event.detail,
+    );
+  }
+  private showInfoToast(message: string) {
+    this.clearInfoToast();
+    this.infoToast = message;
+    this.infoAutoTimer = window.setTimeout(() => this.dismissInfoToast(), 3000);
+  }
+  private clearInfoToast() {
+    if (this.infoAutoTimer) clearTimeout(this.infoAutoTimer);
+    if (this.infoCloseTimer) clearTimeout(this.infoCloseTimer);
+    this.infoAutoTimer = null;
+    this.infoCloseTimer = null;
+    this.infoToast = null;
+    this.infoClosing = false;
+  }
+  private dismissInfoToast() {
+    if (!this.infoToast || this.infoClosing) return;
+    if (this.infoAutoTimer) clearTimeout(this.infoAutoTimer);
+    this.infoAutoTimer = null;
+    this.infoClosing = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.clearInfoToast();
+      return;
+    }
+    this.infoCloseTimer = window.setTimeout(() => this.clearInfoToast(), 150);
+  }
   private scheduleUndoDismiss(delay = 6000) {
     this.pauseUndoDismiss();
     this.undoAutoTimer = window.setTimeout(() => this.dismissUndo(), delay);
@@ -1389,16 +1466,14 @@ export class ReadingListAppElement extends LitElement {
     const item = this.items?.find((entry) => entry.url === event.detail.url);
     if (!item) return;
     try {
-      const synced = await rl.removeReadingItem(item.url);
+      await rl.removeReadingItem(item.url);
       this.items = (this.items ?? []).filter((entry) => entry.url !== item.url);
       this.clearUndo();
       this.deleted = item;
       this.scheduleUndoDismiss();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = synced
-        ? ''
-        : 'Removed on this device. Chrome sync is unavailable.';
+      this.message = '';
       void this.updateComplete.then(() => {
         const next =
           this.shadowRoot
@@ -1425,9 +1500,7 @@ export class ReadingListAppElement extends LitElement {
       this.clearUndo();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = result.synced
-        ? 'Page restored on this device and written to Chrome sync storage.'
-        : 'Page restored only on this device.';
+      this.message = '';
       void this.updateComplete.then(() =>
         this.shadowRoot
           ?.querySelector<HTMLButtonElement>('.sort-button, .save')
@@ -1447,9 +1520,8 @@ export class ReadingListAppElement extends LitElement {
         item.url === result.item.url ? result.item : item,
       );
       this.localOnly = rl.localOnlyCount;
-      this.message = result.synced
-        ? 'Title saved on this device and written to Chrome sync storage.'
-        : 'Title saved only on this device.';
+      this.message = '';
+      this.showInfoToast('Title saved');
     } catch (error) {
       console.error(error);
       this.message = 'Could not change the title.';
@@ -1461,15 +1533,11 @@ export class ReadingListAppElement extends LitElement {
     if (this.reordering) return;
     this.reordering = true;
     try {
-      const synced = await rl.moveItem(
-        event.detail.url,
-        event.detail.direction,
-      );
+      await rl.moveItem(event.detail.url, event.detail.direction);
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
-      this.message = synced
-        ? 'Manual order updated.'
-        : 'Order saved only on this device.';
+      this.message = '';
+      this.showInfoToast('Order updated');
     } catch (error) {
       console.error(error);
       this.message = 'Could not change the order.';
@@ -1574,16 +1642,15 @@ export class ReadingListAppElement extends LitElement {
             );
         }
       }
-      const synced = await rl.reorderItem(
+      await rl.reorderItem(
         event.detail.sourceUrl,
         event.detail.targetUrl,
         event.detail.placement,
       );
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
-      this.message = synced
-        ? 'Manual order updated.'
-        : 'Order saved only on this device.';
+      this.message = '';
+      this.showInfoToast('Order updated');
     } catch (error) {
       console.error(error);
       this.items = previous;

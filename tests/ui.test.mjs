@@ -274,6 +274,7 @@ test('Enter saves an inline edit and Undo restores one deleted page', async () =
   await update();
   row = root.querySelector('reading-list-item');
   assert.equal(row.name, 'Updated title');
+  assert.match(root.querySelector('.info').textContent, /Title saved/);
   row.shadowRoot.querySelector('[title="Delete"]').click();
   await new Promise((resolve) => setTimeout(resolve, 10));
   await update();
@@ -284,6 +285,7 @@ test('Enter saves an inline edit and Undo restores one deleted page', async () =
   await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
   assert.equal(root.querySelector('reading-list-item').name, 'Updated title');
+  assert.equal(root.querySelector('.feedback'), null);
   assert.equal(
     app.constructor.styles[0].cssText.includes('prefers-reduced-motion'),
     true,
@@ -420,11 +422,31 @@ test('A saves the current page but does not fire while editing text', async () =
 
 test('Undo toast overlays the footer, pauses on hover, and dismisses with X', async () => {
   const row = root.querySelector('reading-list-item');
+  const clipboardDescriptor = Object.getOwnPropertyDescriptor(
+    navigator,
+    'clipboard',
+  );
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: async () => {} },
+  });
+  row.shadowRoot.querySelector('[title="Copy URL"]').click();
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  assert.match(root.querySelector('.info').textContent, /URL copied/);
+  assert.equal(root.querySelector('.feedback'), null);
   row.shadowRoot.querySelector('[title="Delete"]').click();
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   const toast = root.querySelector('.undo');
   assert.ok(toast);
+  assert.match(toast.textContent, /example.com deleted/);
+  assert.equal(root.querySelectorAll('.toast-stack .toast').length, 2);
+  root.querySelector('.info .dismiss').click();
+  await new Promise((resolve) => setTimeout(resolve, 170));
+  await update();
+  assert.equal(root.querySelector('.info'), null);
+  assert.ok(root.querySelector('.undo'));
   assert.ok(app.undoAutoTimer);
   assert.ok(toast.querySelector('.dismiss[aria-label="Dismiss Undo"]'));
   toast.dispatchEvent(new window.PointerEvent('pointerenter'));
@@ -444,4 +466,7 @@ test('Undo toast overlays the footer, pauses on hover, and dismisses with X', as
   await new Promise((resolve) => setTimeout(resolve, 170));
   await update();
   assert.equal(root.querySelector('.undo'), null);
+  if (clipboardDescriptor)
+    Object.defineProperty(navigator, 'clipboard', clipboardDescriptor);
+  else delete navigator.clipboard;
 });
