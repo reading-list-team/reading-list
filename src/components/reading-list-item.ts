@@ -28,6 +28,10 @@ export class ReadingListItemElement extends LitElement {
         padding: 8px 2px;
         border-bottom: 1px solid var(--color-line);
         position: relative;
+        transition: background-color var(--motion-smooth) ease;
+      }
+      :host([recently-saved]) .row {
+        background-color: rgba(66, 133, 244, 0.12);
       }
       :host([last]) .row {
         border-bottom: 0;
@@ -180,6 +184,7 @@ export class ReadingListItemElement extends LitElement {
   @property({ type: Boolean }) reorderable = false;
   @property({ type: Boolean, reflect: true }) viewed = false;
   @property({ type: Boolean, reflect: true }) last = false;
+  @property({ type: Boolean, reflect: true, attribute: 'recently-saved' }) recentlySaved = false;
   @state() private editing = false;
   @state() private draft = '';
   @state() private faviconFailed = false;

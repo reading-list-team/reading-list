@@ -27,6 +27,7 @@ import {
   ReadingListSettings,
   sortList,
 } from '../lib/settings.js';
+import type { ReadingListItemElement } from './reading-list-item.js';
 import './reading-list-item.js';
 
 @customElement('reading-list-app')
@@ -571,6 +572,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private sortClosing = false;
   @state() private message = '';
   @state() private justSaved = false;
+  @state() private recentlySavedUrl: string | null = null;
   @state() private loadError = false;
   @state() private localOnly = 0;
   @state() private syncUnavailable = false;
@@ -584,6 +586,7 @@ export class ReadingListAppElement extends LitElement {
   private sortCloseTimer: number | null = null;
   private sheetCloseTimer: number | null = null;
   private saveFeedbackTimer: number | null = null;
+  private savedHighlightTimer: number | null = null;
   private reordering = false;
   private themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -608,6 +611,7 @@ export class ReadingListAppElement extends LitElement {
     if (this.sortCloseTimer) clearTimeout(this.sortCloseTimer);
     if (this.sheetCloseTimer) clearTimeout(this.sheetCloseTimer);
     if (this.saveFeedbackTimer) clearTimeout(this.saveFeedbackTimer);
+    if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
     super.disconnectedCallback();
   }
   private onSystemTheme = () => this.applyTheme();
@@ -895,6 +899,7 @@ export class ReadingListAppElement extends LitElement {
                         .newtab=${this.settings.openNewTab}
                         .reorderable=${this.settings.sortOption === 'manual'}
                         .viewed=${!!item.viewed}
+                        .recentlySaved=${this.recentlySavedUrl === item.url}
                         .last=${index === visible.length - 1}
                         style=${`--drag-offset: ${this.dragOffset(item.url, visible)}px`}
                         ?drag-active=${this.draggedUrl === item.url}
@@ -1239,6 +1244,24 @@ export class ReadingListAppElement extends LitElement {
       this.syncUnavailable = !rl.isSyncAvailable;
       this.message = '';
       this.showSavedFeedback();
+      this.recentlySavedUrl = result.item.url;
+      if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
+      this.savedHighlightTimer = window.setTimeout(() => {
+        this.recentlySavedUrl = null;
+        this.savedHighlightTimer = null;
+      }, 2400);
+      await this.updateComplete;
+      const row = [
+        ...(this.shadowRoot?.querySelectorAll<ReadingListItemElement>(
+          'reading-list-item',
+        ) ?? []),
+      ].find((item) => item.href === result.item.url);
+      row?.scrollIntoView?.({
+        block: 'center',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+      });
     } catch (error) {
       console.error(error);
       this.message = 'Could not save this page.';

@@ -372,6 +372,11 @@ test('A saves the current page but does not fire while editing text', async () =
     root.querySelector('.save').getAttribute('aria-keyshortcuts'),
     'A',
   );
+  let scrolledUrl = null;
+  const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView;
+  window.HTMLElement.prototype.scrollIntoView = function () {
+    scrolledUrl = this.href;
+  };
   const before = app.items.length;
   document.dispatchEvent(
     new window.KeyboardEvent('keydown', { key: 'a', bubbles: true }),
@@ -379,6 +384,11 @@ test('A saves the current page but does not fire while editing text', async () =
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   assert.equal(app.items.length, before + 1);
+  assert.equal(scrolledUrl, 'https://example.com/new');
+  assert.equal(
+    root.querySelector('reading-list-item[recently-saved]')?.href,
+    scrolledUrl,
+  );
   assert.equal(root.querySelector('.feedback'), null);
   assert.equal(root.querySelector('.save').classList.contains('saved'), true);
   assert.match(
@@ -403,4 +413,7 @@ test('A saves the current page but does not fire while editing text', async () =
     .dispatchEvent(
       new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
     );
+  if (originalScrollIntoView)
+    window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+  else delete window.HTMLElement.prototype.scrollIntoView;
 });
