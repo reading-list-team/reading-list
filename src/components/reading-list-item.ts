@@ -12,6 +12,13 @@ export class ReadingListItemElement extends LitElement {
     css`
       :host {
         display: block;
+        position: relative;
+        transform: translateY(var(--drag-offset, 0px));
+        transition: transform var(--motion-smooth)
+          cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      :host([drag-active]) {
+        opacity: 0.12;
       }
       .row {
         min-height: 68px;
@@ -21,23 +28,6 @@ export class ReadingListItemElement extends LitElement {
         padding: 8px 2px;
         border-bottom: 1px solid var(--color-line);
         position: relative;
-      }
-      .row.drop-before::before,
-      .row.drop-after::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--color-accent);
-        border-radius: 2px;
-        z-index: 3;
-      }
-      .row.drop-before::before {
-        top: 0;
-      }
-      .row.drop-after::after {
-        bottom: 0;
       }
       .drag-handle {
         flex: 0 0 18px;
@@ -66,9 +56,6 @@ export class ReadingListItemElement extends LitElement {
       .drag-handle:hover {
         background: var(--color-surface);
       }
-      .row.dragging {
-        opacity: 0.55;
-      }
       .favicon {
         flex: 0 0 30px;
         width: 30px;
@@ -81,7 +68,7 @@ export class ReadingListItemElement extends LitElement {
         display: grid;
         place-items: center;
         color: var(--color-accent);
-        font-weight: var(--weight-heading);
+        font-weight: var(--weight-medium);
       }
       .content {
         min-width: 0;
@@ -192,8 +179,6 @@ export class ReadingListItemElement extends LitElement {
   @state() private editing = false;
   @state() private draft = '';
   @state() private faviconFailed = false;
-  @state() private dragging = false;
-  @state() private dropPlacement: 'before' | 'after' | null = null;
 
   private get hostname(): string {
     try {
@@ -205,9 +190,8 @@ export class ReadingListItemElement extends LitElement {
 
   override render() {
     return html`<div
-      class=${`row ${this.dragging ? 'dragging' : ''} ${this.dropPlacement ? `drop-${this.dropPlacement}` : ''}`}
+      class="row"
       @dragover=${this.onDragOver}
-      @dragleave=${this.onDragLeave}
       @drop=${this.onDrop}
     >
       ${this.reorderable
@@ -370,11 +354,22 @@ export class ReadingListItemElement extends LitElement {
     if (!this.reorderable || !event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('application/x-reading-list-item', this.href);
-    this.dragging = true;
+    const row = this.shadowRoot?.querySelector<HTMLElement>('.row');
+    if (row) {
+      try {
+        event.dataTransfer.setDragImage(
+          row,
+          12,
+          row.getBoundingClientRect().height / 2,
+        );
+      } catch {
+        // Keep native dragging if a test DOM or browser omits custom drag images.
+      }
+    }
+    this.dispatch('reorder-start', { url: this.href });
   }
   private onDragEnd() {
-    this.dragging = false;
-    this.dropPlacement = null;
+    this.dispatch('reorder-end');
   }
   private onDragOver(event: DragEvent) {
     if (
@@ -384,20 +379,10 @@ export class ReadingListItemElement extends LitElement {
       return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
-    const row = event.currentTarget as HTMLElement;
-    this.dropPlacement =
-      event.clientY <
-      row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2
-        ? 'before'
-        : 'after';
-  }
-  private onDragLeave(event: DragEvent) {
-    if (
-      !(event.currentTarget as HTMLElement).contains(
-        event.relatedTarget as Node,
-      )
-    )
-      this.dropPlacement = null;
+    this.dispatch('reorder-preview', {
+      targetUrl: this.href,
+      placement: this.dragPlacement(event),
+    });
   }
   private onDrop(event: DragEvent) {
     if (!this.reorderable || !event.dataTransfer) return;
@@ -406,14 +391,20 @@ export class ReadingListItemElement extends LitElement {
     );
     if (!sourceUrl) return;
     event.preventDefault();
-    const placement = this.dropPlacement ?? 'before';
-    this.dropPlacement = null;
+    const placement = this.dragPlacement(event);
     if (sourceUrl !== this.href)
       this.dispatch('reorder-drop', {
         sourceUrl,
         targetUrl: this.href,
         placement,
       });
+  }
+  private dragPlacement(event: DragEvent): 'before' | 'after' {
+    const row = event.currentTarget as HTMLElement;
+    return event.clientY <
+      row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2
+      ? 'before'
+      : 'after';
   }
   private async openItem(event: MouseEvent) {
     event.preventDefault();

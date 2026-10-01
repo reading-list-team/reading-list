@@ -296,9 +296,14 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
     transfer.getData('application/x-reading-list-item'),
     rows[0].href,
   );
+  assert.equal(app.draggedUrl, rows[0].href);
   rows[1].shadowRoot
     .querySelector('.row')
     .dispatchEvent(dragEvent('dragover', 1));
+  await update();
+  assert.equal(rows[0].hasAttribute('drag-active'), true);
+  assert.match(rows[1].getAttribute('style'), /--drag-offset: -68px/);
+  assert.equal(rows[1].shadowRoot.querySelector('.drop-after'), null);
   rows[1].shadowRoot.querySelector('.row').dispatchEvent(dragEvent('drop', 1));
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
