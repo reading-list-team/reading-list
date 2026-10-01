@@ -166,7 +166,10 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   assert.ok(root.querySelector('.search-box.closing .close-search'));
   await new Promise((resolve) => setTimeout(resolve, 230));
   await update();
-  assert.equal(root.querySelector('.settings-toggle').getAttribute('aria-hidden'), 'false');
+  assert.equal(
+    root.querySelector('.settings-toggle').getAttribute('aria-hidden'),
+    'false',
+  );
   search.click();
   await update();
   root
@@ -360,4 +363,36 @@ test('options page uses switches and hides manual direction', async () => {
   await options.updateComplete;
   assert.equal(optionsRoot.textContent.includes('Direction'), true);
   options.remove();
+});
+
+test('A saves the current page but does not fire while editing text', async () => {
+  assert.equal(
+    root.querySelector('.save').getAttribute('aria-keyshortcuts'),
+    'A',
+  );
+  const before = app.items.length;
+  document.dispatchEvent(
+    new window.KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  assert.equal(app.items.length, before + 1);
+
+  const row = root.querySelector('reading-list-item');
+  row.shadowRoot.querySelector('[title="Edit title"]').click();
+  await row.updateComplete;
+  row.shadowRoot.querySelector('.editor input').dispatchEvent(
+    new window.KeyboardEvent('keydown', {
+      key: 'a',
+      bubbles: true,
+      composed: true,
+    }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  assert.equal(app.items.length, before + 1);
+  row.shadowRoot
+    .querySelector('.editor input')
+    .dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
 });

@@ -34,6 +34,7 @@ export class ReadingListAppElement extends LitElement {
     designTokens,
     css`
       :host {
+        --footer-height: 52px;
         display: flex;
         flex-direction: column;
         width: 360px;
@@ -108,6 +109,8 @@ export class ReadingListAppElement extends LitElement {
         font-size: var(--text-xs);
       }
       .list-head {
+        position: relative;
+        z-index: 2;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -233,11 +236,14 @@ export class ReadingListAppElement extends LitElement {
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
+      .list reading-list-item:last-of-type {
+        margin-bottom: 28px;
+      }
       .list:hover,
       .list:focus-within,
       .sheet-body:hover,
       .sheet-body:focus-within {
-        scrollbar-color: var(--color-muted) transparent;
+        scrollbar-color: var(--color-surface) transparent;
       }
       .list::-webkit-scrollbar,
       .sheet-body::-webkit-scrollbar {
@@ -256,7 +262,7 @@ export class ReadingListAppElement extends LitElement {
       .list:focus-within::-webkit-scrollbar-thumb,
       .sheet-body:hover::-webkit-scrollbar-thumb,
       .sheet-body:focus-within::-webkit-scrollbar-thumb {
-        background: var(--color-muted);
+        background: var(--color-surface);
       }
       .empty {
         height: 100%;
@@ -282,10 +288,10 @@ export class ReadingListAppElement extends LitElement {
       footer {
         position: relative;
         flex: none;
-        min-height: 58px;
+        height: var(--footer-height);
         display: flex;
         align-items: center;
-        padding: 8px var(--content-gutter);
+        padding: 6px var(--content-gutter);
         background: var(--color-bg);
       }
       .search-box {
@@ -318,7 +324,7 @@ export class ReadingListAppElement extends LitElement {
       .settings-toggle {
         position: absolute;
         right: var(--content-gutter);
-        top: 13px;
+        top: calc((var(--footer-height) - 32px) / 2);
       }
       .settings-toggle {
         transition:
@@ -361,7 +367,7 @@ export class ReadingListAppElement extends LitElement {
       }
       .undo {
         position: absolute;
-        bottom: 66px;
+        bottom: calc(var(--footer-height) + 8px);
         left: var(--content-gutter);
         right: var(--content-gutter);
         background: var(--color-text);
@@ -542,6 +548,7 @@ export class ReadingListAppElement extends LitElement {
     document.title = i18n.getMessage('appName', 'Reading List');
     chrome.storage.onChanged.addListener(this.onStorageChanged);
     this.addEventListener('keydown', this.onKeydown);
+    document.addEventListener('keydown', this.onSaveShortcut);
     document.addEventListener('pointerdown', this.onOutsidePointer);
     this.themeMedia.addEventListener('change', this.onSystemTheme);
     void this.load();
@@ -549,6 +556,7 @@ export class ReadingListAppElement extends LitElement {
   override disconnectedCallback() {
     chrome.storage.onChanged.removeListener(this.onStorageChanged);
     this.removeEventListener('keydown', this.onKeydown);
+    document.removeEventListener('keydown', this.onSaveShortcut);
     document.removeEventListener('pointerdown', this.onOutsidePointer);
     this.themeMedia.removeEventListener('change', this.onSystemTheme);
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
@@ -563,6 +571,33 @@ export class ReadingListAppElement extends LitElement {
       this.closeSort();
       this.focusSort();
     }
+  };
+  private onSaveShortcut = (event: KeyboardEvent) => {
+    if (
+      event.key.toLowerCase() !== 'a' ||
+      event.repeat ||
+      event.isComposing ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      this.items === null ||
+      this.searchOpen ||
+      this.searchClosing ||
+      this.sortOpen ||
+      this.shadowRoot?.querySelector<HTMLDialogElement>('dialog')?.open
+    )
+      return;
+    const editing = event
+      .composedPath()
+      .some(
+        (target) =>
+          target instanceof HTMLElement &&
+          (target.matches('input, textarea, select, [contenteditable]') ||
+            target.isContentEditable),
+      );
+    if (editing) return;
+    event.preventDefault();
+    void this.saveCurrent();
   };
   private onOutsidePointer = (event: PointerEvent) => {
     const path = event.composedPath();
@@ -684,7 +719,8 @@ export class ReadingListAppElement extends LitElement {
         <button
           class="save"
           aria-label="Save current page"
-          title="Save current page"
+          aria-keyshortcuts="A"
+          title="Save current page (A)"
           ?disabled=${this.items === null}
           @click=${this.saveCurrent}
         >

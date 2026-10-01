@@ -150,15 +150,15 @@ export class ReadingListItemElement extends LitElement {
         width: 100%;
         min-width: 0;
         height: 34px;
-        padding: 0 8px;
-        border: 1px solid var(--color-line);
-        border-radius: var(--radius-sm);
-        background: var(--color-bg);
+        padding: 0 4px;
+        border: 0;
+        border-bottom: 1px solid var(--color-muted);
+        border-radius: 0;
+        background: transparent;
         color: var(--color-text);
       }
       .editor input:focus {
-        border-color: var(--color-accent);
-        box-shadow: var(--focus-ring);
+        border-bottom: 2px solid var(--color-accent);
         outline: 0;
       }
       @keyframes enter {
