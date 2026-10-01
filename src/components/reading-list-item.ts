@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { rl } from '../lib/rl.js';
 
 @customElement('reading-list-item')
 export class ReadingListItemElement extends LitElement {
@@ -133,6 +134,39 @@ export class ReadingListItemElement extends LitElement {
       z-index: 2;
     }
 
+    .item-actions {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      display: flex;
+    }
+
+    .item-actions button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      padding: 0.3rem;
+    }
+
+    .title-editor {
+      display: flex;
+      gap: 0.25rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .title-editor input { min-width: 0; flex: 1; }
+
+    :host([data-theme='dark']) {
+      --rl-bg-color: #30343b;
+      --rl-link-color: #eee;
+      --rl-link-hover-bg: #454b55;
+    }
+
+    :host([viewed]) .title { font-weight: normal; }
+
     .delete-button-content {
       color: #ccc;
       border-radius: 9999px;
@@ -180,6 +214,12 @@ export class ReadingListItemElement extends LitElement {
   @property({ type: Boolean })
   newtab = false;
 
+  @property({ type: Boolean })
+  reorderable = false;
+
+  @property({ type: Boolean, reflect: true })
+  viewed = false;
+
   private get url() {
     if (!this.href) return null;
     try {
@@ -201,13 +241,25 @@ export class ReadingListItemElement extends LitElement {
   @state()
   faviconError = false;
 
+  @state()
+  editingTitle = false;
+
+  @state()
+  draftTitle = '';
+
   override render() {
     return html`
       <div class="reading-list-item">
         <div class="item-content">
-          <a class="title" href=${this.href} @click=${this._onLinkClick}
-            >${this.name}</a
-          >
+          ${this.editingTitle
+            ? html`<div class="title-editor">
+                <input aria-label="Page title" .value=${this.draftTitle}
+                  @input=${this._onTitleInput} @keydown=${this._onTitleKeydown} />
+                <button type="button" @click=${this._saveTitle}>Save</button>
+                <button type="button" @click=${this._cancelTitle}>Cancel</button>
+              </div>`
+            : html`<a class="title" href=${this.href} @click=${this._onLinkClick}
+                >${this.name}</a>`}
           <div class="host">${this.url?.hostname ?? this.href}</div>
           <div class="favicon">
             ${this.favicon && !this.faviconError
@@ -222,15 +274,32 @@ export class ReadingListItemElement extends LitElement {
         <button class="delete-button" @click=${this._onDeleteClick}>
           <span class="delete-button-content">&times;</span>
         </button>
+        <div class="item-actions">
+          ${this.reorderable
+            ? html`<button aria-label="Move up" @click=${() => this._move(-1)}>↑</button>
+                <button aria-label="Move down" @click=${() => this._move(1)}>↓</button>`
+            : ''}
+          <button aria-label="Edit title" @click=${this._editTitle}>Edit</button>
+        </div>
       </div>
     `;
   }
 
-  private _onLinkClick(event: MouseEvent) {
+  private async _onLinkClick(event: MouseEvent) {
     if (this.href) {
       event.preventDefault();
       // If the control or meta key (⌘ on Mac, ⊞ on Windows) is pressed or if options is selected…
       const modifierDown = event.ctrlKey || event.metaKey || this.newtab;
+      try {
+        await rl.markViewed(this.href);
+        this.dispatchEvent(new CustomEvent('viewed-item', {
+          bubbles: true,
+          composed: true,
+          detail: { url: this.href },
+        }));
+      } catch (error) {
+        console.error('Could not mark Reading List page as viewed', error);
+      }
       openLink(this.href, modifierDown);
     }
   }
@@ -239,6 +308,46 @@ export class ReadingListItemElement extends LitElement {
     this.dispatchEvent(
       new Event('delete-item', { bubbles: true, composed: true }),
     );
+  }
+
+  private _editTitle() {
+    this.draftTitle = this.name;
+    this.editingTitle = true;
+    void this.updateComplete.then(() => {
+      this.shadowRoot?.querySelector<HTMLInputElement>('.title-editor input')?.focus();
+    });
+  }
+
+  private _onTitleInput(event: Event) {
+    this.draftTitle = (event.target as HTMLInputElement).value;
+  }
+
+  private _onTitleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') this._saveTitle();
+    if (event.key === 'Escape') this._cancelTitle();
+  }
+
+  private _saveTitle() {
+    const title = this.draftTitle.trim();
+    if (!title) return;
+    this.dispatchEvent(new CustomEvent('update-title', {
+      bubbles: true,
+      composed: true,
+      detail: { url: this.href, title },
+    }));
+    this.editingTitle = false;
+  }
+
+  private _cancelTitle() {
+    this.editingTitle = false;
+  }
+
+  private _move(direction: -1 | 1) {
+    this.dispatchEvent(new CustomEvent('move-item', {
+      bubbles: true,
+      composed: true,
+      detail: { url: this.href, direction },
+    }));
   }
 }
 

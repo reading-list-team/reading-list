@@ -5,6 +5,11 @@ import { i18n } from '../lib/i18n';
 import { rl, ListItemData } from '../lib/rl';
 import { ReadingListItemElement } from './reading-list-item';
 import { parseBackup, ImportPreview } from '../lib/backup';
+import {
+  DEFAULT_SETTINGS,
+  ReadingListSettings,
+  sortList,
+} from '../lib/settings';
 import './reading-list-item.js';
 
 @customElement('reading-list-app')
@@ -154,6 +159,26 @@ export class ReadingListAppElement extends LitElement {
     .import-preview {
       margin-top: 0.5rem;
     }
+
+    .settings {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .settings label {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    :host([data-theme='dark']) {
+      --rl-bg-color: #30343b;
+      --rl-link-color: #eee;
+      --rl-link-hover-bg: #454b55;
+      color: #eee;
+      background: #202329;
+    }
   `;
 
   constructor() {
@@ -163,12 +188,21 @@ export class ReadingListAppElement extends LitElement {
         this._listItems = listItems;
         if (!rl.isSyncAvailable) {
           this.statusText = 'Chrome sync is unavailable. Your local list is shown.';
+        } else if (rl.localOnlyCount > 0) {
+          this.statusText = `${rl.localOnlyCount} pages are saved only on this device.`;
         }
       },
       (error) => {
         console.error(error);
         this.statusText = 'Could not load your list. Please reopen Reading List.';
       },
+    );
+    rl.getSettings().then(
+      (settings) => {
+        this.settings = settings;
+        this.dataset.theme = settings.theme;
+      },
+      (error) => console.error('Could not load Reading List settings', error),
     );
   }
 
@@ -188,6 +222,9 @@ export class ReadingListAppElement extends LitElement {
 
   @state()
   importPreview: ImportPreview | null = null;
+
+  @state()
+  settings: ReadingListSettings = DEFAULT_SETTINGS;
 
   override render() {
     return html`
@@ -221,20 +258,58 @@ export class ReadingListAppElement extends LitElement {
         />
       </search>
 
+      <div class="settings">
+        <label>Sort by
+          <select .value=${this.settings.sortOption} @change=${this._changeSort}>
+            <option value="manual">Manual</option>
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+          </select>
+        </label>
+        <label>Order
+          <select .value=${this.settings.sortOrder} @change=${this._changeOrder}>
+            <option value="down">Descending</option>
+            <option value="up">Ascending</option>
+          </select>
+        </label>
+        <label>Theme
+          <select .value=${this.settings.theme} @change=${this._changeTheme}>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" .checked=${this.settings.openNewTab}
+            @change=${this._changeNewTab} />Open in new tab
+        </label>
+        <label>
+          <input type="checkbox" .checked=${this.settings.viewAll}
+            @change=${this._changeViewAll} />Show all pages
+        </label>
+      </div>
+
       <div class="reading-list">
         ${repeat(
-          this._listItems?.filter(
+          sortList(this._listItems ?? [], this.settings).filter(
             (item) =>
-              !this.searchQuery ||
-              item.url.toLocaleUpperCase().includes(this.searchQuery) ||
-              item.title.toLocaleUpperCase().includes(this.searchQuery),
+              (this.settings.viewAll || !item.viewed) &&
+              (!this.searchQuery ||
+                item.url.toLocaleUpperCase().includes(this.searchQuery) ||
+                item.title.toLocaleUpperCase().includes(this.searchQuery)),
           ) ?? [],
           (item) => item.url,
           (listItem) =>
             html`<reading-list-item
+              data-theme=${this.settings.theme}
               .name=${listItem.title}
               .href=${listItem.url}
+              .newtab=${this.settings.openNewTab}
+              .reorderable=${this.settings.sortOption === 'manual'}
+              .viewed=${!!listItem.viewed}
               @delete-item=${this._onDeleteItemClicked}
+              @update-title=${this._onUpdateTitle}
+              @move-item=${this._onMoveItem}
+              @viewed-item=${this._onViewedItem}
             ></reading-list-item>`,
         )}
       </div>
@@ -337,6 +412,50 @@ export class ReadingListAppElement extends LitElement {
     this.searchQuery = input.value.trim().toLocaleUpperCase();
   }
 
+  private async _applySettings(settings: ReadingListSettings) {
+    try {
+      const synced = await rl.saveSettings(settings);
+      this.settings = settings;
+      this.dataset.theme = settings.theme;
+      this.statusText = synced
+        ? '' : 'Settings saved on this device; Chrome sync is unavailable.';
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Could not save settings. Please try again.';
+    }
+  }
+
+  private _changeSort(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'manual' || value === 'date' || value === 'title') {
+      void this._applySettings({ ...this.settings, sortOption: value });
+    }
+  }
+
+  private _changeOrder(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'up' || value === 'down') {
+      void this._applySettings({ ...this.settings, sortOrder: value });
+    }
+  }
+
+  private _changeTheme(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value === 'light' || value === 'dark') {
+      void this._applySettings({ ...this.settings, theme: value });
+    }
+  }
+
+  private _changeNewTab(event: Event) {
+    const openNewTab = (event.target as HTMLInputElement).checked;
+    void this._applySettings({ ...this.settings, openNewTab });
+  }
+
+  private _changeViewAll(event: Event) {
+    const viewAll = (event.target as HTMLInputElement).checked;
+    void this._applySettings({ ...this.settings, viewAll });
+  }
+
   private async _onDeleteItemClicked(event: Event) {
     if (!this._listItems) return;
     const url = (event.target as ReadingListItemElement).href;
@@ -350,6 +469,38 @@ export class ReadingListAppElement extends LitElement {
       console.error(error);
       this.statusText = 'Could not remove this page. Please try again.';
     }
+  }
+
+  private async _onUpdateTitle(event: CustomEvent<{ url: string; title: string }>) {
+    try {
+      const result = await rl.updateTitle(event.detail.url, event.detail.title);
+      this._listItems = (this._listItems ?? []).map((item) =>
+        item.url === result.item.url ? result.item : item,
+      );
+      this.statusText = result.synced
+        ? 'Title saved.' : 'Title saved on this device; Chrome sync is unavailable.';
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Could not change the title. Please try again.';
+    }
+  }
+
+  private async _onMoveItem(event: CustomEvent<{ url: string; direction: -1 | 1 }>) {
+    try {
+      const synced = await rl.moveItem(event.detail.url, event.detail.direction);
+      this._listItems = await rl.getListItems();
+      this.statusText = synced
+        ? '' : 'Order saved on this device; Chrome sync is unavailable.';
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Could not change the order. Please try again.';
+    }
+  }
+
+  private _onViewedItem(event: CustomEvent<{ url: string }>) {
+    this._listItems = (this._listItems ?? []).map((item) =>
+      item.url === event.detail.url ? { ...item, viewed: true } : item,
+    );
   }
 
   private async _addReadingItem(url: string, title: string) {

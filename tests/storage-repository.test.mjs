@@ -118,3 +118,37 @@ test('export keeps raw local and sync records; import merges without overwriting
   assert.deepEqual(local.values[`rl:v1:item:${second.url}`], second);
   assert.deepEqual((await new RL().getListItems()).length, 2);
 });
+
+test('v2 settings migrate and edits keep their legacy sync shape', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ settings: {
+    theme: 'dark', sortOption: 'title', sortOrder: 'down', custom: 'keep',
+  } });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  const settings = await list.getSettings();
+  assert.equal(settings.theme, 'dark');
+  assert.equal(settings.sortOrder, 'up');
+  assert.deepEqual(local.values['rl:v1:settings'], settings);
+
+  assert.equal(await list.saveSettings({ ...settings, sortOption: 'manual' }), true);
+  assert.equal(sync.values.settings.sortOption, '');
+  assert.equal(sync.values.settings.custom, 'keep');
+});
+
+test('manual movement and viewed status persist while retaining metadata', async () => {
+  const second = { url: 'https://example.com/other', title: 'Other', addedAt: 50 };
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy, [second.url]: second });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+  assert.equal(await list.moveItem(second.url, -1), true);
+  const moved = await list.getListItems();
+  assert.equal(moved[0].url, second.url);
+  assert.equal(moved[1].viewed, true);
+
+  const viewed = await list.markViewed(second.url);
+  assert.equal(viewed.item.viewed, true);
+  assert.equal((await new RL().getListItems()).find((item) => item.url === second.url).viewed, true);
+});
