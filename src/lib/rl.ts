@@ -27,6 +27,12 @@ export interface ImportResult {
   synced: boolean;
 }
 
+export interface RetryResult {
+  synced: number;
+  remaining: number;
+  conflicts: number;
+}
+
 const ITEM_PREFIX = 'rl:v1:item:';
 const DELETED_PREFIX = 'rl:v1:deleted:';
 const SHADOW_PREFIX = 'rl:v1:sync-shadow:';
@@ -340,6 +346,36 @@ export class RL {
       console.error('Reading List order saved locally but not synced', error);
       return false;
     }
+  }
+
+  async retrySync(): Promise<RetryResult> {
+    await this.ensureLoaded();
+    const remote = await chrome.storage.sync.get(null);
+    this.syncRecords = remote;
+    const local = await chrome.storage.local.get(null);
+    let synced = 0;
+    let conflicts = 0;
+    for (const item of this.list) {
+      if (sameItem(remote[item.url], item)) continue;
+      const shadow = local[SHADOW_PREFIX + item.url];
+      if (Object.prototype.hasOwnProperty.call(remote, item.url) &&
+        (!shadow || !sameItem(remote[item.url], shadow))) {
+        conflicts++;
+        continue;
+      }
+      if (synced >= 25) break;
+      try {
+        await chrome.storage.sync.set({ [item.url]: item });
+        await chrome.storage.local.set({ [SHADOW_PREFIX + item.url]: item });
+        remote[item.url] = item;
+        this.syncRecords[item.url] = item;
+        synced++;
+      } catch (error) {
+        console.error('Reading List could not retry Chrome sync', error);
+        break;
+      }
+    }
+    return { synced, remaining: this.localOnlyCount, conflicts };
   }
 }
 

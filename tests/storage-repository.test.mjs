@@ -195,3 +195,34 @@ test('manual movement and viewed status persist while retaining metadata', async
   assert.equal(viewed.item.viewed, true);
   assert.equal((await new RL().getListItems()).find((item) => item.url === second.url).viewed, true);
 });
+
+test('retry sync publishes a local-only edit once Chrome sync works again', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+
+  sync.failSet = true;
+  await list.updateTitle(url, 'Offline title');
+  assert.equal(list.localOnlyCount, 1);
+  sync.failSet = false;
+  assert.deepEqual(await list.retrySync(), { synced: 1, remaining: 0, conflicts: 0 });
+  assert.equal(sync.values[url].title, 'Offline title');
+});
+
+test('retry sync does not overwrite a conflicting remote edit', async () => {
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: legacy });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+
+  sync.failSet = true;
+  await list.updateTitle(url, 'Local title');
+  sync.failSet = false;
+  sync.values[url] = { ...legacy, title: 'Remote title' };
+  assert.deepEqual(await list.retrySync(), { synced: 0, remaining: 1, conflicts: 1 });
+  assert.equal(sync.values[url].title, 'Remote title');
+  assert.equal((await list.getListItems())[0].title, 'Local title');
+});

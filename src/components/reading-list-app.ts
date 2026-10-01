@@ -186,6 +186,7 @@ export class ReadingListAppElement extends LitElement {
     rl.getListItems().then(
       (listItems) => {
         this._listItems = listItems;
+        this.localOnlyCount = rl.localOnlyCount;
         if (!rl.isSyncAvailable) {
           this.statusText = 'Chrome sync is unavailable. Your local list is shown.';
         } else if (rl.localOnlyCount > 0) {
@@ -230,6 +231,7 @@ export class ReadingListAppElement extends LitElement {
       this.syncRefreshTimer = null;
       void rl.refresh().then(async (items) => {
         this._listItems = items;
+        this.localOnlyCount = rl.localOnlyCount;
         this.settings = await rl.getSettings();
         this.dataset.theme = this.settings.theme;
         if (rl.localOnlyCount > 0 && !this.statusText) {
@@ -253,6 +255,9 @@ export class ReadingListAppElement extends LitElement {
 
   @state()
   importPreview: ImportPreview | null = null;
+
+  @state()
+  localOnlyCount = 0;
 
   @state()
   settings: ReadingListSettings = DEFAULT_SETTINGS;
@@ -288,6 +293,13 @@ export class ReadingListAppElement extends LitElement {
           @input=${this._onSearchInput}
         />
       </search>
+
+      ${this.localOnlyCount > 0
+        ? html`<div class="backup-actions">
+            <span>${this.localOnlyCount} on this device only</span>
+            <button type="button" @click=${this._retrySync}>Retry sync</button>
+          </div>`
+        : ''}
 
       <div class="settings">
         <label>Sort by
@@ -424,6 +436,7 @@ export class ReadingListAppElement extends LitElement {
     try {
       const result = await rl.importItems(this.importPreview.items);
       this._listItems = await rl.getListItems();
+      this.localOnlyCount = rl.localOnlyCount;
       this.statusText = `${result.imported} pages imported; ${result.alreadyPresent} already present. ${
         result.synced ? '' : 'Imported pages are saved on this device; Chrome sync is full or unavailable.'
       }`;
@@ -436,6 +449,19 @@ export class ReadingListAppElement extends LitElement {
 
   private _cancelImport() {
     this.importPreview = null;
+  }
+
+  private async _retrySync() {
+    try {
+      const result = await rl.retrySync();
+      this.localOnlyCount = result.remaining;
+      this.statusText = `${result.synced} pages added to Chrome sync; ${result.remaining} remain on this device only.${
+        result.conflicts ? ` ${result.conflicts} need conflict review.` : ''
+      }`;
+    } catch (error) {
+      console.error(error);
+      this.statusText = 'Chrome sync is unavailable. Your local pages are safe.';
+    }
   }
 
   private _onSearchInput(event: InputEvent) {
@@ -493,6 +519,7 @@ export class ReadingListAppElement extends LitElement {
     try {
       const synced = await rl.removeReadingItem(url);
       this._listItems = this._listItems.filter((item) => item.url !== url);
+      this.localOnlyCount = rl.localOnlyCount;
       this.statusText = synced
         ? ''
         : 'Removed on this device. Chrome sync is unavailable.';
@@ -508,6 +535,7 @@ export class ReadingListAppElement extends LitElement {
       this._listItems = (this._listItems ?? []).map((item) =>
         item.url === result.item.url ? result.item : item,
       );
+      this.localOnlyCount = rl.localOnlyCount;
       this.statusText = result.synced
         ? 'Title saved.' : 'Title saved on this device; Chrome sync is unavailable.';
     } catch (error) {
@@ -520,6 +548,7 @@ export class ReadingListAppElement extends LitElement {
     try {
       const synced = await rl.moveItem(event.detail.url, event.detail.direction);
       this._listItems = await rl.getListItems();
+      this.localOnlyCount = rl.localOnlyCount;
       this.statusText = synced
         ? '' : 'Order saved on this device; Chrome sync is unavailable.';
     } catch (error) {
@@ -544,6 +573,7 @@ export class ReadingListAppElement extends LitElement {
           result.item,
           ...this._listItems.filter((item) => item.url !== url),
         ];
+        this.localOnlyCount = rl.localOnlyCount;
         this.statusText = result.synced
           ? 'Saved in Chrome sync storage.'
           : 'Saved on this device. Chrome sync is unavailable or full.';
