@@ -21,6 +21,8 @@ export class ReadingListItemElement extends LitElement {
         opacity: 0.12;
       }
       .row {
+        --row-action-bg: var(--color-bg);
+        --row-action-hover: var(--color-surface);
         min-height: 68px;
         display: flex;
         align-items: center;
@@ -28,10 +30,28 @@ export class ReadingListItemElement extends LitElement {
         padding: 8px 2px;
         border-bottom: 1px solid var(--color-line);
         position: relative;
-        transition: background-color var(--motion-smooth) ease;
       }
       :host([recently-saved]) .row {
-        background-color: rgba(66, 133, 244, 0.12);
+        --row-action-bg: var(--color-highlight);
+        --row-action-hover: var(--color-highlight-hover);
+      }
+      .row::before {
+        content: '';
+        position: absolute;
+        inset: 4px 0 5px;
+        z-index: 0;
+        border-radius: var(--radius-md);
+        background: var(--color-highlight);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-smooth) ease;
+      }
+      :host([recently-saved]) .row::before {
+        opacity: 1;
+      }
+      .row > * {
+        position: relative;
+        z-index: 1;
       }
       :host([last]) .row {
         border-bottom: 0;
@@ -69,11 +89,12 @@ export class ReadingListItemElement extends LitElement {
         height: 30px;
         border-radius: 8px;
         object-fit: contain;
-        background: var(--color-surface);
+        background: transparent;
       }
       .fallback {
         display: grid;
         place-items: center;
+        background: var(--color-surface);
         color: var(--color-accent);
         font-weight: var(--weight-medium);
       }
@@ -108,6 +129,7 @@ export class ReadingListItemElement extends LitElement {
       }
       .actions {
         position: absolute;
+        z-index: 2;
         right: 0;
         top: 50%;
         transform: translateY(-50%);
@@ -115,7 +137,11 @@ export class ReadingListItemElement extends LitElement {
         align-items: center;
         gap: 1px;
         padding-left: 18px;
-        background: linear-gradient(90deg, transparent, var(--color-bg) 16px);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--row-action-bg) 16px
+        );
         opacity: 0;
         pointer-events: none;
         transition: opacity var(--motion-fast) ease;
@@ -137,7 +163,7 @@ export class ReadingListItemElement extends LitElement {
       }
       .icon-button:hover {
         color: var(--color-text);
-        background: var(--color-surface);
+        background: var(--row-action-hover);
       }
       .delete:hover {
         color: var(--color-danger);
@@ -184,7 +210,8 @@ export class ReadingListItemElement extends LitElement {
   @property({ type: Boolean }) reorderable = false;
   @property({ type: Boolean, reflect: true }) viewed = false;
   @property({ type: Boolean, reflect: true }) last = false;
-  @property({ type: Boolean, reflect: true, attribute: 'recently-saved' }) recentlySaved = false;
+  @property({ type: Boolean, reflect: true, attribute: 'recently-saved' })
+  recentlySaved = false;
   @state() private editing = false;
   @state() private draft = '';
   @state() private faviconFailed = false;

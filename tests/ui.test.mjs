@@ -134,6 +134,10 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   const field = root.querySelector('.search-field');
   assert.equal(root.activeElement, field);
   assert.equal(
+    root.querySelector('.close-search').parentElement,
+    root.querySelector('.settings-toggle').parentElement,
+  );
+  assert.equal(
     root.querySelector('.settings-toggle').getAttribute('aria-hidden'),
     'true',
   );
@@ -155,7 +159,7 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   await update();
   assert.equal(app.searchOpen, false);
   assert.equal(app.searchClosing, true);
-  assert.ok(root.querySelector('.search-box.closing .close-search'));
+  assert.ok(root.querySelector('footer.search-closing .close-search'));
   await new Promise((resolve) => setTimeout(resolve, 230));
   await update();
   assert.equal(root.querySelector('.search-field'), null);
@@ -165,7 +169,7 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   root.querySelector('.close-search').click();
   await update();
   assert.equal(app.searchClosing, true);
-  assert.ok(root.querySelector('.search-box.closing .close-search'));
+  assert.ok(root.querySelector('footer.search-closing .close-search'));
   await new Promise((resolve) => setTimeout(resolve, 230));
   await update();
   assert.equal(

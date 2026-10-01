@@ -325,6 +325,7 @@ export class ReadingListAppElement extends LitElement {
         height: var(--footer-height);
         display: flex;
         align-items: center;
+        gap: 8px;
         padding: 6px var(--content-gutter) 12px var(--content-gutter);
         background: var(--color-bg);
       }
@@ -350,7 +351,9 @@ export class ReadingListAppElement extends LitElement {
       .search-box.open,
       .search-box.closing {
         flex-grow: 1;
-        padding-right: 40px;
+      }
+      .search-toggle svg {
+        transform: translate(-1px, -1px);
       }
       .search-field {
         min-width: 0;
@@ -364,11 +367,17 @@ export class ReadingListAppElement extends LitElement {
       .search-field:focus {
         outline: 0;
       }
-      .close-search,
-      .settings-toggle {
+      .footer-end {
+        position: relative;
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+        margin-left: auto;
+      }
+      .footer-end .close-search,
+      .footer-end .settings-toggle {
         position: absolute;
-        right: var(--content-gutter);
-        top: calc((var(--footer-height) - 32px) / 2);
+        inset: 0;
       }
       .settings-toggle {
         transition:
@@ -381,11 +390,11 @@ export class ReadingListAppElement extends LitElement {
         pointer-events: none;
       }
       .search-box.open .search-field,
-      .search-box.open .close-search {
+      footer.search-open .close-search {
         animation: search-rise 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
       }
       .search-box.closing .search-field,
-      .search-box.closing .close-search {
+      footer.search-closing .close-search {
         animation: search-fall var(--motion-smooth) cubic-bezier(0.4, 0, 1, 1)
           both;
       }
@@ -730,6 +739,9 @@ export class ReadingListAppElement extends LitElement {
       this.searchOpen &&
       !path.includes(
         this.shadowRoot?.querySelector('.search-box') as EventTarget,
+      ) &&
+      !path.includes(
+        this.shadowRoot?.querySelector('.footer-end') as EventTarget,
       )
     )
       window.setTimeout(() => this.closeSearch(false), 0);
@@ -986,7 +998,11 @@ export class ReadingListAppElement extends LitElement {
                   )}
       </div>
       <footer
-        class=${this.searchOpen || this.searchClosing ? 'search-active' : ''}
+        class=${this.searchOpen
+          ? 'search-active search-open'
+          : this.searchClosing
+            ? 'search-active search-closing'
+            : ''}
       >
         <div
           class=${`search-box ${this.searchOpen ? 'open' : this.searchClosing ? 'closing' : ''}`}
@@ -1001,34 +1017,39 @@ export class ReadingListAppElement extends LitElement {
           </button>
           ${this.searchOpen || this.searchClosing
             ? html`<input
-                  class="search-field"
-                  type="search"
-                  aria-label="Search saved pages"
-                  placeholder="Find a page"
-                  .value=${this.query}
-                  @input=${(event: Event) =>
-                    (this.query = (event.target as HTMLInputElement).value)}
-                  @keydown=${this.searchKeydown}
-                /><button
-                  class="footer-button close-search"
-                  aria-label="Close search"
-                  title="Close search"
-                  @click=${() => this.closeSearch()}
-                >
-                  ${icon(X, 18)}
-                </button>`
+                class="search-field"
+                type="search"
+                aria-label="Search saved pages"
+                placeholder="Find a page"
+                .value=${this.query}
+                @input=${(event: Event) =>
+                  (this.query = (event.target as HTMLInputElement).value)}
+                @keydown=${this.searchKeydown}
+              />`
             : ''}
         </div>
-        <button
-          class="footer-button settings-toggle"
-          aria-label="Open settings"
-          aria-hidden=${this.searchOpen || this.searchClosing}
-          tabindex=${this.searchOpen || this.searchClosing ? -1 : 0}
-          title="Settings"
-          @click=${this.openSettings}
-        >
-          ${icon(Settings, 20)}
-        </button>
+        <div class="footer-end">
+          <button
+            class="footer-button settings-toggle"
+            aria-label="Open settings"
+            aria-hidden=${this.searchOpen || this.searchClosing}
+            tabindex=${this.searchOpen || this.searchClosing ? -1 : 0}
+            title="Settings"
+            @click=${this.openSettings}
+          >
+            ${icon(Settings, 20)}
+          </button>
+          ${this.searchOpen || this.searchClosing
+            ? html`<button
+                class="footer-button close-search"
+                aria-label="Close search"
+                title="Close search"
+                @click=${() => this.closeSearch()}
+              >
+                ${icon(X, 18)}
+              </button>`
+            : ''}
+        </div>
       </footer>
       ${this.deleted || this.infoToast
         ? html`<div class="toast-stack">

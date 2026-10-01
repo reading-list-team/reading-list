@@ -7,6 +7,8 @@ export const designTokens = css`
     --color-muted: #77808d;
     --color-line: #e9edf2;
     --color-surface: #f5f7fa;
+    --color-highlight: #e8f0fe;
+    --color-highlight-hover: #d9e7ff;
     --color-accent: #4285f4;
     --color-accent-hover: #3367d6;
     --color-danger: #ea4335;
@@ -43,6 +45,8 @@ export const designTokens = css`
     --color-muted: #a3a3a3;
     --color-line: #333333;
     --color-surface: #262626;
+    --color-highlight: #1c2432;
+    --color-highlight-hover: #263650;
     --color-accent: #4285f4;
     --color-accent-hover: #3367d6;
     --color-danger: #ea4335;
