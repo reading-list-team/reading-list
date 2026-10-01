@@ -133,6 +133,12 @@ export class ReadingListAppElement extends LitElement {
       display: block;
     }
 
+    .reading-list {
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 0.15rem;
+    }
+
     reading-list-item:not(:first-child) {
       margin-top: 0.5rem;
     }
@@ -324,15 +330,15 @@ export class ReadingListAppElement extends LitElement {
             <option value="up">Ascending</option>
           </select>
         </label>
-        <label>Theme
+        <label>${i18n.getMessage('theme', 'Theme')}
           <select .value=${this.settings.theme} @change=${this._changeTheme}>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+            <option value="light">${i18n.getMessage('light', 'Light')}</option>
+            <option value="dark">${i18n.getMessage('dark', 'Dark')}</option>
           </select>
         </label>
         <label>
           <input type="checkbox" .checked=${this.settings.openNewTab}
-            @change=${this._changeNewTab} />Open in new tab
+            @change=${this._changeNewTab} />${i18n.getMessage('openNewTab', 'Open in new tab')}
         </label>
         <label>
           <input type="checkbox" .checked=${this.settings.viewAll}
