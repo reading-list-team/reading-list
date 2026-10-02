@@ -1,11 +1,18 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { Download, Upload, RotateCw } from 'lucide';
+import { Download, Upload } from 'lucide';
 import { icon } from '../lib/icon.js';
 import { designTokens, resolvedTheme } from '../lib/design-tokens.js';
 import { parseBackup, ImportPreview } from '../lib/backup.js';
 import { rl } from '../lib/rl.js';
 import { DEFAULT_SETTINGS, ReadingListSettings } from '../lib/settings.js';
+import './reading-list-notice.js';
+
+type OptionsError = {
+  message: string;
+  actionLabel?: string;
+  action?: () => Promise<void> | void;
+};
 
 @customElement('reading-list-options')
 export class ReadingListOptionsElement extends LitElement {
@@ -128,10 +135,15 @@ export class ReadingListOptionsElement extends LitElement {
   @state() private preview: ImportPreview | null = null;
   @state() private restoreSettings = false;
   @state() private message = '';
+  @state() private errorNotice: OptionsError | null = null;
   @state() private count = 0;
   @state() private localOnly = 0;
+  @state() private syncUnavailable = false;
   @state() private conflicts = 0;
+  @state() private dismissedConflict = false;
+  @state() private dismissedStorageWarning = false;
   @state() private loading = true;
+  @state() private loadError = false;
   private media = window.matchMedia('(prefers-color-scheme: dark)');
   override connectedCallback() {
     super.connectedCallback();
@@ -153,11 +165,17 @@ export class ReadingListOptionsElement extends LitElement {
       this.count = items.length;
       this.settings = await rl.getSettings();
       this.localOnly = rl.localOnlyCount;
+      this.syncUnavailable = !rl.isSyncAvailable;
       this.conflicts = rl.conflictCount;
       this.applyTheme();
+      this.loadError = false;
+      this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.message = 'Could not load Reading List data.';
+      this.loadError = true;
+      this.showError("We couldn't open your list.", 'Try again', () =>
+        this.load(),
+      );
     } finally {
       this.loading = false;
     }
@@ -166,157 +184,217 @@ export class ReadingListOptionsElement extends LitElement {
     return html`<main>
       <h1>Reading List settings</h1>
       <p class="lead">Manage your list, preferences, and backups.</p>
-      ${this.message
-        ? html`<p class="status" role="status">${this.message}</p>`
+      ${this.errorNotice
+        ? html`<reading-list-notice
+            data-theme=${resolvedTheme(this.settings.theme)}
+            variant="error"
+            .message=${this.errorNotice.message}
+            .actionLabel=${this.errorNotice.actionLabel ?? ''}
+            @notice-action=${this.retryError}
+            @notice-dismiss=${() => (this.errorNotice = null)}
+          ></reading-list-notice>`
         : ''}
       ${this.loading
         ? html`<p>Loading settings…</p>`
-        : html` <section>
-              <h2>Preferences</h2>
-              <label class="row"
-                ><span>Theme</span
-                ><select
-                  .value=${this.settings.theme}
-                  @change=${(event: Event) =>
-                    this.updateSetting(
-                      'theme',
-                      (event.target as HTMLSelectElement)
-                        .value as ReadingListSettings['theme'],
-                    )}
+        : this.loadError
+          ? ''
+          : html` <section>
+                <h2>Preferences</h2>
+                <label class="row"
+                  ><span>Theme</span
+                  ><select
+                    .value=${this.settings.theme}
+                    @change=${(event: Event) =>
+                      this.updateSetting(
+                        'theme',
+                        (event.target as HTMLSelectElement)
+                          .value as ReadingListSettings['theme'],
+                      )}
+                  >
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                  </select></label
                 >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select></label
-              >
-              <label class="row"
-                ><span>Open links in a new tab</span
-                ><input
-                  type="checkbox"
-                  role="switch"
-                  class="switch"
-                  .checked=${this.settings.openNewTab}
-                  @change=${(event: Event) =>
-                    this.updateSetting(
-                      'openNewTab',
-                      (event.target as HTMLInputElement).checked,
-                    )}
-              /></label>
-              <label class="row"
-                ><span>Show viewed pages</span
-                ><input
-                  type="checkbox"
-                  role="switch"
-                  class="switch"
-                  .checked=${this.settings.viewAll}
-                  @change=${(event: Event) =>
-                    this.updateSetting(
-                      'viewAll',
-                      (event.target as HTMLInputElement).checked,
-                    )}
-              /></label>
-              <label class="row"
-                ><span>Sort by</span
-                ><select
-                  .value=${this.settings.sortOption}
-                  @change=${(event: Event) =>
-                    this.updateSetting(
-                      'sortOption',
-                      (event.target as HTMLSelectElement)
-                        .value as ReadingListSettings['sortOption'],
-                    )}
+                <label class="row"
+                  ><span>Open links in a new tab</span
+                  ><input
+                    type="checkbox"
+                    role="switch"
+                    class="switch"
+                    .checked=${this.settings.openNewTab}
+                    @change=${(event: Event) =>
+                      this.updateSetting(
+                        'openNewTab',
+                        (event.target as HTMLInputElement).checked,
+                      )}
+                /></label>
+                <label class="row"
+                  ><span>Show viewed pages</span
+                  ><input
+                    type="checkbox"
+                    role="switch"
+                    class="switch"
+                    .checked=${this.settings.viewAll}
+                    @change=${(event: Event) =>
+                      this.updateSetting(
+                        'viewAll',
+                        (event.target as HTMLInputElement).checked,
+                      )}
+                /></label>
+                <label class="row"
+                  ><span>Sort by</span
+                  ><select
+                    .value=${this.settings.sortOption}
+                    @change=${(event: Event) =>
+                      this.updateSetting(
+                        'sortOption',
+                        (event.target as HTMLSelectElement)
+                          .value as ReadingListSettings['sortOption'],
+                      )}
+                  >
+                    <option value="manual">Manual order</option>
+                    <option value="date">Date added</option>
+                    <option value="title">Title</option>
+                  </select></label
                 >
-                  <option value="manual">Manual order</option>
-                  <option value="date">Date added</option>
-                  <option value="title">Title</option>
-                </select></label
-              >
-              ${this.settings.sortOption === 'manual'
-                ? ''
-                : html`<label class="row"
-                    ><span>Direction</span
-                    ><select
-                      .value=${this.settings.sortOrder}
-                      @change=${(event: Event) =>
-                        this.updateSetting(
-                          'sortOrder',
-                          (event.target as HTMLSelectElement)
-                            .value as ReadingListSettings['sortOrder'],
-                        )}
-                    >
-                      <option value="down">Descending</option>
-                      <option value="up">Ascending</option>
-                    </select></label
-                  >`}
-            </section>
-            <section>
-              <h2>Storage and recovery</h2>
-              <p class="muted">
-                ${this.count} page${this.count === 1 ? '' : 's'} on this device.
-                ${this.localOnly
-                  ? `${this.localOnly} saved only on this device.`
-                  : 'All visible pages were written to Chrome sync storage.'}
-                A successful Chrome sync storage write does not confirm delivery
-                to another device.
-              </p>
-              ${this.conflicts
-                ? html`<p class="muted">
-                    ${this.conflicts} conflicting
-                    version${this.conflicts === 1 ? '' : 's'} kept in backup
-                    data. Export a backup before further changes.
-                  </p>`
-                : ''}
-              <div class="actions">
-                <button @click=${this.retry}>
-                  ${icon(RotateCw, 16)} Retry sync</button
-                ><button @click=${this.exportBackup}>
-                  ${icon(Download, 16)} Export backup</button
-                ><button @click=${this.chooseImport}>
-                  ${icon(Upload, 16)} Import backup
-                </button>
-              </div>
-              <input
-                class="file"
-                id="import-file"
-                type="file"
-                accept=".json,application/json"
-                @change=${this.prepareImport}
-              />
-              ${this.preview
-                ? html`<div class="preview">
-                    <p><strong>Import preview</strong></p>
-                    <p>
-                      ${this.preview.items.length} valid
-                      page${this.preview.items.length === 1 ? '' : 's'} found;
-                      ${this.preview.skipped} other or invalid records skipped.
-                      Existing pages will be kept.
-                    </p>
-                    ${this.preview.settings
-                      ? html`<label
-                          ><input
-                            type="checkbox"
-                            role="switch"
-                            class="switch"
-                            .checked=${this.restoreSettings}
-                            @change=${(event: Event) =>
-                              (this.restoreSettings = (
-                                event.target as HTMLInputElement
-                              ).checked)}
-                          />
-                          Restore settings from backup</label
-                        >`
-                      : ''}
-                    <div class="actions">
-                      <button class="primary" @click=${this.confirmImport}>
-                        Import pages</button
-                      ><button @click=${() => (this.preview = null)}>
-                        Cancel
-                      </button>
-                    </div>
-                  </div>`
-                : ''}
-            </section>`}
+                ${this.settings.sortOption === 'manual'
+                  ? ''
+                  : html`<label class="row"
+                      ><span>Order</span
+                      ><select
+                        .value=${this.settings.sortOrder}
+                        @change=${(event: Event) =>
+                          this.updateSetting(
+                            'sortOrder',
+                            (event.target as HTMLSelectElement)
+                              .value as ReadingListSettings['sortOrder'],
+                          )}
+                      >
+                        <option value="down">
+                          ${this.settings.sortOption === 'date'
+                            ? 'Newest first'
+                            : 'Z to A'}
+                        </option>
+                        <option value="up">
+                          ${this.settings.sortOption === 'date'
+                            ? 'Oldest first'
+                            : 'A to Z'}
+                        </option>
+                      </select></label
+                    >`}
+              </section>
+              <section>
+                <h2>Backups and help</h2>
+                <p class="muted">
+                  ${this.count} page${this.count === 1 ? '' : 's'} saved here.
+                  ${this.localOnly || this.syncUnavailable
+                    ? ''
+                    : 'They may show up on your other devices later.'}
+                </p>
+                ${!this.errorNotice &&
+                (this.localOnly || this.syncUnavailable) &&
+                !this.dismissedStorageWarning
+                  ? html`<reading-list-notice
+                      data-theme=${resolvedTheme(this.settings.theme)}
+                      .message=${this.localOnly
+                        ? `${this.localOnly} page${this.localOnly === 1 ? ' is' : 's are'} only on this device.`
+                        : "Chrome can't sync right now. Your pages are safe here."}
+                      action-label="Try again"
+                      @notice-action=${this.retry}
+                      @notice-dismiss=${() =>
+                        (this.dismissedStorageWarning = true)}
+                    ></reading-list-notice>`
+                  : ''}
+                ${this.conflicts && !this.dismissedConflict
+                  ? html`<reading-list-notice
+                      data-theme=${resolvedTheme(this.settings.theme)}
+                      .message=${this.conflicts === 1
+                        ? 'We found two copies of a page. Both are safe. Download a backup to keep them.'
+                        : 'We found more than one copy of some pages. They are safe. Download a backup to keep them.'}
+                      action-label="Download backup"
+                      @notice-action=${this.exportBackup}
+                      @notice-dismiss=${() => (this.dismissedConflict = true)}
+                    ></reading-list-notice>`
+                  : ''}
+                <div class="actions">
+                  <button @click=${this.exportBackup}>
+                    ${icon(Download, 16)} Download backup</button
+                  ><button @click=${this.chooseImport}>
+                    ${icon(Upload, 16)} Add from backup
+                  </button>
+                </div>
+                ${this.message
+                  ? html`<p class="status" role="status">${this.message}</p>`
+                  : ''}
+                <input
+                  class="file"
+                  id="import-file"
+                  type="file"
+                  accept=".json,application/json"
+                  @change=${this.prepareImport}
+                />
+                ${this.preview
+                  ? html`<div class="preview">
+                      <p><strong>Check backup</strong></p>
+                      <p>
+                        ${this.preview.items.length}
+                        page${this.preview.items.length === 1 ? ' is' : 's are'}
+                        ready to add.
+                        ${this.preview.skipped
+                          ? `${this.preview.skipped} could not be used.`
+                          : ''}
+                        Pages already here will stay.
+                      </p>
+                      ${this.preview.settings
+                        ? html`<label
+                            ><input
+                              type="checkbox"
+                              role="switch"
+                              class="switch"
+                              .checked=${this.restoreSettings}
+                              @change=${(event: Event) =>
+                                (this.restoreSettings = (
+                                  event.target as HTMLInputElement
+                                ).checked)}
+                            />
+                            Use settings from backup</label
+                          >`
+                        : ''}
+                      <div class="actions">
+                        <button class="primary" @click=${this.confirmImport}>
+                          Import pages</button
+                        ><button @click=${() => (this.preview = null)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>`
+                  : ''}
+              </section>`}
     </main>`;
+  }
+  private showError(
+    message: string,
+    actionLabel = '',
+    action?: () => Promise<void> | void,
+  ) {
+    this.errorNotice = { message, actionLabel, action };
+    this.message = '';
+  }
+  private async retryError() {
+    const notice = this.errorNotice;
+    if (!notice?.action) return;
+    try {
+      await notice.action();
+      if (this.errorNotice === notice) this.errorNotice = null;
+    } catch (error) {
+      console.error(error);
+      this.showError(
+        "We couldn't try again.",
+        notice.actionLabel,
+        notice.action,
+      );
+    }
   }
   private async updateSetting<K extends keyof ReadingListSettings>(
     key: K,
@@ -327,24 +405,30 @@ export class ReadingListOptionsElement extends LitElement {
       const synced = await rl.saveSettings(next);
       this.settings = next;
       this.applyTheme();
-      this.message = synced
-        ? 'Settings saved on this device and written to Chrome sync storage.'
-        : 'Settings saved only on this device.';
+      this.message = synced ? '' : 'Setting saved here.';
+      this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.message = 'Could not save settings.';
+      this.showError("We couldn't save this change.", 'Try again', () =>
+        this.updateSetting(key, value),
+      );
     }
   }
   private async retry() {
     try {
       const result = await rl.retrySync();
       this.localOnly = result.remaining;
-      this.conflicts = result.conflicts;
-      this.message = `${result.synced} written to Chrome sync storage; ${result.remaining} saved only on this device.`;
+      this.syncUnavailable = false;
+      this.dismissedStorageWarning = false;
+      this.conflicts = Math.max(rl.conflictCount, result.conflicts);
+      this.message = '';
+      this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.message =
-        'Could not reach Chrome sync storage. Your local pages are safe.';
+      this.syncUnavailable = true;
+      this.showError("We couldn't sync your pages.", 'Try again', () =>
+        this.retry(),
+      );
     }
   }
   private async exportBackup() {
@@ -364,10 +448,13 @@ export class ReadingListOptionsElement extends LitElement {
       setTimeout(() => URL.revokeObjectURL(url), 60000);
       this.message = backup.rawSync
         ? 'Backup downloaded.'
-        : 'Local backup downloaded. Chrome sync data was unavailable.';
+        : 'Backup downloaded. Some sync data was not available.';
+      this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.message = 'Could not create a backup.';
+      this.showError("We couldn't make a backup.", 'Try again', () =>
+        this.exportBackup(),
+      );
     }
   }
   private chooseImport() {
@@ -381,10 +468,13 @@ export class ReadingListOptionsElement extends LitElement {
       this.preview = parseBackup(await file.text());
       this.restoreSettings = false;
       this.message = '';
+      this.errorNotice = null;
     } catch (error) {
       console.error(error);
       this.preview = null;
-      this.message = 'This is not a supported Reading List backup.';
+      this.showError("We couldn't read this backup.", 'Choose file', () =>
+        this.chooseImport(),
+      );
     } finally {
       input.value = '';
     }
@@ -396,22 +486,40 @@ export class ReadingListOptionsElement extends LitElement {
       this.count = (await rl.getListItems()).length;
       this.localOnly = rl.localOnlyCount;
       let settingsMessage = '';
+      let settingsError: OptionsError | null = null;
       if (this.restoreSettings && this.preview.settings) {
+        const desiredSettings = this.preview.settings;
         try {
-          await rl.saveSettings(this.preview.settings);
-          this.settings = this.preview.settings;
+          const synced = await rl.saveSettings(desiredSettings);
+          this.settings = desiredSettings;
           this.applyTheme();
-          settingsMessage = ' Settings restored.';
+          settingsMessage = synced
+            ? ' Settings added.'
+            : ' Setting saved here.';
         } catch (error) {
           console.error(error);
-          settingsMessage = ' Settings could not be restored.';
+          settingsError = {
+            message: "We couldn't use these settings.",
+            actionLabel: 'Try again',
+            action: async () => {
+              const synced = await rl.saveSettings(desiredSettings);
+              this.settings = desiredSettings;
+              this.applyTheme();
+              this.message = synced ? 'Settings added.' : 'Setting saved here.';
+            },
+          };
         }
       }
-      this.message = `${result.imported} pages imported; ${result.alreadyPresent} already present.${result.synced ? '' : ' Imported pages are saved only on this device.'}${settingsMessage}`;
+      this.message = `${result.imported} page${result.imported === 1 ? '' : 's'} added. ${result.alreadyPresent} already here.${settingsMessage}`;
+      this.errorNotice = settingsError;
       this.preview = null;
     } catch (error) {
       console.error(error);
-      this.message = 'Import failed. Your existing pages were kept.';
+      this.showError(
+        "We couldn't add these pages. Your list is safe.",
+        'Try again',
+        () => this.confirmImport(),
+      );
     }
   }
 }

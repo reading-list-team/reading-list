@@ -99,18 +99,7 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   assert.match(root.textContent, /Save your first page/);
   app.items = initial;
   await update();
-  const preview = root.querySelector('.review-controls select');
-  assert.equal(preview.options.length, 7);
-  preview.value = 'local';
-  preview.dispatchEvent(new window.Event('change', { bubbles: true }));
-  await update();
-  assert.match(
-    root.querySelector('.review-notice').textContent,
-    /saved only on this device/,
-  );
-  preview.value = 'live';
-  preview.dispatchEvent(new window.Event('change', { bubbles: true }));
-  await update();
+  assert.ok(!root.querySelector('.review-controls'));
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
   assert.equal(
     root.querySelector('reading-list-item').hasAttribute('last'),
@@ -125,15 +114,40 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   assert.equal(root.querySelectorAll('reading-list-item').length, 40);
   app.localOnly = 2;
   await update();
-  assert.match(
-    root.querySelector('.warning').textContent,
-    /2 pages saved only on this device/,
-  );
+  let notice = root.querySelector('reading-list-notice');
+  assert.equal(notice.variant, 'warning');
+  assert.equal(notice.message, '2 pages are only on this device.');
+  assert.equal(notice.actionLabel, 'Try again');
+  notice.shadowRoot.querySelector('.dismiss').click();
+  await update();
+  assert.ok(!root.querySelector('reading-list-notice'));
+  app.localOnly = 3;
+  await update();
+  notice = root.querySelector('reading-list-notice');
+  assert.equal(notice.message, '3 pages are only on this device.');
+  notice.shadowRoot.querySelector('.action').click();
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  assert.equal(app.localOnly, 0);
+  assert.ok(!root.querySelector('reading-list-notice'));
+  app.showError("We couldn't save this page.", async () => {});
+  await update();
+  notice = root.querySelector('reading-list-notice');
+  assert.equal(notice.variant, 'error');
+  assert.equal(notice.message, "We couldn't save this page.");
+  notice.shadowRoot.querySelector('.action').click();
+  await update();
+  assert.ok(!root.querySelector('reading-list-notice'));
   app.loadError = true;
   app.items = null;
+  app.showError("We couldn't open your list.", () => app.load());
   await update();
-  assert.match(root.textContent, /Couldn’t load your list/);
+  assert.equal(
+    root.querySelector('reading-list-notice').message,
+    "We couldn't open your list.",
+  );
   app.loadError = false;
+  app.topNotice = null;
   app.localOnly = 0;
   app.items = initial;
   await update();
@@ -234,7 +248,7 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   sort.click();
   await update();
   assert.equal(
-    root.querySelector('.sort-menu').textContent.includes('Direction'),
+    root.querySelector('.sort-menu').textContent.includes('Order'),
     false,
   );
   assert.equal(
@@ -302,7 +316,7 @@ test('Enter saves an inline edit and Undo restores one deleted page', async () =
   await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 1);
   assert.equal(root.querySelector('reading-list-item').name, 'Updated title');
-  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
+  assert.ok(!root.querySelector('.feedback'));
   assert.equal(
     app.constructor.styles[0].cssText.includes('prefers-reduced-motion'),
     true,
@@ -374,7 +388,7 @@ test('options page uses switches and hides manual direction', async () => {
   await options.updateComplete;
   const optionsRoot = options.shadowRoot;
   assert.equal(optionsRoot.querySelectorAll('input[role="switch"]').length, 2);
-  assert.equal(optionsRoot.textContent.includes('Direction'), false);
+  assert.equal(optionsRoot.textContent.includes('Order'), false);
   const sort = [...optionsRoot.querySelectorAll('select')].find(
     (select) => select.value === 'manual',
   );
@@ -382,7 +396,27 @@ test('options page uses switches and hides manual direction', async () => {
   sort.dispatchEvent(new window.Event('change', { bubbles: true }));
   await new Promise((resolve) => setTimeout(resolve, 15));
   await options.updateComplete;
-  assert.equal(optionsRoot.textContent.includes('Direction'), true);
+  assert.equal(optionsRoot.textContent.includes('Order'), true);
+  options.conflicts = 1;
+  await options.updateComplete;
+  const recovery = [
+    ...optionsRoot.querySelectorAll('reading-list-notice'),
+  ].find((notice) => notice.message.includes('two copies'));
+  assert.ok(recovery);
+  assert.equal(recovery.actionLabel, 'Download backup');
+  recovery.shadowRoot.querySelector('.dismiss').click();
+  await options.updateComplete;
+  assert.ok(
+    ![...optionsRoot.querySelectorAll('reading-list-notice')].some((notice) =>
+      notice.message.includes('two copies'),
+    ),
+  );
+  options.showError("We couldn't make a backup.", 'Try again', async () => {});
+  await options.updateComplete;
+  assert.equal(
+    optionsRoot.querySelector('reading-list-notice[variant="error"]').message,
+    "We couldn't make a backup.",
+  );
   options.remove();
 });
 
@@ -408,7 +442,7 @@ test('A saves the current page but does not fire while editing text', async () =
     root.querySelector('reading-list-item[recently-saved]')?.href,
     scrolledUrl,
   );
-  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
+  assert.ok(!root.querySelector('.feedback'));
   assert.equal(root.querySelector('.save').classList.contains('saved'), true);
   assert.match(
     root.querySelector('.visually-hidden[role="status"]').textContent,
@@ -451,8 +485,7 @@ test('Undo toast overlays the footer, pauses on hover, and dismisses with X', as
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   assert.match(root.querySelector('.info').textContent, /URL copied/);
-  assert.match(root.querySelector('.review-notice').textContent, /URL copied/);
-  assert.equal(root.querySelector('.feedback:not(.review-notice)'), null);
+  assert.ok(!root.querySelector('.feedback'));
   row.shadowRoot.querySelector('[title="Delete"]').click();
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
