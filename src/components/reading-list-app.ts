@@ -29,48 +29,14 @@ import {
 } from '../lib/settings.js';
 import type { ReadingListItemElement } from './reading-list-item.js';
 import './reading-list-item.js';
+import './reading-list-notice.js';
 
-// Temporary review surface. Turn off after the notification wording is approved.
-const SHOW_NOTIFICATION_REVIEW = true;
-const NOTIFICATION_PREVIEWS = [
-  { id: 'live', label: 'Live notification', text: '', warning: false },
-  {
-    id: 'local',
-    label: 'Saved only here',
-    text: '1 page saved only on this device.',
-    warning: true,
-  },
-  {
-    id: 'sync',
-    label: 'Sync unavailable',
-    text: 'Chrome sync is unavailable. Your local list is shown.',
-    warning: true,
-  },
-  {
-    id: 'conflict',
-    label: 'Conflict',
-    text: '1 conflicting version kept in backup data.',
-    warning: true,
-  },
-  {
-    id: 'retry',
-    label: 'Retry result',
-    text: '0 written to Chrome sync storage; 1 saved only on this device.',
-    warning: false,
-  },
-  {
-    id: 'save-error',
-    label: 'Save error',
-    text: 'Could not save this page.',
-    warning: false,
-  },
-  {
-    id: 'restore-error',
-    label: 'Undo error',
-    text: 'Could not restore the page. Try Undo again.',
-    warning: false,
-  },
-] as const;
+type TopNotice = {
+  variant: 'warning' | 'error';
+  message: string;
+  action?: () => Promise<void> | void;
+  key?: string;
+};
 
 @customElement('reading-list-app')
 export class ReadingListAppElement extends LitElement {
@@ -145,55 +111,6 @@ export class ReadingListAppElement extends LitElement {
         clip-path: inset(50%);
         white-space: nowrap;
         border: 0;
-      }
-      .warning {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px var(--content-gutter);
-        background: #fef7e0;
-        color: #67480c;
-        font-size: var(--text-xs);
-        line-height: 1.35;
-        border-left: 3px solid var(--color-warning);
-      }
-      :host([data-theme='dark']) .warning {
-        background: #3a321f;
-        color: #ffe4a8;
-      }
-      .warning span {
-        flex: 1;
-      }
-      .warning button {
-        border: 0;
-        background: transparent;
-        color: inherit;
-        text-decoration: underline;
-        font-weight: var(--weight-medium);
-        padding: 4px;
-      }
-      .feedback {
-        margin: 0;
-        padding: 6px var(--content-gutter);
-        color: var(--color-muted);
-        font-size: var(--text-xs);
-      }
-      .review-controls {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 6px var(--content-gutter) 0;
-        color: var(--color-muted);
-        font-size: var(--text-xs);
-      }
-      .review-controls select {
-        max-width: 170px;
-        padding: 4px 6px;
-        border: 1px solid var(--color-line);
-        border-radius: 6px;
-        background: var(--color-surface);
-        color: var(--color-text);
       }
       .list-head {
         position: relative;
@@ -696,14 +613,14 @@ export class ReadingListAppElement extends LitElement {
   @state() private query = '';
   @state() private sortOpen = false;
   @state() private sortClosing = false;
-  @state() private message = '';
-  @state() private reviewChoice = 'live';
+  @state() private topNotice: TopNotice | null = null;
+  @state() private dismissedWarningKeys: string[] = [];
+  @state() private noticeBusy = false;
   @state() private justSaved = false;
   @state() private recentlySavedUrl: string | null = null;
   @state() private loadError = false;
   @state() private localOnly = 0;
   @state() private syncUnavailable = false;
-  @state() private conflicts = 0;
   @state() private deleted: ListItemData | null = null;
   @state() private undoClosing = false;
   @state() private infoToast: string | null = null;
@@ -824,12 +741,12 @@ export class ReadingListAppElement extends LitElement {
       this.applyTheme();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.conflicts = rl.conflictCount;
       this.loadError = false;
+      this.topNotice = null;
     } catch (error) {
       console.error(error);
       this.loadError = true;
-      this.message = 'Could not load your list.';
+      this.showError("We couldn't open your list.", () => this.load());
     }
   }
   private onStorageChanged = (
@@ -845,7 +762,10 @@ export class ReadingListAppElement extends LitElement {
         .then(() => this.load())
         .catch((error) => {
           console.error(error);
-          this.message = 'Could not refresh the list.';
+          this.showError("We couldn't update your list.", async () => {
+            await rl.refresh();
+            await this.load();
+          });
         });
     }, 100);
   };
@@ -883,53 +803,74 @@ export class ReadingListAppElement extends LitElement {
       return this.dragHeight;
     return 0;
   }
-  private get warningText() {
-    const parts = [];
-    if (this.localOnly)
-      parts.push(
-        `${this.localOnly} page${this.localOnly === 1 ? '' : 's'} saved only on this device.`,
-      );
-    if (this.syncUnavailable && !this.localOnly)
-      parts.push('Chrome sync is unavailable. Your local list is shown.');
-    if (this.conflicts)
-      parts.push(
-        `${this.conflicts} conflicting version${this.conflicts === 1 ? '' : 's'} kept in backup data.`,
-      );
-    return parts.join(' ');
+  private get warningNotices(): TopNotice[] {
+    const notices: TopNotice[] = [];
+    if (this.localOnly > 0) {
+      const count = this.localOnly;
+      notices.push({
+        variant: 'warning',
+        key: `pages:${count}`,
+        message: `${count} page${count === 1 ? ' is' : 's are'} only on this device.`,
+        action: () => this.retrySync(),
+      });
+    } else if (this.syncUnavailable) {
+      notices.push({
+        variant: 'warning',
+        key: 'sync-unavailable',
+        message: "Chrome can't sync right now. Your pages are safe here.",
+        action: () => this.retrySync(),
+      });
+    }
+    return notices;
   }
-  private get reviewNotice(): { text: string; warning: boolean } {
-    const sample = NOTIFICATION_PREVIEWS.find(
-      (item) => item.id === this.reviewChoice,
+  private get activeNotice(): TopNotice | null {
+    if (this.topNotice) return this.topNotice;
+    return (
+      this.warningNotices.find(
+        (notice) => !this.dismissedWarningKeys.includes(notice.key ?? ''),
+      ) ?? null
     );
-    if (sample && sample.id !== 'live') return sample;
-    if (this.message) return { text: this.message, warning: false };
-    if (this.infoToast) return { text: this.infoToast, warning: false };
-    if (this.deleted)
-      return {
-        text: `${this.hostname(this.deleted.url)} deleted`,
-        warning: false,
-      };
-    if (this.justSaved) return { text: 'Page saved', warning: false };
-    if (this.warningText) return { text: this.warningText, warning: true };
-    return {
-      text: 'No active notification. Choose an example or use the popup.',
-      warning: false,
-    };
+  }
+  private showError(message: string, action?: () => Promise<void> | void) {
+    this.topNotice = { variant: 'error', message, action };
+  }
+  private async onNoticeAction(notice: TopNotice) {
+    if (!notice.action || this.noticeBusy) return;
+    this.noticeBusy = true;
+    try {
+      await notice.action();
+      if (this.topNotice === notice) this.topNotice = null;
+    } catch (error) {
+      console.error(error);
+      this.showError("We couldn't try again.", notice.action);
+    } finally {
+      this.noticeBusy = false;
+    }
+  }
+  private onNoticeDismiss(notice: TopNotice) {
+    if (this.topNotice === notice) this.topNotice = null;
+    else if (notice.key)
+      this.dismissedWarningKeys = [...this.dismissedWarningKeys, notice.key];
   }
   private get sortLabel() {
     const mode = { manual: 'Manual', date: 'Date', title: 'Title' }[
       this.settings.sortOption
     ];
     const direction =
-      this.settings.sortOption === 'manual'
-        ? ''
-        : this.settings.sortOrder === 'up'
-          ? ', ascending'
-          : ', descending';
+      this.settings.sortOption === 'date'
+        ? this.settings.sortOrder === 'up'
+          ? ', oldest first'
+          : ', newest first'
+        : this.settings.sortOption === 'title'
+          ? this.settings.sortOrder === 'up'
+            ? ', A to Z'
+            : ', Z to A'
+          : '';
     return `Sort: ${mode}${direction}`;
   }
   override render() {
     const visible = this.visibleItems;
+    const notice = this.activeNotice;
     return html`
       <header>
         <h1>Reading List</h1>
@@ -947,41 +888,16 @@ export class ReadingListAppElement extends LitElement {
       <div class="visually-hidden" role="status">
         ${this.justSaved ? 'Page saved' : ''}
       </div>
-      ${this.localOnly || this.syncUnavailable || this.conflicts
-        ? html`<div class="warning" role="status">
-            <span>${this.warningText}</span
-            ><button @click=${this.retrySync}>Retry</button>
-          </div>`
-        : ''}
-      ${SHOW_NOTIFICATION_REVIEW
-        ? html`
-            <div class="review-controls">
-              <span>Notification review</span
-              ><select
-                aria-label="Preview notification"
-                .value=${this.reviewChoice}
-                @change=${(event: Event) =>
-                  (this.reviewChoice = (
-                    event.target as HTMLSelectElement
-                  ).value)}
-              >
-                ${NOTIFICATION_PREVIEWS.map(
-                  (item) =>
-                    html`<option value=${item.id}>${item.label}</option>`,
-                )}
-              </select>
-            </div>
-            ${this.reviewNotice.warning
-              ? html`<div class="warning review-notice" role="status">
-                  <span>${this.reviewNotice.text}</span>
-                </div>`
-              : html`<p class="feedback review-notice" role="status">
-                  ${this.reviewNotice.text}
-                </p>`}
-          `
-        : ''}
-      ${!SHOW_NOTIFICATION_REVIEW && this.message
-        ? html`<p class="feedback" role="status">${this.message}</p>`
+      ${notice
+        ? html`<reading-list-notice
+            data-theme=${resolvedTheme(this.settings.theme)}
+            .variant=${notice.variant}
+            .message=${notice.message}
+            .actionLabel=${notice.action ? 'Try again' : ''}
+            .busy=${this.noticeBusy}
+            @notice-action=${() => this.onNoticeAction(notice)}
+            @notice-dismiss=${() => this.onNoticeDismiss(notice)}
+          ></reading-list-notice>`
         : ''}
       ${this.items !== null && this.items.length
         ? html`<div class="list-head">
@@ -1037,7 +953,7 @@ export class ReadingListAppElement extends LitElement {
                     ${this.settings.sortOption === 'manual'
                       ? ''
                       : html` <div class="divider"></div>
-                          <div class="menu-label">Direction</div>
+                          <div class="menu-label">Order</div>
                           ${(['down', 'up'] as const).map(
                             (order) =>
                               html`<button
@@ -1047,9 +963,13 @@ export class ReadingListAppElement extends LitElement {
                                 order}
                                 @click=${() => this.changeOrder(order)}
                               >
-                                ${order === 'down'
-                                  ? 'Descending'
-                                  : 'Ascending'}${this.settings.sortOrder ===
+                                ${this.settings.sortOption === 'date'
+                                  ? order === 'down'
+                                    ? 'Newest first'
+                                    : 'Oldest first'
+                                  : order === 'down'
+                                    ? 'Z to A'
+                                    : 'A to Z'}${this.settings.sortOrder ===
                                 order
                                   ? icon(Check, 15)
                                   : ''}
@@ -1062,10 +982,7 @@ export class ReadingListAppElement extends LitElement {
         : ''}
       <div class="list">
         ${this.loadError
-          ? html`<div class="empty">
-              <h2>Couldn’t load your list</h2>
-              <p>Try reopening Reading List.</p>
-            </div>`
+          ? html`<div class="empty"></div>`
           : this.items === null
             ? html`<div
                 class="loading"
@@ -1447,12 +1364,13 @@ export class ReadingListAppElement extends LitElement {
       const synced = await rl.saveSettings(settings);
       this.settings = settings;
       this.applyTheme();
-      this.message = synced
-        ? ''
-        : 'Settings saved on this device. Chrome sync is unavailable.';
+      this.topNotice = null;
+      if (!synced) this.showInfoToast('Setting saved here');
     } catch (error) {
       console.error(error);
-      this.message = 'Could not save settings.';
+      this.showError("We couldn't save this change.", () =>
+        this.saveSettings(settings),
+      );
     }
   }
   private changeTheme(theme: ReadingListSettings['theme']) {
@@ -1473,7 +1391,7 @@ export class ReadingListAppElement extends LitElement {
         currentWindow: true,
       });
       if (!tab?.url || !tab.title) {
-        this.message = 'This page cannot be saved.';
+        this.showError("This page can't be saved.");
         return;
       }
       const result = await rl.addReadingItem({
@@ -1487,7 +1405,8 @@ export class ReadingListAppElement extends LitElement {
       ];
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = '';
+      this.dismissedWarningKeys = [];
+      this.topNotice = null;
       this.showSavedFeedback();
       this.recentlySavedUrl = result.item.url;
       if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
@@ -1509,7 +1428,7 @@ export class ReadingListAppElement extends LitElement {
       });
     } catch (error) {
       console.error(error);
-      this.message = 'Could not save this page.';
+      this.showError("We couldn't save this page.", () => this.saveCurrent());
     }
   }
   private async retrySync() {
@@ -1517,11 +1436,12 @@ export class ReadingListAppElement extends LitElement {
       const result = await rl.retrySync();
       this.localOnly = result.remaining;
       this.syncUnavailable = false;
-      this.conflicts = result.conflicts;
-      this.message = `${result.synced} written to Chrome sync storage; ${result.remaining} saved only on this device.`;
+      this.dismissedWarningKeys = [];
+      this.topNotice = null;
     } catch (error) {
       console.error(error);
-      this.message = 'Chrome sync is unavailable. Your local pages are safe.';
+      this.syncUnavailable = true;
+      this.showError("We couldn't sync your pages.", () => this.retrySync());
     }
   }
   private hostname(url: string): string {
@@ -1532,7 +1452,7 @@ export class ReadingListAppElement extends LitElement {
     }
   }
   private onItemMessage(event: CustomEvent<string>) {
-    this.message = '';
+    this.topNotice = null;
     this.showInfoToast(
       event.detail === 'URL copied.' ? 'URL copied' : event.detail,
     );
@@ -1609,7 +1529,7 @@ export class ReadingListAppElement extends LitElement {
       this.scheduleUndoDismiss();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = '';
+      this.topNotice = null;
       void this.updateComplete.then(() => {
         const next =
           this.shadowRoot
@@ -1620,7 +1540,9 @@ export class ReadingListAppElement extends LitElement {
       });
     } catch (error) {
       console.error(error);
-      this.message = 'Could not delete this page.';
+      this.showError("We couldn't delete this page.", () =>
+        this.deleteItem(event),
+      );
     }
   }
   private async undoDelete() {
@@ -1636,7 +1558,7 @@ export class ReadingListAppElement extends LitElement {
       this.clearUndo();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
-      this.message = '';
+      this.topNotice = null;
       void this.updateComplete.then(() =>
         this.shadowRoot
           ?.querySelector<HTMLButtonElement>('.sort-button, .save')
@@ -1644,7 +1566,9 @@ export class ReadingListAppElement extends LitElement {
       );
     } catch (error) {
       console.error(error);
-      this.message = 'Could not restore the page. Try Undo again.';
+      this.showError("We couldn't bring back this page.", () =>
+        this.undoDelete(),
+      );
     }
   }
   private async updateTitle(
@@ -1656,11 +1580,13 @@ export class ReadingListAppElement extends LitElement {
         item.url === result.item.url ? result.item : item,
       );
       this.localOnly = rl.localOnlyCount;
-      this.message = '';
+      this.topNotice = null;
       this.showInfoToast('Title saved');
     } catch (error) {
       console.error(error);
-      this.message = 'Could not change the title.';
+      this.showError("We couldn't change the title.", () =>
+        this.updateTitle(event),
+      );
     }
   }
   private async moveItem(
@@ -1672,11 +1598,11 @@ export class ReadingListAppElement extends LitElement {
       await rl.moveItem(event.detail.url, event.detail.direction);
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
-      this.message = '';
+      this.topNotice = null;
       this.showInfoToast('Order updated');
     } catch (error) {
       console.error(error);
-      this.message = 'Could not change the order.';
+      this.showError("We couldn't move this page.", () => this.moveItem(event));
     } finally {
       this.reordering = false;
     }
@@ -1785,12 +1711,14 @@ export class ReadingListAppElement extends LitElement {
       );
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
-      this.message = '';
+      this.topNotice = null;
       this.showInfoToast('Order updated');
     } catch (error) {
       console.error(error);
       this.items = previous;
-      this.message = 'Could not change the order.';
+      this.showError("We couldn't move this page.", () =>
+        this.reorderDrop(event),
+      );
     } finally {
       this.reorderEnd();
       this.reordering = false;
