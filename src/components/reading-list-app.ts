@@ -1401,7 +1401,7 @@ export class ReadingListAppElement extends LitElement {
         currentWindow: true,
       });
       if (!tab?.url || !tab.title) {
-        this.showError("This page can't be saved.");
+        this.showError("This page can't be saved. Open a website and try again.");
         return;
       }
       const result = await rl.addReadingItem({
