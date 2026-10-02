@@ -183,7 +183,7 @@ export class ReadingListOptionsElement extends LitElement {
   override render() {
     return html`<main>
       <h1>Reading List settings</h1>
-      <p class="lead">Manage your list, preferences, and backups.</p>
+      <p class="lead">Set up your list and save a backup.</p>
       ${this.errorNotice
         ? html`<reading-list-notice
             data-theme=${resolvedTheme(this.settings.theme)}
@@ -199,7 +199,7 @@ export class ReadingListOptionsElement extends LitElement {
         : this.loadError
           ? ''
           : html` <section>
-                <h2>Preferences</h2>
+                <h2>Your choices</h2>
                 <label class="row"
                   ><span>Theme</span
                   ><select

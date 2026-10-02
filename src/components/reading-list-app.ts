@@ -35,6 +35,7 @@ type TopNotice = {
   variant: 'warning' | 'error';
   message: string;
   action?: () => Promise<void> | void;
+  actionLabel?: string;
   key?: string;
 };
 
@@ -621,6 +622,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private loadError = false;
   @state() private localOnly = 0;
   @state() private syncUnavailable = false;
+  @state() private conflictNeedsBackup = false;
   @state() private deleted: ListItemData | null = null;
   @state() private undoClosing = false;
   @state() private infoToast: string | null = null;
@@ -741,6 +743,7 @@ export class ReadingListAppElement extends LitElement {
       this.applyTheme();
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
+      if (this.localOnly === 0) this.conflictNeedsBackup = false;
       this.loadError = false;
       this.topNotice = null;
     } catch (error) {
@@ -809,9 +812,14 @@ export class ReadingListAppElement extends LitElement {
       const count = this.localOnly;
       notices.push({
         variant: 'warning',
-        key: `pages:${count}`,
-        message: `${count} page${count === 1 ? ' is' : 's are'} only on this device.`,
-        action: () => this.retrySync(),
+        key: `${this.conflictNeedsBackup ? 'backup' : 'pages'}:${count}`,
+        message: this.conflictNeedsBackup
+          ? `${count} page${count === 1 ? ' is' : 's are'} only on this device. Open settings to save a backup.`
+          : `${count} page${count === 1 ? ' is' : 's are'} only on this device.`,
+        actionLabel: this.conflictNeedsBackup ? 'Open settings' : 'Try again',
+        action: this.conflictNeedsBackup
+          ? () => chrome.runtime.openOptionsPage()
+          : () => this.retrySync(),
       });
     } else if (this.syncUnavailable) {
       notices.push({
@@ -893,7 +901,9 @@ export class ReadingListAppElement extends LitElement {
             data-theme=${resolvedTheme(this.settings.theme)}
             .variant=${notice.variant}
             .message=${notice.message}
-            .actionLabel=${notice.action ? 'Try again' : ''}
+            .actionLabel=${notice.action
+              ? (notice.actionLabel ?? 'Try again')
+              : ''}
             .busy=${this.noticeBusy}
             @notice-action=${() => this.onNoticeAction(notice)}
             @notice-dismiss=${() => this.onNoticeDismiss(notice)}
@@ -1405,6 +1415,7 @@ export class ReadingListAppElement extends LitElement {
       ];
       this.localOnly = rl.localOnlyCount;
       this.syncUnavailable = !rl.isSyncAvailable;
+      if (this.localOnly === 0) this.conflictNeedsBackup = false;
       this.dismissedWarningKeys = [];
       this.topNotice = null;
       this.showSavedFeedback();
@@ -1436,6 +1447,7 @@ export class ReadingListAppElement extends LitElement {
       const result = await rl.retrySync();
       this.localOnly = result.remaining;
       this.syncUnavailable = false;
+      this.conflictNeedsBackup = result.remaining > 0 && result.conflicts > 0;
       this.dismissedWarningKeys = [];
       this.topNotice = null;
     } catch (error) {

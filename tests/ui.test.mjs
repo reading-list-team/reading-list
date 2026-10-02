@@ -51,6 +51,7 @@ const area = (records) => ({
   },
 });
 globalThis.chrome = {
+  runtime: { async openOptionsPage() {} },
   i18n: {
     getMessage() {
       return '';
@@ -130,6 +131,16 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   await update();
   assert.equal(app.localOnly, 0);
   assert.ok(!root.querySelector('reading-list-notice'));
+  app.localOnly = 1;
+  app.conflictNeedsBackup = true;
+  await update();
+  notice = root.querySelector('reading-list-notice');
+  assert.equal(notice.actionLabel, 'Open settings');
+  assert.match(notice.message, /Open settings to save a backup/);
+  notice.shadowRoot.querySelector('.action').click();
+  await update();
+  app.localOnly = 0;
+  app.conflictNeedsBackup = false;
   app.showError("We couldn't save this page.", async () => {});
   await update();
   notice = root.querySelector('reading-list-notice');
