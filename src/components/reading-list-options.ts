@@ -69,11 +69,20 @@ export class ReadingListOptionsElement extends LitElement {
       }
       select {
         min-width: 145px;
-        padding: 7px 9px;
+        padding: 7px 34px 7px 12px;
         border: 1px solid var(--color-line);
         border-radius: var(--radius-sm);
-        background: var(--color-bg);
+        background-color: var(--color-bg);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2377808d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px 16px;
         color: var(--color-text);
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      :host([data-theme='dark']) select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       }
       button {
         display: inline-flex;
@@ -182,7 +191,7 @@ export class ReadingListOptionsElement extends LitElement {
   }
   override render() {
     return html`<main>
-      <h1>Reading List settings</h1>
+      <h1>Reading List</h1>
       <p class="lead">Set up your list and save a backup.</p>
       ${this.errorNotice
         ? html`<reading-list-notice
@@ -199,7 +208,7 @@ export class ReadingListOptionsElement extends LitElement {
         : this.loadError
           ? ''
           : html` <section>
-                <h2>Your choices</h2>
+                <h2>Settings</h2>
                 <label class="row"
                   ><span>Theme</span
                   ><select
@@ -285,9 +294,9 @@ export class ReadingListOptionsElement extends LitElement {
                     >`}
               </section>
               <section>
-                <h2>Backups and help</h2>
+                <h2>Backups</h2>
                 <p class="muted">
-                  ${this.count} page${this.count === 1 ? '' : 's'} saved here.
+                  ${this.count} page${this.count === 1 ? '' : 's'} are saved here.
                   ${this.localOnly || this.syncUnavailable
                     ? ''
                     : 'They may show up on your other devices later.'}

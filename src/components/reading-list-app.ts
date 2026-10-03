@@ -119,7 +119,7 @@ export class ReadingListAppElement extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 18px var(--content-gutter) 8px;
+        padding: 8px var(--content-gutter);
       }
       .list-label {
         display: flex;
@@ -340,9 +340,20 @@ export class ReadingListAppElement extends LitElement {
         color: var(--color-text);
         background: transparent;
         font-size: var(--text-md);
+        -webkit-appearance: none;
+        appearance: none;
       }
       .search-field:focus {
         outline: 0;
+      }
+      .search-field::-webkit-search-cancel-button,
+      .search-field::-webkit-search-decoration {
+        -webkit-appearance: none;
+        appearance: none;
+        display: none;
+      }
+      .search-field::-moz-search-clear-button {
+        display: none;
       }
       .footer-end {
         position: relative;
@@ -990,7 +1001,12 @@ export class ReadingListAppElement extends LitElement {
             </div>
           </div>`
         : ''}
-      <div class="list">
+      <div
+        class="list"
+        @dragenter=${this.onListDragEnter}
+        @dragover=${this.onListDragOver}
+        @drop=${this.onListDrop}
+      >
         ${this.loadError
           ? html`<div class="empty"></div>`
           : this.items === null
@@ -1031,7 +1047,7 @@ export class ReadingListAppElement extends LitElement {
                         @move-item=${this.moveItem}
                         @reorder-start=${this.reorderStart}
                         @reorder-preview=${this.reorderPreview}
-                        @reorder-end=${this.reorderEnd}
+                        @reorder-end=${this.finishDrag}
                         @reorder-drop=${this.reorderDrop}
                         @viewed-item=${this.markViewed}
                         @item-message=${this.onItemMessage}
@@ -1645,18 +1661,108 @@ export class ReadingListAppElement extends LitElement {
     const next = target + (event.detail.placement === 'after' ? 1 : 0);
     if (next !== this.dragInsertIndex) this.dragInsertIndex = next;
   }
+  private finishDrag(event: CustomEvent<{ x: number; y: number }>) {
+    if (
+      this.draggedUrl &&
+      !this.reordering &&
+      this.pointerInList(event.detail?.x ?? -1, event.detail?.y ?? -1)
+    )
+      this.commitPreview();
+    if (!this.reordering) this.reorderEnd();
+  }
+  private pointerInList(x: number, y: number) {
+    const bounds = this.shadowRoot
+      ?.querySelector('.list')
+      ?.getBoundingClientRect();
+    return (
+      !!bounds &&
+      x >= bounds.left &&
+      x <= bounds.right &&
+      y >= bounds.top &&
+      y <= bounds.bottom
+    );
+  }
   private reorderEnd() {
     this.draggedUrl = null;
     this.dragInsertIndex = null;
   }
+  private onListDragEnter(event: DragEvent) {
+    if (!this.draggedUrl || this.settings.sortOption !== 'manual') return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  }
+  private onListDragOver(event: DragEvent) {
+    if (!this.draggedUrl || this.settings.sortOption !== 'manual') return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    if (event.target !== event.currentTarget) return;
+    const list = event.currentTarget as HTMLElement;
+    const others = [
+      ...list.querySelectorAll<ReadingListItemElement>('reading-list-item'),
+    ].filter((row) => row.href !== this.draggedUrl);
+    this.dragInsertIndex = others.filter((row) => {
+      const bounds = row.getBoundingClientRect();
+      return event.clientY > bounds.top + bounds.height / 2;
+    }).length;
+  }
+  private onListDrop(event: DragEvent) {
+    if (
+      !this.draggedUrl ||
+      this.reordering ||
+      this.settings.sortOption !== 'manual'
+    )
+      return;
+    event.preventDefault();
+    this.commitPreview();
+  }
+  private commitPreview() {
+    if (
+      !this.draggedUrl ||
+      this.reordering ||
+      this.settings.sortOption !== 'manual'
+    )
+      return;
+    const visible = this.visibleItems;
+    const sourceIndex = visible.findIndex(
+      (item) => item.url === this.draggedUrl,
+    );
+    const others = visible.filter((item) => item.url !== this.draggedUrl);
+    const index = Math.max(
+      0,
+      Math.min(this.dragInsertIndex ?? sourceIndex, others.length),
+    );
+    if (sourceIndex < 0 || !others.length || index === sourceIndex) {
+      this.reorderEnd();
+      return;
+    }
+    const target = others[Math.min(index, others.length - 1)];
+    void this.reorderDrop(
+      new CustomEvent('reorder-drop', {
+        detail: {
+          sourceUrl: this.draggedUrl,
+          targetUrl: target.url,
+          placement: index === others.length ? 'after' : 'before',
+        },
+      }),
+    );
+  }
   private async reorderDrop(
     event: CustomEvent<{
-      sourceUrl: string;
+      sourceUrl?: string;
       targetUrl: string;
       placement: 'before' | 'after';
     }>,
   ) {
-    if (this.reordering || this.settings.sortOption !== 'manual') return;
+    const sourceUrl = event.detail.sourceUrl || this.draggedUrl;
+    if (
+      this.reordering ||
+      this.settings.sortOption !== 'manual' ||
+      !sourceUrl ||
+      sourceUrl === event.detail.targetUrl
+    ) {
+      if (!this.reordering) this.reorderEnd();
+      return;
+    }
     this.reordering = true;
     const previous = this.items;
     const oldRects = new Map(
@@ -1674,9 +1780,7 @@ export class ReadingListAppElement extends LitElement {
         ...this.settings,
         sortOption: 'manual',
       });
-      const from = ordered.findIndex(
-        (item) => item.url === event.detail.sourceUrl,
-      );
+      const from = ordered.findIndex((item) => item.url === sourceUrl);
       if (from < 0) return;
       const [moved] = ordered.splice(from, 1);
       const target = ordered.findIndex(
@@ -1717,7 +1821,7 @@ export class ReadingListAppElement extends LitElement {
         }
       }
       await rl.reorderItem(
-        event.detail.sourceUrl,
+        sourceUrl,
         event.detail.targetUrl,
         event.detail.placement,
       );
@@ -1729,7 +1833,15 @@ export class ReadingListAppElement extends LitElement {
       console.error(error);
       this.items = previous;
       this.showError("We couldn't move this page.", () =>
-        this.reorderDrop(event),
+        this.reorderDrop(
+          new CustomEvent('reorder-drop', {
+            detail: {
+              sourceUrl,
+              targetUrl: event.detail.targetUrl,
+              placement: event.detail.placement,
+            },
+          }),
+        ),
       );
     } finally {
       this.reorderEnd();

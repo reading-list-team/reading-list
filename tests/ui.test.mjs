@@ -182,6 +182,10 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
     app.constructor.styles.at(-1).cssText,
     /font-size: var\(--text-md\)/,
   );
+  assert.match(
+    app.constructor.styles.at(-1).cssText,
+    /::-webkit-search-cancel-button[\s\S]*display:\s*none/,
+  );
   field.value = 'missing';
   field.dispatchEvent(new window.InputEvent('input', { bubbles: true }));
   await update();
@@ -354,9 +358,15 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
     0,
   );
   const transfer = new window.DataTransfer();
-  const dragEvent = (type, clientY = 0) => {
-    const event = new window.DragEvent(type, { bubbles: true, clientY });
+  const dragEvent = (type, clientY = 0, clientX = 0) => {
+    const event = new window.DragEvent(type, {
+      bubbles: true,
+      clientX,
+      clientY,
+    });
     Object.defineProperty(event, 'dataTransfer', { value: transfer });
+    Object.defineProperty(event, 'clientX', { value: clientX });
+    Object.defineProperty(event, 'clientY', { value: clientY });
     return event;
   };
   rows[0].shadowRoot
@@ -374,7 +384,13 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
   assert.equal(rows[0].hasAttribute('drag-active'), true);
   assert.match(rows[1].getAttribute('style'), /--drag-offset: -68px/);
   assert.equal(rows[1].shadowRoot.querySelector('.drop-after'), null);
-  rows[1].shadowRoot.querySelector('.row').dispatchEvent(dragEvent('drop', 1));
+  // A drop in the space between rows reaches the list, not a row.
+  // dragend follows drop in the browser and must not move the row again.
+  const listBounds = root.querySelector('.list').getBoundingClientRect();
+  root.querySelector('.list').dispatchEvent(dragEvent('drop', 1));
+  rows[0].shadowRoot.querySelector('.drag-handle').dispatchEvent(
+    dragEvent('dragend', listBounds.top, listBounds.left),
+  );
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   rows = [...root.querySelectorAll('reading-list-item')];
@@ -388,6 +404,80 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
   await update();
   rows = [...root.querySelectorAll('reading-list-item')];
   assert.equal(rows[0].href, saved.url);
+
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragstart'));
+  assert.equal(app.draggedUrl, saved.url);
+  root.querySelector('.list').dispatchEvent(dragEvent('dragover', 100));
+  assert.equal(app.dragInsertIndex, 1);
+  root.querySelector('.list').dispatchEvent(dragEvent('drop', 100));
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[1].href, saved.url);
+
+  rows[1].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
+    );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[0].href, saved.url);
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragstart'));
+  rows[1].shadowRoot
+    .querySelector('.row')
+    .dispatchEvent(dragEvent('dragover', 1));
+  const rowDrop = new window.DragEvent('drop', { bubbles: true, clientY: 1 });
+  Object.defineProperty(rowDrop, 'dataTransfer', {
+    value: new window.DataTransfer(),
+  });
+  Object.defineProperty(rowDrop, 'clientY', { value: 1 });
+  rows[1].shadowRoot.querySelector('.row').dispatchEvent(rowDrop);
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[1].href, saved.url);
+
+  rows[1].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }),
+    );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragstart'));
+  rows[1].shadowRoot
+    .querySelector('.row')
+    .dispatchEvent(dragEvent('dragover', 1));
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(
+      dragEvent('dragend', listBounds.bottom + 40, listBounds.right + 40),
+    );
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[0].href, saved.url);
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragstart'));
+  rows[1].shadowRoot
+    .querySelector('.row')
+    .dispatchEvent(dragEvent('dragover', 1));
+  rows[0].shadowRoot.querySelector('.drag-handle').dispatchEvent(
+    dragEvent('dragend', listBounds.top, listBounds.left),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await update();
+  rows = [...root.querySelectorAll('reading-list-item')];
+  assert.equal(rows[1].href, saved.url);
 });
 
 test('options page uses switches and hides manual direction', async () => {

@@ -27,7 +27,7 @@ export class ReadingListItemElement extends LitElement {
         display: flex;
         align-items: center;
         gap: var(--space-3);
-        padding: 8px 2px;
+        padding: 8px 0;
         border-bottom: 1px solid var(--color-line);
         position: relative;
       }
@@ -227,6 +227,7 @@ export class ReadingListItemElement extends LitElement {
   override render() {
     return html`<div
       class="row"
+      @dragenter=${this.allowItemDrag}
       @dragover=${this.onDragOver}
       @drop=${this.onDrop}
     >
@@ -404,8 +405,13 @@ export class ReadingListItemElement extends LitElement {
     }
     this.dispatch('reorder-start', { url: this.href });
   }
-  private onDragEnd() {
-    this.dispatch('reorder-end');
+  private onDragEnd(event: DragEvent) {
+    this.dispatch('reorder-end', { x: event.clientX, y: event.clientY });
+  }
+  private allowItemDrag(event: DragEvent) {
+    if (!this.reorderable) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
   }
   private onDragOver(event: DragEvent) {
     if (
@@ -421,19 +427,14 @@ export class ReadingListItemElement extends LitElement {
     });
   }
   private onDrop(event: DragEvent) {
-    if (!this.reorderable || !event.dataTransfer) return;
-    const sourceUrl = event.dataTransfer.getData(
-      'application/x-reading-list-item',
-    );
-    if (!sourceUrl) return;
+    if (!this.reorderable) return;
     event.preventDefault();
-    const placement = this.dragPlacement(event);
-    if (sourceUrl !== this.href)
-      this.dispatch('reorder-drop', {
-        sourceUrl,
-        targetUrl: this.href,
-        placement,
-      });
+    event.stopPropagation();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.dispatch('reorder-drop', {
+      targetUrl: this.href,
+      placement: this.dragPlacement(event),
+    });
   }
   private dragPlacement(event: DragEvent): 'before' | 'after' {
     const row = event.currentTarget as HTMLElement;
