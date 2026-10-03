@@ -2,6 +2,8 @@
 
 Visual direction: the supplied three-frame wireframe. The popup uses a compact 360 × 520 px canvas, a quiet empty state, blue save action, understated rows, and a bottom search/settings rail.
 
+List rows use a narrow outer gutter and inner row padding. This keeps favicon/text alignment with the 20 px content gutter while giving the full-width save highlight breathing room around the favicon.
+
 ## Flows
 
 - **Popup load:** a centered, reduced-motion-aware Lucide spinner → empty, populated, or error. Local-only and sync-unavailable notices appear below the header. Retry attempts another Chrome sync storage write; it does not claim cross-device delivery.

@@ -226,7 +226,7 @@ export class ReadingListAppElement extends LitElement {
       .list {
         flex: 1;
         overflow-y: auto;
-        padding: 0 var(--content-gutter) 28px;
+        padding: 0 calc(var(--content-gutter) - var(--space-3)) 28px;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
@@ -240,7 +240,7 @@ export class ReadingListAppElement extends LitElement {
         gap: var(--space-2);
         width: 100%;
         min-height: 42px;
-        padding: var(--space-2) 0;
+        padding: var(--space-2) var(--space-3);
         border: 0;
         background: transparent;
         color: var(--color-muted);

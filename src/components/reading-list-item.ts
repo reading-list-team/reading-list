@@ -27,7 +27,7 @@ export class ReadingListItemElement extends LitElement {
         display: flex;
         align-items: center;
         gap: var(--space-3);
-        padding: 8px 0;
+        padding: 8px var(--space-3);
         border-bottom: 1px solid var(--color-line);
         position: relative;
       }
@@ -130,7 +130,7 @@ export class ReadingListItemElement extends LitElement {
       .actions {
         position: absolute;
         z-index: 2;
-        right: 0;
+        right: var(--space-3);
         top: 50%;
         transform: translateY(-50%);
         display: flex;
