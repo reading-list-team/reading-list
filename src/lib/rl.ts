@@ -21,6 +21,10 @@ export interface SaveResult {
   synced: boolean;
 }
 
+export interface SaveCurrentResult extends SaveResult {
+  alreadyPresent: boolean;
+}
+
 export interface ImportResult {
   imported: number;
   alreadyPresent: number;
@@ -287,6 +291,29 @@ export class RL {
       console.error('Reading List saved locally but could not sync', error);
     }
     return { item, synced };
+  }
+
+  async saveCurrentPage(incoming: ListItemData): Promise<SaveCurrentResult> {
+    await this.ensureLoaded();
+    const itemKey = ITEM_PREFIX + incoming.url;
+    const deletedKey = DELETED_PREFIX + incoming.url;
+    const local = await chrome.storage.local.get([itemKey, deletedKey]);
+    const existing = local[deletedKey]
+      ? undefined
+      : isStoredItem(incoming.url, local[itemKey])
+        ? local[itemKey]
+        : this.list.find((item) => item.url === incoming.url);
+    if (existing) {
+      this.list = this.list.some((item) => item.url === incoming.url)
+        ? this.list.map((item) => item.url === incoming.url ? existing : item)
+        : [existing, ...this.list];
+      return {
+        item: existing,
+        synced: sameItem(this.syncRecords[incoming.url], existing),
+        alreadyPresent: true,
+      };
+    }
+    return { ...(await this.addReadingItem(incoming)), alreadyPresent: false };
   }
 
   async removeReadingItem(url: string): Promise<boolean> {

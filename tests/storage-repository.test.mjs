@@ -52,6 +52,47 @@ test('a sync quota failure keeps the new title locally and reports local-only', 
   assert.equal((await new RL().getListItems())[0].title, 'New title');
 });
 
+test('saving the same URL again preserves a custom title and all item metadata', async () => {
+  const customized = {
+    ...legacy,
+    title: 'Adidas',
+    viewed: true,
+    index: 4,
+    noteFromOldVersion: 'keep this',
+  };
+  const local = memoryArea();
+  const sync = memoryArea({ [url]: customized });
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  await list.getListItems();
+  local.failSet = true;
+  sync.failSet = true;
+
+  const result = await list.saveCurrentPage({
+    url,
+    title: 'Current tab title',
+    addedAt: 999,
+  });
+  assert.equal(result.alreadyPresent, true);
+  assert.deepEqual(result.item, customized);
+  assert.deepEqual(await list.getListItems(), [customized]);
+  assert.deepEqual(sync.values[url], customized);
+});
+
+test('saving a new URL still writes through the local-first path', async () => {
+  const local = memoryArea();
+  const sync = memoryArea();
+  globalThis.chrome = { storage: { local, sync } };
+  const list = new RL();
+  const item = { url, title: 'New page', addedAt: 200 };
+
+  const result = await list.saveCurrentPage(item);
+  assert.equal(result.alreadyPresent, false);
+  assert.deepEqual(result.item, item);
+  assert.deepEqual(local.values[`rl:v1:item:${url}`], item);
+  assert.deepEqual(sync.values[url], item);
+});
+
 test('a failed remote deletion stays deleted after restart', async () => {
   const local = memoryArea();
   const sync = memoryArea({ [url]: legacy });
