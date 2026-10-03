@@ -622,3 +622,69 @@ test('Undo toast overlays the footer, pauses on hover, and dismisses with X', as
     Object.defineProperty(navigator, 'clipboard', clipboardDescriptor);
   else delete navigator.clipboard;
 });
+
+test('saving an existing page shows Already saved and keeps its edited title', async () => {
+  const url = 'https://example.com/new';
+  await rl.updateTitle(url, 'My custom title');
+  app.items = await rl.getListItems();
+  app.settings = { ...app.settings, viewAll: true };
+  app.query = '';
+  await update();
+  const before = app.items.find((item) => item.url === url);
+  const count = app.items.length;
+
+  root.querySelector('.save').click();
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  await update();
+  assert.equal(app.items.length, count);
+  assert.deepEqual(app.items.find((item) => item.url === url), before);
+  assert.match(root.querySelector('.info')?.textContent ?? '', /Already saved/);
+});
+
+test('Viewed disclosure appears only while viewed pages are hidden', async () => {
+  const originalItems = app.items;
+  const originalSettings = app.settings;
+  const originalQuery = app.query;
+  app.items = [
+    { ...saved, viewed: false },
+    {
+      url: 'https://example.com/viewed',
+      title: 'A viewed page',
+      addedAt: 90,
+      viewed: true,
+    },
+  ];
+  app.settings = { ...app.settings, viewAll: false };
+  app.query = '';
+  app.viewedOpen = false;
+  await update();
+
+  const disclosure = root.querySelector('.viewed-toggle');
+  assert.match(disclosure.textContent, /Viewed \(1\)/);
+  assert.equal(disclosure.getAttribute('aria-expanded'), 'false');
+  assert.equal(root.querySelectorAll('reading-list-item').length, 1);
+  disclosure.click();
+  await update();
+  assert.equal(disclosure.getAttribute('aria-expanded'), 'true');
+  assert.equal(root.querySelectorAll('reading-list-item').length, 2);
+  assert.equal(
+    root.querySelector('reading-list-item[data-list-group="viewed"]').reorderable,
+    false,
+  );
+
+  app.query = 'viewed page';
+  await update();
+  assert.match(root.textContent, /No unread pages/);
+  assert.equal(root.querySelectorAll('reading-list-item').length, 1);
+  app.settings = { ...app.settings, viewAll: true };
+  app.query = '';
+  await update();
+  assert.equal(root.querySelector('.viewed-toggle'), null);
+  assert.equal(root.querySelectorAll('reading-list-item').length, 2);
+
+  app.items = originalItems;
+  app.settings = originalSettings;
+  app.query = originalQuery;
+  app.viewedOpen = false;
+  await update();
+});

@@ -9,6 +9,7 @@ import {
   CalendarArrowUp,
   Check,
   ChevronDown,
+  ChevronRight,
   LoaderCircle,
   Monitor,
   Moon,
@@ -228,6 +229,37 @@ export class ReadingListAppElement extends LitElement {
         padding: 0 var(--content-gutter) 28px;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
+      }
+      .viewed-section {
+        border-top: 1px solid var(--color-line);
+        margin-top: var(--space-2);
+      }
+      .viewed-toggle {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+        min-height: 42px;
+        padding: var(--space-2) 0;
+        border: 0;
+        background: transparent;
+        color: var(--color-muted);
+        text-align: left;
+        font-size: var(--text-md);
+      }
+      .viewed-toggle:hover {
+        color: var(--color-text);
+      }
+      .viewed-toggle svg {
+        transition: transform var(--motion-fast);
+      }
+      .viewed-toggle[aria-expanded='true'] svg {
+        transform: rotate(90deg);
+      }
+      .viewed-empty {
+        height: auto;
+        min-height: 170px;
+        padding-bottom: var(--space-4);
       }
       .list:hover,
       .list:focus-within,
@@ -621,6 +653,7 @@ export class ReadingListAppElement extends LitElement {
   @state() private items: ListItemData[] | null = null;
   @state() private settings: ReadingListSettings = DEFAULT_SETTINGS;
   @state() private searchOpen = false;
+  @state() private viewedOpen = false;
   @state() private searchClosing = false;
   @state() private query = '';
   @state() private sortOpen = false;
@@ -787,11 +820,20 @@ export class ReadingListAppElement extends LitElement {
     return sortList(this.items ?? [], this.settings).filter(
       (item) =>
         (this.settings.viewAll || !item.viewed) &&
-        (!this.query ||
-          `${item.title} ${item.url}`
-            .toLocaleLowerCase()
-            .includes(this.query.toLocaleLowerCase())),
+        this.matchesQuery(item),
     );
+  }
+  private get viewedItems() {
+    if (this.settings.viewAll) return [];
+    return sortList(this.items ?? [], this.settings).filter(
+      (item) => item.viewed && this.matchesQuery(item),
+    );
+  }
+  private matchesQuery(item: ListItemData) {
+    return !this.query ||
+      `${item.title} ${item.url}`
+        .toLocaleLowerCase()
+        .includes(this.query.toLocaleLowerCase());
   }
   private dragOffset(url: string, visible: ListItemData[]): number {
     if (
@@ -887,8 +929,40 @@ export class ReadingListAppElement extends LitElement {
           : '';
     return `Sort: ${mode}${direction}`;
   }
+  private renderItem(
+    item: ListItemData,
+    index: number,
+    total: number,
+    reorderable: boolean,
+    group: 'main' | 'viewed',
+    visible: ListItemData[],
+  ) {
+    return html`<reading-list-item
+      .name=${item.title}
+      .href=${item.url}
+      .newtab=${this.settings.openNewTab}
+      .reorderable=${reorderable}
+      .viewed=${!!item.viewed}
+      .recentlySaved=${this.recentlySavedUrl === item.url}
+      .last=${index === total - 1}
+      style=${`--drag-offset: ${reorderable ? this.dragOffset(item.url, visible) : 0}px`}
+      ?drag-active=${this.draggedUrl === item.url}
+      data-list-group=${group}
+      data-theme=${resolvedTheme(this.settings.theme)}
+      @delete-item=${this.deleteItem}
+      @update-title=${this.updateTitle}
+      @move-item=${this.moveItem}
+      @reorder-start=${this.reorderStart}
+      @reorder-preview=${this.reorderPreview}
+      @reorder-end=${this.finishDrag}
+      @reorder-drop=${this.reorderDrop}
+      @viewed-item=${this.markViewed}
+      @item-message=${this.onItemMessage}
+    ></reading-list-item>`;
+  }
   override render() {
     const visible = this.visibleItems;
+    const viewed = this.viewedItems;
     const notice = this.activeNotice;
     return html`
       <header>
@@ -1022,37 +1096,55 @@ export class ReadingListAppElement extends LitElement {
                   <h2>Save your first page</h2>
                   <p>Click the + button to save your first page.</p>
                 </div>`
-              : !visible.length
-                ? html`<div class="empty">
-                    <h2>No pages found</h2>
-                    <p>Try another search or show all pages in settings.</p>
-                  </div>`
-                : repeat(
-                    visible,
-                    (item) => item.url,
-                    (item, index) =>
-                      html`<reading-list-item
-                        .name=${item.title}
-                        .href=${item.url}
-                        .newtab=${this.settings.openNewTab}
-                        .reorderable=${this.settings.sortOption === 'manual'}
-                        .viewed=${!!item.viewed}
-                        .recentlySaved=${this.recentlySavedUrl === item.url}
-                        .last=${index === visible.length - 1}
-                        style=${`--drag-offset: ${this.dragOffset(item.url, visible)}px`}
-                        ?drag-active=${this.draggedUrl === item.url}
-                        data-theme=${resolvedTheme(this.settings.theme)}
-                        @delete-item=${this.deleteItem}
-                        @update-title=${this.updateTitle}
-                        @move-item=${this.moveItem}
-                        @reorder-start=${this.reorderStart}
-                        @reorder-preview=${this.reorderPreview}
-                        @reorder-end=${this.finishDrag}
-                        @reorder-drop=${this.reorderDrop}
-                        @viewed-item=${this.markViewed}
-                        @item-message=${this.onItemMessage}
-                      ></reading-list-item>`,
-                  )}
+            : html`
+                ${!visible.length
+                  ? html`<div class=${`empty ${viewed.length ? 'viewed-empty' : ''}`}>
+                      <h2>${viewed.length ? 'No unread pages' : 'No pages found'}</h2>
+                      <p>${viewed.length
+                        ? 'Pages you opened are in Viewed below.'
+                        : 'Try another search or show all pages in settings.'}</p>
+                    </div>`
+                  : repeat(
+                      visible,
+                      (item) => item.url,
+                      (item, index) => this.renderItem(
+                        item,
+                        index,
+                        visible.length,
+                        this.settings.sortOption === 'manual',
+                        'main',
+                        visible,
+                      ),
+                    )}
+                ${viewed.length
+                  ? html`<section class="viewed-section" aria-label="Viewed pages">
+                      <button
+                        class="viewed-toggle"
+                        aria-expanded=${this.viewedOpen}
+                        aria-controls="viewed-list"
+                        @click=${() => (this.viewedOpen = !this.viewedOpen)}
+                      >
+                        ${icon(ChevronRight, 16)} Viewed (${viewed.length})
+                      </button>
+                      <div id="viewed-list" ?hidden=${!this.viewedOpen}>
+                        ${this.viewedOpen
+                          ? repeat(
+                              viewed,
+                              (item) => item.url,
+                              (item, index) => this.renderItem(
+                                item,
+                                index,
+                                viewed.length,
+                                false,
+                                'viewed',
+                                visible,
+                              ),
+                            )
+                          : ''}
+                      </div>
+                    </section>`
+                  : ''}
+              `}
       </div>
       <footer
         class=${this.searchOpen
@@ -1388,6 +1480,7 @@ export class ReadingListAppElement extends LitElement {
   private async saveSettings(settings: ReadingListSettings) {
     try {
       const synced = await rl.saveSettings(settings);
+      if (settings.viewAll !== this.settings.viewAll) this.viewedOpen = false;
       this.settings = settings;
       this.applyTheme();
       this.topNotice = null;
@@ -1410,6 +1503,26 @@ export class ReadingListAppElement extends LitElement {
       this.saveFeedbackTimer = null;
     }, 1400);
   }
+  private async highlightItem(url: string) {
+    this.recentlySavedUrl = url;
+    if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
+    this.savedHighlightTimer = window.setTimeout(() => {
+      this.recentlySavedUrl = null;
+      this.savedHighlightTimer = null;
+    }, 2400);
+    await this.updateComplete;
+    const row = [
+      ...(this.shadowRoot?.querySelectorAll<ReadingListItemElement>(
+        'reading-list-item',
+      ) ?? []),
+    ].find((item) => item.href === url);
+    row?.scrollIntoView?.({
+      block: 'center',
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'auto'
+        : 'smooth',
+    });
+  }
   private async saveCurrent() {
     try {
       const [tab] = await chrome.tabs.query({
@@ -1420,11 +1533,23 @@ export class ReadingListAppElement extends LitElement {
         this.showError("This page can't be saved. Open a website and try again.");
         return;
       }
-      const result = await rl.addReadingItem({
+      const result = await rl.saveCurrentPage({
         url: tab.url,
         title: tab.title,
         addedAt: Date.now(),
       });
+      if (result.alreadyPresent) {
+        this.items = (this.items ?? []).some((item) => item.url === tab.url)
+          ? (this.items ?? []).map((item) =>
+              item.url === tab.url ? result.item : item,
+            )
+          : [...(this.items ?? []), result.item];
+        this.localOnly = rl.localOnlyCount;
+        if (result.item.viewed && !this.settings.viewAll) this.viewedOpen = true;
+        this.showInfoToast('Already saved');
+        await this.highlightItem(result.item.url);
+        return;
+      }
       this.items = [
         result.item,
         ...(this.items ?? []).filter((item) => item.url !== tab.url),
@@ -1435,24 +1560,7 @@ export class ReadingListAppElement extends LitElement {
       this.dismissedWarningKeys = [];
       this.topNotice = null;
       this.showSavedFeedback();
-      this.recentlySavedUrl = result.item.url;
-      if (this.savedHighlightTimer) clearTimeout(this.savedHighlightTimer);
-      this.savedHighlightTimer = window.setTimeout(() => {
-        this.recentlySavedUrl = null;
-        this.savedHighlightTimer = null;
-      }, 2400);
-      await this.updateComplete;
-      const row = [
-        ...(this.shadowRoot?.querySelectorAll<ReadingListItemElement>(
-          'reading-list-item',
-        ) ?? []),
-      ].find((item) => item.href === result.item.url);
-      row?.scrollIntoView?.({
-        block: 'center',
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? 'auto'
-          : 'smooth',
-      });
+      await this.highlightItem(result.item.url);
     } catch (error) {
       console.error(error);
       this.showError("We couldn't save this page.", () => this.saveCurrent());
@@ -1674,12 +1782,16 @@ export class ReadingListAppElement extends LitElement {
     const bounds = this.shadowRoot
       ?.querySelector('.list')
       ?.getBoundingClientRect();
+    const viewedBounds = this.shadowRoot
+      ?.querySelector('.viewed-section')
+      ?.getBoundingClientRect();
     return (
       !!bounds &&
       x >= bounds.left &&
       x <= bounds.right &&
       y >= bounds.top &&
-      y <= bounds.bottom
+      y <= bounds.bottom &&
+      (!viewedBounds || y < viewedBounds.top)
     );
   }
   private reorderEnd() {
@@ -1698,7 +1810,9 @@ export class ReadingListAppElement extends LitElement {
     if (event.target !== event.currentTarget) return;
     const list = event.currentTarget as HTMLElement;
     const others = [
-      ...list.querySelectorAll<ReadingListItemElement>('reading-list-item'),
+      ...list.querySelectorAll<ReadingListItemElement>(
+        'reading-list-item[data-list-group="main"]',
+      ),
     ].filter((row) => row.href !== this.draggedUrl);
     this.dragInsertIndex = others.filter((row) => {
       const bounds = row.getBoundingClientRect();
@@ -1712,6 +1826,11 @@ export class ReadingListAppElement extends LitElement {
       this.settings.sortOption !== 'manual'
     )
       return;
+    const viewed = this.shadowRoot?.querySelector('.viewed-section');
+    if (viewed?.contains(event.target as Node)) {
+      this.reorderEnd();
+      return;
+    }
     event.preventDefault();
     this.commitPreview();
   }
