@@ -7,3 +7,4 @@ dist
 /build/
 /extension/scripts/
 *.zip
+/docs/
