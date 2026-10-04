@@ -40,6 +40,8 @@ type TopNotice = {
   key?: string;
 };
 
+const countFormatter = new Intl.NumberFormat('en-US');
+
 @customElement('reading-list-app')
 export class ReadingListAppElement extends LitElement {
   static override styles = [
@@ -873,8 +875,8 @@ export class ReadingListAppElement extends LitElement {
         variant: 'warning',
         key: `${this.conflictNeedsBackup ? 'backup' : 'pages'}:${count}`,
         message: this.conflictNeedsBackup
-          ? `${count} page${count === 1 ? ' is' : 's are'} only on this device. Open settings to save a backup.`
-          : `${count} page${count === 1 ? ' is' : 's are'} only on this device.`,
+          ? `${countFormatter.format(count)} page${count === 1 ? ' is' : 's are'} only on this device. Open settings to save a backup.`
+          : `${countFormatter.format(count)} page${count === 1 ? ' is' : 's are'} only on this device.`,
         actionLabel: this.conflictNeedsBackup ? 'Open settings' : 'Try again',
         action: this.conflictNeedsBackup
           ? () => chrome.runtime.openOptionsPage()
@@ -1003,7 +1005,7 @@ export class ReadingListAppElement extends LitElement {
       ${this.items !== null && this.items.length
         ? html`<div class="list-head">
             <span class="list-label"
-              >My List <span class="count">${this.items.length}</span></span
+              >My List <span class="count">${countFormatter.format(this.items.length)}</span></span
             >
             <div class="sort-wrap">
               <button
@@ -1145,7 +1147,7 @@ export class ReadingListAppElement extends LitElement {
                           aria-controls="viewed-list"
                           @click=${() => (this.viewedOpen = !this.viewedOpen)}
                         >
-                          ${icon(ChevronRight, 16)} Viewed (${viewed.length})
+                          ${icon(ChevronRight, 16)} Viewed (${countFormatter.format(viewed.length)})
                         </button>
                         <div id="viewed-list" ?hidden=${!this.viewedOpen}>
                           ${this.viewedOpen

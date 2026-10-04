@@ -120,6 +120,18 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   }));
   await update();
   assert.equal(root.querySelectorAll('reading-list-item').length, 40);
+  const previousSettings = app.settings;
+  app.settings = { ...previousSettings, viewAll: false };
+  app.items = Array.from({ length: 1000 }, (_, index) => ({
+    ...saved,
+    url: `https://example.com/viewed-${index}`,
+    viewed: true,
+  }));
+  await update();
+  assert.equal(root.querySelector('.count').textContent, '1,000');
+  assert.match(root.querySelector('.viewed-toggle').textContent, /Viewed \(1,000\)/);
+  app.settings = previousSettings;
+  app.items = initial;
   app.localOnly = 2;
   await update();
   let notice = root.querySelector('reading-list-notice');
