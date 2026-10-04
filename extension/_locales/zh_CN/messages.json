@@ -33,7 +33,7 @@
     "message": "展示上下文菜单:"
   },
   "dark": {
-    "message": "暗黑"
+    "message": "深色"
   },
   "dateButton": {
     "message": "日期"
@@ -51,7 +51,7 @@
     "message": "导入"
   },
   "light": {
-    "message": "明亮主题"
+    "message": "浅色"
   },
   "openNewTab": {
     "message": "在新标签页中打开链接:"
@@ -73,5 +73,594 @@
   },
   "unreadButton": {
     "message": "未读"
+  },
+  "pageSaved": {
+    "message": "页面已保存",
+    "description": "pageSaved"
+  },
+  "saveCurrentPage": {
+    "message": "保存当前页面",
+    "description": "saveCurrentPage"
+  },
+  "saveCurrentPageShortcut": {
+    "message": "保存当前页面 (A)",
+    "description": "saveCurrentPageShortcut"
+  },
+  "myList": {
+    "message": "我的列表",
+    "description": "myList"
+  },
+  "sortPages": {
+    "message": "排序页面",
+    "description": "sortPages"
+  },
+  "sortBy": {
+    "message": "排序方式",
+    "description": "sortBy"
+  },
+  "sortManual": {
+    "message": "手动",
+    "description": "sortManual"
+  },
+  "sortDate": {
+    "message": "日期",
+    "description": "sortDate"
+  },
+  "sortTitle": {
+    "message": "标题",
+    "description": "sortTitle"
+  },
+  "manualOrder": {
+    "message": "手动排序",
+    "description": "manualOrder"
+  },
+  "dateAdded": {
+    "message": "添加日期",
+    "description": "dateAdded"
+  },
+  "order": {
+    "message": "顺序",
+    "description": "order"
+  },
+  "newestFirst": {
+    "message": "最新优先",
+    "description": "newestFirst"
+  },
+  "oldestFirst": {
+    "message": "最早优先",
+    "description": "oldestFirst"
+  },
+  "aToZ": {
+    "message": "从 A 到 Z",
+    "description": "aToZ"
+  },
+  "zToA": {
+    "message": "从 Z 到 A",
+    "description": "zToA"
+  },
+  "sortManualLabel": {
+    "message": "排序：手动",
+    "description": "sortManualLabel"
+  },
+  "sortDateNewestLabel": {
+    "message": "排序：日期，最新优先",
+    "description": "sortDateNewestLabel"
+  },
+  "sortDateOldestLabel": {
+    "message": "排序：日期，最早优先",
+    "description": "sortDateOldestLabel"
+  },
+  "sortTitleAZLabel": {
+    "message": "排序：标题，从 A 到 Z",
+    "description": "sortTitleAZLabel"
+  },
+  "sortTitleZALabel": {
+    "message": "排序：标题，从 Z 到 A",
+    "description": "sortTitleZALabel"
+  },
+  "loadingPages": {
+    "message": "正在加载页面",
+    "description": "loadingPages"
+  },
+  "saveFirstPage": {
+    "message": "保存您的第一个页面",
+    "description": "saveFirstPage"
+  },
+  "saveFirstPageHelp": {
+    "message": "点击 + 保存您的第一个页面。",
+    "description": "saveFirstPageHelp"
+  },
+  "noUnreadPages": {
+    "message": "没有未查看的页面",
+    "description": "noUnreadPages"
+  },
+  "noPagesFound": {
+    "message": "未找到页面",
+    "description": "noPagesFound"
+  },
+  "viewedPagesBelow": {
+    "message": "您打开过的页面位于下方的“已查看”中。",
+    "description": "viewedPagesBelow"
+  },
+  "searchNoResultsHelp": {
+    "message": "请尝试其他搜索词，或在设置中显示所有页面。",
+    "description": "searchNoResultsHelp"
+  },
+  "viewedPages": {
+    "message": "已查看",
+    "description": "viewedPages"
+  },
+  "viewedPagesCount": {
+    "message": "已查看（$count$）",
+    "description": "viewedPagesCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "openSearch": {
+    "message": "打开搜索",
+    "description": "openSearch"
+  },
+  "searchPages": {
+    "message": "搜索页面",
+    "description": "searchPages"
+  },
+  "searchSavedPages": {
+    "message": "搜索已保存的页面",
+    "description": "searchSavedPages"
+  },
+  "findPage": {
+    "message": "查找页面",
+    "description": "findPage"
+  },
+  "openSettings": {
+    "message": "打开设置",
+    "description": "openSettings"
+  },
+  "closeSearch": {
+    "message": "关闭搜索",
+    "description": "closeSearch"
+  },
+  "dismissNotification": {
+    "message": "关闭通知",
+    "description": "dismissNotification"
+  },
+  "dismiss": {
+    "message": "关闭",
+    "description": "dismiss"
+  },
+  "deletedSite": {
+    "message": "已删除 $site$",
+    "description": "deletedSite",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "撤销",
+    "description": "undo"
+  },
+  "dismissUndo": {
+    "message": "关闭撤销提示",
+    "description": "dismissUndo"
+  },
+  "settings": {
+    "message": "设置",
+    "description": "settings"
+  },
+  "closeSettings": {
+    "message": "关闭设置",
+    "description": "closeSettings"
+  },
+  "themeWithMode": {
+    "message": "主题（$mode$）",
+    "description": "themeWithMode",
+    "placeholders": {
+      "mode": {
+        "content": "$1"
+      }
+    }
+  },
+  "system": {
+    "message": "跟随系统",
+    "description": "system"
+  },
+  "systemTheme": {
+    "message": "系统主题",
+    "description": "systemTheme"
+  },
+  "lightTheme": {
+    "message": "浅色主题",
+    "description": "lightTheme"
+  },
+  "darkTheme": {
+    "message": "深色主题",
+    "description": "darkTheme"
+  },
+  "openLinksNewTab": {
+    "message": "在新标签页中打开链接",
+    "description": "openLinksNewTab"
+  },
+  "showViewedPages": {
+    "message": "显示已查看的页面",
+    "description": "showViewedPages"
+  },
+  "feedback": {
+    "message": "反馈",
+    "description": "feedback"
+  },
+  "feedbackHelp": {
+    "message": "发现问题或有新想法？请告诉我们。",
+    "description": "feedbackHelp"
+  },
+  "sendFeedback": {
+    "message": "发送反馈",
+    "description": "sendFeedback"
+  },
+  "additionalSettings": {
+    "message": "其他设置",
+    "description": "additionalSettings"
+  },
+  "additionalSettingsHelp": {
+    "message": "保存列表副本，或从文件中添加列表。",
+    "description": "additionalSettingsHelp"
+  },
+  "openSettingsButton": {
+    "message": "打开设置",
+    "description": "openSettingsButton"
+  },
+  "versionLabel": {
+    "message": "版本 $version$",
+    "description": "versionLabel",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "tryAgain": {
+    "message": "重试",
+    "description": "tryAgain"
+  },
+  "localOnlyOne": {
+    "message": "有 $count$ 个页面仅保存在此设备上。",
+    "description": "localOnlyOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyOther": {
+    "message": "有 $count$ 个页面仅保存在此设备上。",
+    "description": "localOnlyOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOne": {
+    "message": "有 $count$ 个页面仅保存在此设备上。请打开设置保存备份。",
+    "description": "localOnlyBackupOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOther": {
+    "message": "有 $count$ 个页面仅保存在此设备上。请打开设置保存备份。",
+    "description": "localOnlyBackupOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncUnavailable": {
+    "message": "Chrome 目前无法同步。您的页面在此设备上是安全的。",
+    "description": "syncUnavailable"
+  },
+  "openListError": {
+    "message": "无法打开您的列表。",
+    "description": "openListError"
+  },
+  "updateListError": {
+    "message": "无法更新您的列表。",
+    "description": "updateListError"
+  },
+  "retryError": {
+    "message": "重试失败。",
+    "description": "retryError"
+  },
+  "saveSettingError": {
+    "message": "无法保存此更改。",
+    "description": "saveSettingError"
+  },
+  "settingSavedHere": {
+    "message": "设置已保存在此设备上。",
+    "description": "settingSavedHere"
+  },
+  "pageCannotSave": {
+    "message": "无法保存此页面。请打开网站后重试。",
+    "description": "pageCannotSave"
+  },
+  "alreadySaved": {
+    "message": "已保存",
+    "description": "alreadySaved"
+  },
+  "savePageError": {
+    "message": "无法保存此页面。",
+    "description": "savePageError"
+  },
+  "syncPagesError": {
+    "message": "无法同步您的页面。",
+    "description": "syncPagesError"
+  },
+  "urlCopied": {
+    "message": "链接已复制",
+    "description": "urlCopied"
+  },
+  "copyUrlError": {
+    "message": "无法复制链接。",
+    "description": "copyUrlError"
+  },
+  "deletePageError": {
+    "message": "无法删除此页面。",
+    "description": "deletePageError"
+  },
+  "restorePageError": {
+    "message": "无法恢复此页面。",
+    "description": "restorePageError"
+  },
+  "titleSaved": {
+    "message": "标题已保存",
+    "description": "titleSaved"
+  },
+  "changeTitleError": {
+    "message": "无法更改标题。",
+    "description": "changeTitleError"
+  },
+  "orderUpdated": {
+    "message": "顺序已更新",
+    "description": "orderUpdated"
+  },
+  "movePageError": {
+    "message": "无法移动此页面。",
+    "description": "movePageError"
+  },
+  "dragToReorder": {
+    "message": "拖动以重新排序",
+    "description": "dragToReorder"
+  },
+  "dragItemHelp": {
+    "message": "拖动 $name$ 以重新排序。也可以使用方向键移动。",
+    "description": "dragItemHelp",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageTitle": {
+    "message": "页面标题",
+    "description": "pageTitle"
+  },
+  "saveTitle": {
+    "message": "保存标题",
+    "description": "saveTitle"
+  },
+  "cancelEditing": {
+    "message": "取消编辑",
+    "description": "cancelEditing"
+  },
+  "editTitle": {
+    "message": "编辑标题",
+    "description": "editTitle"
+  },
+  "editItem": {
+    "message": "编辑 $name$",
+    "description": "editItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "copyUrl": {
+    "message": "复制链接",
+    "description": "copyUrl"
+  },
+  "copyUrlForItem": {
+    "message": "复制 $name$ 的链接",
+    "description": "copyUrlForItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "delete": {
+    "message": "删除",
+    "description": "delete"
+  },
+  "deleteItem": {
+    "message": "删除 $name$",
+    "description": "deleteItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsLead": {
+    "message": "设置列表并保存备份。",
+    "description": "optionsLead"
+  },
+  "loadingSettings": {
+    "message": "正在加载设置…",
+    "description": "loadingSettings"
+  },
+  "backups": {
+    "message": "备份",
+    "description": "backups"
+  },
+  "savedHereOne": {
+    "message": "此处保存了 $count$ 个页面。",
+    "description": "savedHereOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedHereOther": {
+    "message": "此处保存了 $count$ 个页面。",
+    "description": "savedHereOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "otherDevicesLater": {
+    "message": "它们稍后可能会出现在您的其他设备上。",
+    "description": "otherDevicesLater"
+  },
+  "conflictOne": {
+    "message": "发现同一页面的两个副本。两个副本均安全。请下载备份以保留它们。",
+    "description": "conflictOne"
+  },
+  "conflictOther": {
+    "message": "发现某些页面有多个副本。它们均安全。请下载备份以保留它们。",
+    "description": "conflictOther"
+  },
+  "downloadBackup": {
+    "message": "下载备份",
+    "description": "downloadBackup"
+  },
+  "addFromBackup": {
+    "message": "从备份添加",
+    "description": "addFromBackup"
+  },
+  "checkBackup": {
+    "message": "检查备份",
+    "description": "checkBackup"
+  },
+  "readyToAddOne": {
+    "message": "有 $count$ 个页面可添加。",
+    "description": "readyToAddOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "readyToAddOther": {
+    "message": "有 $count$ 个页面可添加。",
+    "description": "readyToAddOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "skippedCount": {
+    "message": "有 $count$ 个无法使用。",
+    "description": "skippedCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "existingPagesStay": {
+    "message": "已有页面会保留。",
+    "description": "existingPagesStay"
+  },
+  "useBackupSettings": {
+    "message": "使用备份中的设置",
+    "description": "useBackupSettings"
+  },
+  "importPages": {
+    "message": "导入页面",
+    "description": "importPages"
+  },
+  "cancel": {
+    "message": "取消",
+    "description": "cancel"
+  },
+  "backupDownloaded": {
+    "message": "备份已下载。",
+    "description": "backupDownloaded"
+  },
+  "backupDownloadedPartial": {
+    "message": "备份已下载。部分同步数据不可用。",
+    "description": "backupDownloadedPartial"
+  },
+  "backupError": {
+    "message": "无法创建备份。",
+    "description": "backupError"
+  },
+  "chooseFile": {
+    "message": "选择文件",
+    "description": "chooseFile"
+  },
+  "readBackupError": {
+    "message": "无法读取此备份。",
+    "description": "readBackupError"
+  },
+  "settingsAdded": {
+    "message": "设置已添加。",
+    "description": "settingsAdded"
+  },
+  "useSettingsError": {
+    "message": "无法使用这些设置。",
+    "description": "useSettingsError"
+  },
+  "importResultOne": {
+    "message": "已添加 $count$ 个页面。已有 $existing$ 个。",
+    "description": "importResultOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importResultOther": {
+    "message": "已添加 $count$ 个页面。已有 $existing$ 个。",
+    "description": "importResultOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importError": {
+    "message": "无法添加这些页面。您的列表是安全的。",
+    "description": "importError"
+  },
+  "trying": {
+    "message": "正在重试…",
+    "description": "trying"
+  },
+  "closeNotice": {
+    "message": "关闭提示",
+    "description": "closeNotice"
+  },
+  "themeLabel": {
+    "message": "主题",
+    "description": "Settings field label."
   }
 }

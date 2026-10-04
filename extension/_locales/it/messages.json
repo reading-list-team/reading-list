@@ -33,7 +33,7 @@
     "message": "Mostrare nel menu di contesto:"
   },
   "dark": {
-    "message": "scuro"
+    "message": "Scuro"
   },
   "dateButton": {
     "message": "data"
@@ -51,7 +51,7 @@
     "message": "Importare"
   },
   "light": {
-    "message": "luce"
+    "message": "Chiaro"
   },
   "openNewTab": {
     "message": "Aprire il link in una nuova scheda:"
@@ -73,5 +73,594 @@
   },
   "unreadButton": {
     "message": "non letto"
+  },
+  "pageSaved": {
+    "message": "Pagina salvata",
+    "description": "pageSaved"
+  },
+  "saveCurrentPage": {
+    "message": "Salva la pagina corrente",
+    "description": "saveCurrentPage"
+  },
+  "saveCurrentPageShortcut": {
+    "message": "Salva la pagina corrente (A)",
+    "description": "saveCurrentPageShortcut"
+  },
+  "myList": {
+    "message": "La mia lista",
+    "description": "myList"
+  },
+  "sortPages": {
+    "message": "Ordina le pagine",
+    "description": "sortPages"
+  },
+  "sortBy": {
+    "message": "Ordina per",
+    "description": "sortBy"
+  },
+  "sortManual": {
+    "message": "Manuale",
+    "description": "sortManual"
+  },
+  "sortDate": {
+    "message": "Data",
+    "description": "sortDate"
+  },
+  "sortTitle": {
+    "message": "Titolo",
+    "description": "sortTitle"
+  },
+  "manualOrder": {
+    "message": "Ordine manuale",
+    "description": "manualOrder"
+  },
+  "dateAdded": {
+    "message": "Data di aggiunta",
+    "description": "dateAdded"
+  },
+  "order": {
+    "message": "Ordine",
+    "description": "order"
+  },
+  "newestFirst": {
+    "message": "Più recenti prima",
+    "description": "newestFirst"
+  },
+  "oldestFirst": {
+    "message": "Meno recenti prima",
+    "description": "oldestFirst"
+  },
+  "aToZ": {
+    "message": "Dalla A alla Z",
+    "description": "aToZ"
+  },
+  "zToA": {
+    "message": "Dalla Z alla A",
+    "description": "zToA"
+  },
+  "sortManualLabel": {
+    "message": "Ordine: Manuale",
+    "description": "sortManualLabel"
+  },
+  "sortDateNewestLabel": {
+    "message": "Ordine: Data, più recenti prima",
+    "description": "sortDateNewestLabel"
+  },
+  "sortDateOldestLabel": {
+    "message": "Ordine: Data, meno recenti prima",
+    "description": "sortDateOldestLabel"
+  },
+  "sortTitleAZLabel": {
+    "message": "Ordine: Titolo, dalla A alla Z",
+    "description": "sortTitleAZLabel"
+  },
+  "sortTitleZALabel": {
+    "message": "Ordine: Titolo, dalla Z alla A",
+    "description": "sortTitleZALabel"
+  },
+  "loadingPages": {
+    "message": "Caricamento delle pagine",
+    "description": "loadingPages"
+  },
+  "saveFirstPage": {
+    "message": "Salva la tua prima pagina",
+    "description": "saveFirstPage"
+  },
+  "saveFirstPageHelp": {
+    "message": "Fai clic su + per salvare la tua prima pagina.",
+    "description": "saveFirstPageHelp"
+  },
+  "noUnreadPages": {
+    "message": "Nessuna pagina da leggere",
+    "description": "noUnreadPages"
+  },
+  "noPagesFound": {
+    "message": "Nessuna pagina trovata",
+    "description": "noPagesFound"
+  },
+  "viewedPagesBelow": {
+    "message": "Le pagine aperte sono in «Visualizzate» qui sotto.",
+    "description": "viewedPagesBelow"
+  },
+  "searchNoResultsHelp": {
+    "message": "Prova un'altra ricerca o mostra tutte le pagine nelle impostazioni.",
+    "description": "searchNoResultsHelp"
+  },
+  "viewedPages": {
+    "message": "Visualizzate",
+    "description": "viewedPages"
+  },
+  "viewedPagesCount": {
+    "message": "Visualizzate ($count$)",
+    "description": "viewedPagesCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "openSearch": {
+    "message": "Apri la ricerca",
+    "description": "openSearch"
+  },
+  "searchPages": {
+    "message": "Cerca pagine",
+    "description": "searchPages"
+  },
+  "searchSavedPages": {
+    "message": "Cerca nelle pagine salvate",
+    "description": "searchSavedPages"
+  },
+  "findPage": {
+    "message": "Trova una pagina",
+    "description": "findPage"
+  },
+  "openSettings": {
+    "message": "Apri le impostazioni",
+    "description": "openSettings"
+  },
+  "closeSearch": {
+    "message": "Chiudi la ricerca",
+    "description": "closeSearch"
+  },
+  "dismissNotification": {
+    "message": "Chiudi la notifica",
+    "description": "dismissNotification"
+  },
+  "dismiss": {
+    "message": "Chiudi",
+    "description": "dismiss"
+  },
+  "deletedSite": {
+    "message": "$site$ eliminato",
+    "description": "deletedSite",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "Annulla",
+    "description": "undo"
+  },
+  "dismissUndo": {
+    "message": "Chiudi l'avviso di annullamento",
+    "description": "dismissUndo"
+  },
+  "settings": {
+    "message": "Impostazioni",
+    "description": "settings"
+  },
+  "closeSettings": {
+    "message": "Chiudi le impostazioni",
+    "description": "closeSettings"
+  },
+  "themeWithMode": {
+    "message": "Tema ($mode$)",
+    "description": "themeWithMode",
+    "placeholders": {
+      "mode": {
+        "content": "$1"
+      }
+    }
+  },
+  "system": {
+    "message": "Sistema",
+    "description": "system"
+  },
+  "systemTheme": {
+    "message": "Tema di sistema",
+    "description": "systemTheme"
+  },
+  "lightTheme": {
+    "message": "Tema chiaro",
+    "description": "lightTheme"
+  },
+  "darkTheme": {
+    "message": "Tema scuro",
+    "description": "darkTheme"
+  },
+  "openLinksNewTab": {
+    "message": "Apri i link in una nuova scheda",
+    "description": "openLinksNewTab"
+  },
+  "showViewedPages": {
+    "message": "Mostra le pagine visualizzate",
+    "description": "showViewedPages"
+  },
+  "feedback": {
+    "message": "Feedback",
+    "description": "feedback"
+  },
+  "feedbackHelp": {
+    "message": "Hai trovato un problema o hai un'idea? Scrivici.",
+    "description": "feedbackHelp"
+  },
+  "sendFeedback": {
+    "message": "Invia feedback",
+    "description": "sendFeedback"
+  },
+  "additionalSettings": {
+    "message": "Altre impostazioni",
+    "description": "additionalSettings"
+  },
+  "additionalSettingsHelp": {
+    "message": "Salva una copia della lista o aggiungine una da un file.",
+    "description": "additionalSettingsHelp"
+  },
+  "openSettingsButton": {
+    "message": "Apri le impostazioni",
+    "description": "openSettingsButton"
+  },
+  "versionLabel": {
+    "message": "Versione $version$",
+    "description": "versionLabel",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "tryAgain": {
+    "message": "Riprova",
+    "description": "tryAgain"
+  },
+  "localOnlyOne": {
+    "message": "$count$ pagina è solo su questo dispositivo.",
+    "description": "localOnlyOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyOther": {
+    "message": "$count$ pagine sono solo su questo dispositivo.",
+    "description": "localOnlyOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOne": {
+    "message": "$count$ pagina è solo su questo dispositivo. Apri le impostazioni per salvare un backup.",
+    "description": "localOnlyBackupOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOther": {
+    "message": "$count$ pagine sono solo su questo dispositivo. Apri le impostazioni per salvare un backup.",
+    "description": "localOnlyBackupOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncUnavailable": {
+    "message": "Chrome non può sincronizzare ora. Le tue pagine sono al sicuro qui.",
+    "description": "syncUnavailable"
+  },
+  "openListError": {
+    "message": "Non è stato possibile aprire la tua lista.",
+    "description": "openListError"
+  },
+  "updateListError": {
+    "message": "Non è stato possibile aggiornare la tua lista.",
+    "description": "updateListError"
+  },
+  "retryError": {
+    "message": "Non è stato possibile riprovare.",
+    "description": "retryError"
+  },
+  "saveSettingError": {
+    "message": "Non è stato possibile salvare questa modifica.",
+    "description": "saveSettingError"
+  },
+  "settingSavedHere": {
+    "message": "Impostazione salvata qui.",
+    "description": "settingSavedHere"
+  },
+  "pageCannotSave": {
+    "message": "Questa pagina non può essere salvata. Apri un sito web e riprova.",
+    "description": "pageCannotSave"
+  },
+  "alreadySaved": {
+    "message": "Già salvata",
+    "description": "alreadySaved"
+  },
+  "savePageError": {
+    "message": "Non è stato possibile salvare questa pagina.",
+    "description": "savePageError"
+  },
+  "syncPagesError": {
+    "message": "Non è stato possibile sincronizzare le tue pagine.",
+    "description": "syncPagesError"
+  },
+  "urlCopied": {
+    "message": "URL copiato",
+    "description": "urlCopied"
+  },
+  "copyUrlError": {
+    "message": "Impossibile copiare l'URL.",
+    "description": "copyUrlError"
+  },
+  "deletePageError": {
+    "message": "Non è stato possibile eliminare questa pagina.",
+    "description": "deletePageError"
+  },
+  "restorePageError": {
+    "message": "Non è stato possibile ripristinare questa pagina.",
+    "description": "restorePageError"
+  },
+  "titleSaved": {
+    "message": "Titolo salvato",
+    "description": "titleSaved"
+  },
+  "changeTitleError": {
+    "message": "Non è stato possibile modificare il titolo.",
+    "description": "changeTitleError"
+  },
+  "orderUpdated": {
+    "message": "Ordine aggiornato",
+    "description": "orderUpdated"
+  },
+  "movePageError": {
+    "message": "Non è stato possibile spostare questa pagina.",
+    "description": "movePageError"
+  },
+  "dragToReorder": {
+    "message": "Trascina per riordinare",
+    "description": "dragToReorder"
+  },
+  "dragItemHelp": {
+    "message": "Trascina $name$ per riordinare. Usa i tasti freccia per spostarlo.",
+    "description": "dragItemHelp",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageTitle": {
+    "message": "Titolo della pagina",
+    "description": "pageTitle"
+  },
+  "saveTitle": {
+    "message": "Salva il titolo",
+    "description": "saveTitle"
+  },
+  "cancelEditing": {
+    "message": "Annulla la modifica",
+    "description": "cancelEditing"
+  },
+  "editTitle": {
+    "message": "Modifica il titolo",
+    "description": "editTitle"
+  },
+  "editItem": {
+    "message": "Modifica $name$",
+    "description": "editItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "copyUrl": {
+    "message": "Copia URL",
+    "description": "copyUrl"
+  },
+  "copyUrlForItem": {
+    "message": "Copia l'URL di $name$",
+    "description": "copyUrlForItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "delete": {
+    "message": "Elimina",
+    "description": "delete"
+  },
+  "deleteItem": {
+    "message": "Elimina $name$",
+    "description": "deleteItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsLead": {
+    "message": "Configura la lista e salva un backup.",
+    "description": "optionsLead"
+  },
+  "loadingSettings": {
+    "message": "Caricamento delle impostazioni…",
+    "description": "loadingSettings"
+  },
+  "backups": {
+    "message": "Backup",
+    "description": "backups"
+  },
+  "savedHereOne": {
+    "message": "$count$ pagina è salvata qui.",
+    "description": "savedHereOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedHereOther": {
+    "message": "$count$ pagine sono salvate qui.",
+    "description": "savedHereOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "otherDevicesLater": {
+    "message": "Potrebbero apparire più tardi sugli altri dispositivi.",
+    "description": "otherDevicesLater"
+  },
+  "conflictOne": {
+    "message": "Abbiamo trovato due copie di una pagina. Entrambe sono al sicuro. Scarica un backup per conservarle.",
+    "description": "conflictOne"
+  },
+  "conflictOther": {
+    "message": "Abbiamo trovato più copie di alcune pagine. Sono al sicuro. Scarica un backup per conservarle.",
+    "description": "conflictOther"
+  },
+  "downloadBackup": {
+    "message": "Scarica backup",
+    "description": "downloadBackup"
+  },
+  "addFromBackup": {
+    "message": "Aggiungi da backup",
+    "description": "addFromBackup"
+  },
+  "checkBackup": {
+    "message": "Controlla il backup",
+    "description": "checkBackup"
+  },
+  "readyToAddOne": {
+    "message": "$count$ pagina è pronta per essere aggiunta.",
+    "description": "readyToAddOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "readyToAddOther": {
+    "message": "$count$ pagine sono pronte per essere aggiunte.",
+    "description": "readyToAddOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "skippedCount": {
+    "message": "Elementi non utilizzabili: $count$.",
+    "description": "skippedCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "existingPagesStay": {
+    "message": "Le pagine già presenti resteranno.",
+    "description": "existingPagesStay"
+  },
+  "useBackupSettings": {
+    "message": "Usa le impostazioni del backup",
+    "description": "useBackupSettings"
+  },
+  "importPages": {
+    "message": "Importa pagine",
+    "description": "importPages"
+  },
+  "cancel": {
+    "message": "Annulla",
+    "description": "cancel"
+  },
+  "backupDownloaded": {
+    "message": "Backup scaricato.",
+    "description": "backupDownloaded"
+  },
+  "backupDownloadedPartial": {
+    "message": "Backup scaricato. Alcuni dati sincronizzati non erano disponibili.",
+    "description": "backupDownloadedPartial"
+  },
+  "backupError": {
+    "message": "Non è stato possibile creare un backup.",
+    "description": "backupError"
+  },
+  "chooseFile": {
+    "message": "Scegli file",
+    "description": "chooseFile"
+  },
+  "readBackupError": {
+    "message": "Non è stato possibile leggere questo backup.",
+    "description": "readBackupError"
+  },
+  "settingsAdded": {
+    "message": "Impostazioni aggiunte.",
+    "description": "settingsAdded"
+  },
+  "useSettingsError": {
+    "message": "Non è stato possibile usare queste impostazioni.",
+    "description": "useSettingsError"
+  },
+  "importResultOne": {
+    "message": "Aggiunta $count$ pagina. Già qui: $existing$.",
+    "description": "importResultOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importResultOther": {
+    "message": "Aggiunte $count$ pagine. Già qui: $existing$.",
+    "description": "importResultOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importError": {
+    "message": "Non è stato possibile aggiungere queste pagine. La tua lista è al sicuro.",
+    "description": "importError"
+  },
+  "trying": {
+    "message": "Riprovo…",
+    "description": "trying"
+  },
+  "closeNotice": {
+    "message": "Chiudi l'avviso",
+    "description": "closeNotice"
+  },
+  "themeLabel": {
+    "message": "Tema",
+    "description": "Settings field label."
   }
 }

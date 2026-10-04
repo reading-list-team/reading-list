@@ -2,6 +2,7 @@ import { LitElement, css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { X } from 'lucide';
 import { icon } from '../lib/icon.js';
+import { i18n } from '../lib/i18n.js';
 
 @customElement('reading-list-notice')
 export class ReadingListNoticeElement extends LitElement {
@@ -101,15 +102,15 @@ export class ReadingListNoticeElement extends LitElement {
             ?disabled=${this.busy}
             @click=${this.onAction}
           >
-            ${this.busy ? 'Trying…' : this.actionLabel}
+            ${this.busy ? i18n.getMessage('trying') : this.actionLabel}
           </button>`
         : ''}
       ${this.dismissible
         ? html`<button
             class="dismiss"
             type="button"
-            aria-label="Close notice"
-            title="Close notice"
+            aria-label=${i18n.getMessage('closeNotice')}
+            title=${i18n.getMessage('closeNotice')}
             @click=${this.onDismiss}
           >
             ${icon(X, 15)}

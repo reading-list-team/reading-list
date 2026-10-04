@@ -33,7 +33,7 @@
     "message": "Afficher dans le menu contextuel:"
   },
   "dark": {
-    "message": "foncé"
+    "message": "Sombre"
   },
   "dateButton": {
     "message": "date"
@@ -51,7 +51,7 @@
     "message": "Importer"
   },
   "light": {
-    "message": "lumière"
+    "message": "Clair"
   },
   "openNewTab": {
     "message": "Ouvrir un lien dans un nouvel onglet:"
@@ -73,5 +73,594 @@
   },
   "unreadButton": {
     "message": "non lu"
+  },
+  "pageSaved": {
+    "message": "Page enregistrée",
+    "description": "pageSaved"
+  },
+  "saveCurrentPage": {
+    "message": "Enregistrer la page actuelle",
+    "description": "saveCurrentPage"
+  },
+  "saveCurrentPageShortcut": {
+    "message": "Enregistrer la page actuelle (A)",
+    "description": "saveCurrentPageShortcut"
+  },
+  "myList": {
+    "message": "Ma liste",
+    "description": "myList"
+  },
+  "sortPages": {
+    "message": "Trier les pages",
+    "description": "sortPages"
+  },
+  "sortBy": {
+    "message": "Trier par",
+    "description": "sortBy"
+  },
+  "sortManual": {
+    "message": "Manuel",
+    "description": "sortManual"
+  },
+  "sortDate": {
+    "message": "Date",
+    "description": "sortDate"
+  },
+  "sortTitle": {
+    "message": "Titre",
+    "description": "sortTitle"
+  },
+  "manualOrder": {
+    "message": "Ordre manuel",
+    "description": "manualOrder"
+  },
+  "dateAdded": {
+    "message": "Date d'ajout",
+    "description": "dateAdded"
+  },
+  "order": {
+    "message": "Ordre",
+    "description": "order"
+  },
+  "newestFirst": {
+    "message": "Plus récents d'abord",
+    "description": "newestFirst"
+  },
+  "oldestFirst": {
+    "message": "Plus anciens d'abord",
+    "description": "oldestFirst"
+  },
+  "aToZ": {
+    "message": "De A à Z",
+    "description": "aToZ"
+  },
+  "zToA": {
+    "message": "De Z à A",
+    "description": "zToA"
+  },
+  "sortManualLabel": {
+    "message": "Tri : Manuel",
+    "description": "sortManualLabel"
+  },
+  "sortDateNewestLabel": {
+    "message": "Tri : Date, plus récents d'abord",
+    "description": "sortDateNewestLabel"
+  },
+  "sortDateOldestLabel": {
+    "message": "Tri : Date, plus anciens d'abord",
+    "description": "sortDateOldestLabel"
+  },
+  "sortTitleAZLabel": {
+    "message": "Tri : Titre, de A à Z",
+    "description": "sortTitleAZLabel"
+  },
+  "sortTitleZALabel": {
+    "message": "Tri : Titre, de Z à A",
+    "description": "sortTitleZALabel"
+  },
+  "loadingPages": {
+    "message": "Chargement des pages",
+    "description": "loadingPages"
+  },
+  "saveFirstPage": {
+    "message": "Enregistrez votre première page",
+    "description": "saveFirstPage"
+  },
+  "saveFirstPageHelp": {
+    "message": "Cliquez sur + pour enregistrer votre première page.",
+    "description": "saveFirstPageHelp"
+  },
+  "noUnreadPages": {
+    "message": "Aucune page non consultée",
+    "description": "noUnreadPages"
+  },
+  "noPagesFound": {
+    "message": "Aucune page trouvée",
+    "description": "noPagesFound"
+  },
+  "viewedPagesBelow": {
+    "message": "Les pages ouvertes se trouvent dans « Consultées » ci-dessous.",
+    "description": "viewedPagesBelow"
+  },
+  "searchNoResultsHelp": {
+    "message": "Essayez une autre recherche ou affichez toutes les pages dans les paramètres.",
+    "description": "searchNoResultsHelp"
+  },
+  "viewedPages": {
+    "message": "Consultées",
+    "description": "viewedPages"
+  },
+  "viewedPagesCount": {
+    "message": "Consultées ($count$)",
+    "description": "viewedPagesCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "openSearch": {
+    "message": "Ouvrir la recherche",
+    "description": "openSearch"
+  },
+  "searchPages": {
+    "message": "Rechercher des pages",
+    "description": "searchPages"
+  },
+  "searchSavedPages": {
+    "message": "Rechercher des pages enregistrées",
+    "description": "searchSavedPages"
+  },
+  "findPage": {
+    "message": "Rechercher une page",
+    "description": "findPage"
+  },
+  "openSettings": {
+    "message": "Ouvrir les paramètres",
+    "description": "openSettings"
+  },
+  "closeSearch": {
+    "message": "Fermer la recherche",
+    "description": "closeSearch"
+  },
+  "dismissNotification": {
+    "message": "Fermer la notification",
+    "description": "dismissNotification"
+  },
+  "dismiss": {
+    "message": "Fermer",
+    "description": "dismiss"
+  },
+  "deletedSite": {
+    "message": "$site$ supprimé",
+    "description": "deletedSite",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "Annuler",
+    "description": "undo"
+  },
+  "dismissUndo": {
+    "message": "Fermer l'avis d'annulation",
+    "description": "dismissUndo"
+  },
+  "settings": {
+    "message": "Paramètres",
+    "description": "settings"
+  },
+  "closeSettings": {
+    "message": "Fermer les paramètres",
+    "description": "closeSettings"
+  },
+  "themeWithMode": {
+    "message": "Thème ($mode$)",
+    "description": "themeWithMode",
+    "placeholders": {
+      "mode": {
+        "content": "$1"
+      }
+    }
+  },
+  "system": {
+    "message": "Système",
+    "description": "system"
+  },
+  "systemTheme": {
+    "message": "Thème du système",
+    "description": "systemTheme"
+  },
+  "lightTheme": {
+    "message": "Thème clair",
+    "description": "lightTheme"
+  },
+  "darkTheme": {
+    "message": "Thème sombre",
+    "description": "darkTheme"
+  },
+  "openLinksNewTab": {
+    "message": "Ouvrir les liens dans un nouvel onglet",
+    "description": "openLinksNewTab"
+  },
+  "showViewedPages": {
+    "message": "Afficher les pages consultées",
+    "description": "showViewedPages"
+  },
+  "feedback": {
+    "message": "Commentaires",
+    "description": "feedback"
+  },
+  "feedbackHelp": {
+    "message": "Un bug ou une idée ? Dites-le-nous.",
+    "description": "feedbackHelp"
+  },
+  "sendFeedback": {
+    "message": "Envoyer un commentaire",
+    "description": "sendFeedback"
+  },
+  "additionalSettings": {
+    "message": "Autres paramètres",
+    "description": "additionalSettings"
+  },
+  "additionalSettingsHelp": {
+    "message": "Enregistrez une copie de votre liste ou ajoutez-en une depuis un fichier.",
+    "description": "additionalSettingsHelp"
+  },
+  "openSettingsButton": {
+    "message": "Ouvrir les paramètres",
+    "description": "openSettingsButton"
+  },
+  "versionLabel": {
+    "message": "Version $version$",
+    "description": "versionLabel",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "tryAgain": {
+    "message": "Réessayer",
+    "description": "tryAgain"
+  },
+  "localOnlyOne": {
+    "message": "$count$ page est uniquement sur cet appareil.",
+    "description": "localOnlyOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyOther": {
+    "message": "$count$ pages sont uniquement sur cet appareil.",
+    "description": "localOnlyOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOne": {
+    "message": "$count$ page est uniquement sur cet appareil. Ouvrez les paramètres pour enregistrer une sauvegarde.",
+    "description": "localOnlyBackupOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOther": {
+    "message": "$count$ pages sont uniquement sur cet appareil. Ouvrez les paramètres pour enregistrer une sauvegarde.",
+    "description": "localOnlyBackupOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncUnavailable": {
+    "message": "Chrome ne peut pas synchroniser pour le moment. Vos pages sont en sécurité ici.",
+    "description": "syncUnavailable"
+  },
+  "openListError": {
+    "message": "Impossible d'ouvrir votre liste.",
+    "description": "openListError"
+  },
+  "updateListError": {
+    "message": "Impossible de mettre à jour votre liste.",
+    "description": "updateListError"
+  },
+  "retryError": {
+    "message": "Impossible de réessayer.",
+    "description": "retryError"
+  },
+  "saveSettingError": {
+    "message": "Impossible d'enregistrer cette modification.",
+    "description": "saveSettingError"
+  },
+  "settingSavedHere": {
+    "message": "Paramètre enregistré ici.",
+    "description": "settingSavedHere"
+  },
+  "pageCannotSave": {
+    "message": "Cette page ne peut pas être enregistrée. Ouvrez un site Web et réessayez.",
+    "description": "pageCannotSave"
+  },
+  "alreadySaved": {
+    "message": "Déjà enregistrée",
+    "description": "alreadySaved"
+  },
+  "savePageError": {
+    "message": "Impossible d'enregistrer cette page.",
+    "description": "savePageError"
+  },
+  "syncPagesError": {
+    "message": "Impossible de synchroniser vos pages.",
+    "description": "syncPagesError"
+  },
+  "urlCopied": {
+    "message": "URL copiée",
+    "description": "urlCopied"
+  },
+  "copyUrlError": {
+    "message": "Impossible de copier l'URL.",
+    "description": "copyUrlError"
+  },
+  "deletePageError": {
+    "message": "Impossible de supprimer cette page.",
+    "description": "deletePageError"
+  },
+  "restorePageError": {
+    "message": "Impossible de restaurer cette page.",
+    "description": "restorePageError"
+  },
+  "titleSaved": {
+    "message": "Titre enregistré",
+    "description": "titleSaved"
+  },
+  "changeTitleError": {
+    "message": "Impossible de modifier le titre.",
+    "description": "changeTitleError"
+  },
+  "orderUpdated": {
+    "message": "Ordre mis à jour",
+    "description": "orderUpdated"
+  },
+  "movePageError": {
+    "message": "Impossible de déplacer cette page.",
+    "description": "movePageError"
+  },
+  "dragToReorder": {
+    "message": "Faire glisser pour réorganiser",
+    "description": "dragToReorder"
+  },
+  "dragItemHelp": {
+    "message": "Faites glisser $name$ pour le déplacer. Utilisez les flèches du clavier.",
+    "description": "dragItemHelp",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageTitle": {
+    "message": "Titre de la page",
+    "description": "pageTitle"
+  },
+  "saveTitle": {
+    "message": "Enregistrer le titre",
+    "description": "saveTitle"
+  },
+  "cancelEditing": {
+    "message": "Annuler la modification",
+    "description": "cancelEditing"
+  },
+  "editTitle": {
+    "message": "Modifier le titre",
+    "description": "editTitle"
+  },
+  "editItem": {
+    "message": "Modifier $name$",
+    "description": "editItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "copyUrl": {
+    "message": "Copier l'URL",
+    "description": "copyUrl"
+  },
+  "copyUrlForItem": {
+    "message": "Copier l'URL de $name$",
+    "description": "copyUrlForItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "delete": {
+    "message": "Supprimer",
+    "description": "delete"
+  },
+  "deleteItem": {
+    "message": "Supprimer $name$",
+    "description": "deleteItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsLead": {
+    "message": "Configurez votre liste et enregistrez une sauvegarde.",
+    "description": "optionsLead"
+  },
+  "loadingSettings": {
+    "message": "Chargement des paramètres…",
+    "description": "loadingSettings"
+  },
+  "backups": {
+    "message": "Sauvegardes",
+    "description": "backups"
+  },
+  "savedHereOne": {
+    "message": "$count$ page est enregistrée ici.",
+    "description": "savedHereOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedHereOther": {
+    "message": "$count$ pages sont enregistrées ici.",
+    "description": "savedHereOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "otherDevicesLater": {
+    "message": "Elles pourront apparaître plus tard sur vos autres appareils.",
+    "description": "otherDevicesLater"
+  },
+  "conflictOne": {
+    "message": "Nous avons trouvé deux copies d'une page. Les deux sont en sécurité. Téléchargez une sauvegarde pour les conserver.",
+    "description": "conflictOne"
+  },
+  "conflictOther": {
+    "message": "Nous avons trouvé plusieurs copies de certaines pages. Elles sont en sécurité. Téléchargez une sauvegarde pour les conserver.",
+    "description": "conflictOther"
+  },
+  "downloadBackup": {
+    "message": "Télécharger la sauvegarde",
+    "description": "downloadBackup"
+  },
+  "addFromBackup": {
+    "message": "Ajouter depuis une sauvegarde",
+    "description": "addFromBackup"
+  },
+  "checkBackup": {
+    "message": "Vérifier la sauvegarde",
+    "description": "checkBackup"
+  },
+  "readyToAddOne": {
+    "message": "$count$ page est prête à être ajoutée.",
+    "description": "readyToAddOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "readyToAddOther": {
+    "message": "$count$ pages sont prêtes à être ajoutées.",
+    "description": "readyToAddOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "skippedCount": {
+    "message": "Éléments inutilisables : $count$.",
+    "description": "skippedCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "existingPagesStay": {
+    "message": "Les pages déjà présentes seront conservées.",
+    "description": "existingPagesStay"
+  },
+  "useBackupSettings": {
+    "message": "Utiliser les paramètres de la sauvegarde",
+    "description": "useBackupSettings"
+  },
+  "importPages": {
+    "message": "Importer les pages",
+    "description": "importPages"
+  },
+  "cancel": {
+    "message": "Annuler",
+    "description": "cancel"
+  },
+  "backupDownloaded": {
+    "message": "Sauvegarde téléchargée.",
+    "description": "backupDownloaded"
+  },
+  "backupDownloadedPartial": {
+    "message": "Sauvegarde téléchargée. Certaines données de synchronisation étaient indisponibles.",
+    "description": "backupDownloadedPartial"
+  },
+  "backupError": {
+    "message": "Impossible de créer une sauvegarde.",
+    "description": "backupError"
+  },
+  "chooseFile": {
+    "message": "Choisir un fichier",
+    "description": "chooseFile"
+  },
+  "readBackupError": {
+    "message": "Impossible de lire cette sauvegarde.",
+    "description": "readBackupError"
+  },
+  "settingsAdded": {
+    "message": "Paramètres ajoutés.",
+    "description": "settingsAdded"
+  },
+  "useSettingsError": {
+    "message": "Impossible d'utiliser ces paramètres.",
+    "description": "useSettingsError"
+  },
+  "importResultOne": {
+    "message": "$count$ page ajoutée. Déjà ici : $existing$.",
+    "description": "importResultOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importResultOther": {
+    "message": "$count$ pages ajoutées. Déjà ici : $existing$.",
+    "description": "importResultOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importError": {
+    "message": "Impossible d'ajouter ces pages. Votre liste est en sécurité.",
+    "description": "importError"
+  },
+  "trying": {
+    "message": "Nouvelle tentative…",
+    "description": "trying"
+  },
+  "closeNotice": {
+    "message": "Fermer l'avis",
+    "description": "closeNotice"
+  },
+  "themeLabel": {
+    "message": "Thème",
+    "description": "Settings field label."
   }
 }

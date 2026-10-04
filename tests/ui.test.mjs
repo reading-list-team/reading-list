@@ -1,6 +1,31 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
+
+const catalogs = Object.fromEntries(
+  ['en', 'de', 'es', 'fr', 'it', 'bg', 'zh_CN'].map((locale) => [
+    locale,
+    JSON.parse(
+      readFileSync(
+        new URL(
+          `../extension/_locales/${locale}/messages.json`,
+          import.meta.url,
+        ),
+      ),
+    ),
+  ]),
+);
+let currentLocale = 'en';
+const localize = (key, substitutions = []) => {
+  const entry = catalogs[currentLocale][key];
+  if (!entry) return '';
+  const values = Array.isArray(substitutions) ? substitutions : [substitutions];
+  return entry.message.replace(/\$([a-z]+)\$/gi, (_, name) => {
+    const position = Number(entry.placeholders?.[name]?.content?.slice(1)) - 1;
+    return values[position] ?? '';
+  });
+};
 
 const window = new Window({ url: 'https://reading-list.test/' });
 for (const key of [
@@ -58,9 +83,8 @@ globalThis.chrome = {
     },
   },
   i18n: {
-    getMessage() {
-      return '';
-    },
+    getMessage: localize,
+    getUILanguage: () => currentLocale.replace('_', '-'),
   },
   storage: {
     local: area(local),
@@ -129,7 +153,10 @@ test('popup renders loading, empty, populated, long-list, local-only, and error 
   }));
   await update();
   assert.equal(root.querySelector('.count').textContent, '1,000');
-  assert.match(root.querySelector('.viewed-toggle').textContent, /Viewed \(1,000\)/);
+  assert.match(
+    root.querySelector('.viewed-toggle').textContent,
+    /Viewed \(1,000\)/,
+  );
   app.settings = previousSettings;
   app.items = initial;
   app.localOnly = 2;
@@ -802,5 +829,79 @@ test('Title sort uses the matching downward Lucide icons and A-to-Z comes first'
   app.sortOpen = false;
   app.sortClosing = false;
   app.settings = previousSettings;
+  await update();
+});
+
+test('every listed language covers the interface and renders its translated controls', async () => {
+  const englishKeys = Object.keys(catalogs.en);
+  const originalItems = app.items;
+  const originalSettings = app.settings;
+  const options = document.createElement('reading-list-options');
+  document.body.append(options);
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await options.updateComplete;
+  app.items = [saved];
+  app.settings = { ...app.settings, viewAll: true };
+  for (const locale of ['de', 'es', 'fr', 'it', 'bg', 'zh_CN']) {
+    const catalog = catalogs[locale];
+    assert.deepEqual(Object.keys(catalog).sort(), englishKeys.slice().sort());
+    for (const key of englishKeys) {
+      const source = catalogs.en[key];
+      const translated = catalog[key];
+      assert.ok(translated?.message, `${locale}: ${key} is missing`);
+      assert.deepEqual(
+        Object.keys(translated.placeholders ?? {}).sort(),
+        Object.keys(source.placeholders ?? {}).sort(),
+        `${locale}: ${key} placeholders differ`,
+      );
+    }
+    currentLocale = locale;
+    app.requestUpdate();
+    await update();
+    assert.match(
+      root.querySelector('.list-label').textContent,
+      new RegExp(catalog.myList.message),
+    );
+    assert.equal(
+      root.querySelector('.settings-toggle').getAttribute('aria-label'),
+      catalog.openSettings.message,
+    );
+    assert.equal(
+      root.querySelector('.sheet-head h2').textContent,
+      catalog.settings.message,
+    );
+    assert.equal(
+      root
+        .querySelector('.setting-copy')
+        .textContent.includes(catalog.feedback.message),
+      true,
+    );
+    assert.equal(
+      root.querySelector('.sheet-foot').textContent.trim(),
+      localize('versionLabel', '3.1.0'),
+    );
+    app.localOnly = 1000;
+    await update();
+    const count = new Intl.NumberFormat(locale.replace('_', '-')).format(1000);
+    assert.equal(
+      root.querySelector('reading-list-notice').message,
+      localize('localOnlyOther', count),
+    );
+    app.localOnly = 0;
+    options.requestUpdate();
+    await options.updateComplete;
+    assert.equal(
+      options.shadowRoot.querySelector('h1').textContent,
+      catalog.appName.message,
+    );
+    assert.match(
+      options.shadowRoot.textContent,
+      new RegExp(catalog.downloadBackup.message),
+    );
+  }
+  currentLocale = 'en';
+  app.items = originalItems;
+  app.settings = originalSettings;
+  options.remove();
   await update();
 });

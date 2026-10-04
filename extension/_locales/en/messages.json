@@ -98,5 +98,594 @@
   "unreadButton": {
     "message": "unread",
     "description": "Button to show unread reading items."
+  },
+  "pageSaved": {
+    "message": "Page saved",
+    "description": "pageSaved"
+  },
+  "saveCurrentPage": {
+    "message": "Save current page",
+    "description": "saveCurrentPage"
+  },
+  "saveCurrentPageShortcut": {
+    "message": "Save current page (A)",
+    "description": "saveCurrentPageShortcut"
+  },
+  "myList": {
+    "message": "My List",
+    "description": "myList"
+  },
+  "sortPages": {
+    "message": "Sort pages",
+    "description": "sortPages"
+  },
+  "sortBy": {
+    "message": "Sort by",
+    "description": "sortBy"
+  },
+  "sortManual": {
+    "message": "Manual",
+    "description": "sortManual"
+  },
+  "sortDate": {
+    "message": "Date",
+    "description": "sortDate"
+  },
+  "sortTitle": {
+    "message": "Title",
+    "description": "sortTitle"
+  },
+  "manualOrder": {
+    "message": "Manual order",
+    "description": "manualOrder"
+  },
+  "dateAdded": {
+    "message": "Date added",
+    "description": "dateAdded"
+  },
+  "order": {
+    "message": "Order",
+    "description": "order"
+  },
+  "newestFirst": {
+    "message": "Newest first",
+    "description": "newestFirst"
+  },
+  "oldestFirst": {
+    "message": "Oldest first",
+    "description": "oldestFirst"
+  },
+  "aToZ": {
+    "message": "A to Z",
+    "description": "aToZ"
+  },
+  "zToA": {
+    "message": "Z to A",
+    "description": "zToA"
+  },
+  "sortManualLabel": {
+    "message": "Sort: Manual",
+    "description": "sortManualLabel"
+  },
+  "sortDateNewestLabel": {
+    "message": "Sort: Date, newest first",
+    "description": "sortDateNewestLabel"
+  },
+  "sortDateOldestLabel": {
+    "message": "Sort: Date, oldest first",
+    "description": "sortDateOldestLabel"
+  },
+  "sortTitleAZLabel": {
+    "message": "Sort: Title, A to Z",
+    "description": "sortTitleAZLabel"
+  },
+  "sortTitleZALabel": {
+    "message": "Sort: Title, Z to A",
+    "description": "sortTitleZALabel"
+  },
+  "loadingPages": {
+    "message": "Loading your pages",
+    "description": "loadingPages"
+  },
+  "saveFirstPage": {
+    "message": "Save your first page",
+    "description": "saveFirstPage"
+  },
+  "saveFirstPageHelp": {
+    "message": "Click the + button to save your first page.",
+    "description": "saveFirstPageHelp"
+  },
+  "noUnreadPages": {
+    "message": "No unread pages",
+    "description": "noUnreadPages"
+  },
+  "noPagesFound": {
+    "message": "No pages found",
+    "description": "noPagesFound"
+  },
+  "viewedPagesBelow": {
+    "message": "Pages you opened are in Viewed below.",
+    "description": "viewedPagesBelow"
+  },
+  "searchNoResultsHelp": {
+    "message": "Try another search or show all pages in settings.",
+    "description": "searchNoResultsHelp"
+  },
+  "viewedPages": {
+    "message": "Viewed",
+    "description": "viewedPages"
+  },
+  "viewedPagesCount": {
+    "message": "Viewed ($count$)",
+    "description": "viewedPagesCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "openSearch": {
+    "message": "Open search",
+    "description": "openSearch"
+  },
+  "searchPages": {
+    "message": "Search pages",
+    "description": "searchPages"
+  },
+  "searchSavedPages": {
+    "message": "Search saved pages",
+    "description": "searchSavedPages"
+  },
+  "findPage": {
+    "message": "Find a page",
+    "description": "findPage"
+  },
+  "openSettings": {
+    "message": "Open settings",
+    "description": "openSettings"
+  },
+  "closeSearch": {
+    "message": "Close search",
+    "description": "closeSearch"
+  },
+  "dismissNotification": {
+    "message": "Dismiss notification",
+    "description": "dismissNotification"
+  },
+  "dismiss": {
+    "message": "Dismiss",
+    "description": "dismiss"
+  },
+  "deletedSite": {
+    "message": "$site$ deleted",
+    "description": "deletedSite",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "Undo",
+    "description": "undo"
+  },
+  "dismissUndo": {
+    "message": "Dismiss Undo",
+    "description": "dismissUndo"
+  },
+  "settings": {
+    "message": "Settings",
+    "description": "settings"
+  },
+  "closeSettings": {
+    "message": "Close settings",
+    "description": "closeSettings"
+  },
+  "themeWithMode": {
+    "message": "Theme ($mode$)",
+    "description": "themeWithMode",
+    "placeholders": {
+      "mode": {
+        "content": "$1"
+      }
+    }
+  },
+  "system": {
+    "message": "System",
+    "description": "system"
+  },
+  "systemTheme": {
+    "message": "System theme",
+    "description": "systemTheme"
+  },
+  "lightTheme": {
+    "message": "Light theme",
+    "description": "lightTheme"
+  },
+  "darkTheme": {
+    "message": "Dark theme",
+    "description": "darkTheme"
+  },
+  "openLinksNewTab": {
+    "message": "Open links in a new tab",
+    "description": "openLinksNewTab"
+  },
+  "showViewedPages": {
+    "message": "Show viewed pages",
+    "description": "showViewedPages"
+  },
+  "feedback": {
+    "message": "Feedback",
+    "description": "feedback"
+  },
+  "feedbackHelp": {
+    "message": "Found a bug or have an idea? Tell us.",
+    "description": "feedbackHelp"
+  },
+  "sendFeedback": {
+    "message": "Send feedback",
+    "description": "sendFeedback"
+  },
+  "additionalSettings": {
+    "message": "Additional Settings",
+    "description": "additionalSettings"
+  },
+  "additionalSettingsHelp": {
+    "message": "Save a copy of your list or add one from a file.",
+    "description": "additionalSettingsHelp"
+  },
+  "openSettingsButton": {
+    "message": "Open Settings",
+    "description": "openSettingsButton"
+  },
+  "versionLabel": {
+    "message": "Version $version$",
+    "description": "versionLabel",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "tryAgain": {
+    "message": "Try again",
+    "description": "tryAgain"
+  },
+  "localOnlyOne": {
+    "message": "$count$ page is only on this device.",
+    "description": "localOnlyOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyOther": {
+    "message": "$count$ pages are only on this device.",
+    "description": "localOnlyOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOne": {
+    "message": "$count$ page is only on this device. Open settings to save a backup.",
+    "description": "localOnlyBackupOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOther": {
+    "message": "$count$ pages are only on this device. Open settings to save a backup.",
+    "description": "localOnlyBackupOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncUnavailable": {
+    "message": "Chrome can't sync right now. Your pages are safe here.",
+    "description": "syncUnavailable"
+  },
+  "openListError": {
+    "message": "We couldn't open your list.",
+    "description": "openListError"
+  },
+  "updateListError": {
+    "message": "We couldn't update your list.",
+    "description": "updateListError"
+  },
+  "retryError": {
+    "message": "We couldn't try again.",
+    "description": "retryError"
+  },
+  "saveSettingError": {
+    "message": "We couldn't save this change.",
+    "description": "saveSettingError"
+  },
+  "settingSavedHere": {
+    "message": "Setting saved here.",
+    "description": "settingSavedHere"
+  },
+  "pageCannotSave": {
+    "message": "This page can't be saved. Open a website and try again.",
+    "description": "pageCannotSave"
+  },
+  "alreadySaved": {
+    "message": "Already saved",
+    "description": "alreadySaved"
+  },
+  "savePageError": {
+    "message": "We couldn't save this page.",
+    "description": "savePageError"
+  },
+  "syncPagesError": {
+    "message": "We couldn't sync your pages.",
+    "description": "syncPagesError"
+  },
+  "urlCopied": {
+    "message": "URL copied",
+    "description": "urlCopied"
+  },
+  "copyUrlError": {
+    "message": "Could not copy the URL.",
+    "description": "copyUrlError"
+  },
+  "deletePageError": {
+    "message": "We couldn't delete this page.",
+    "description": "deletePageError"
+  },
+  "restorePageError": {
+    "message": "We couldn't bring back this page.",
+    "description": "restorePageError"
+  },
+  "titleSaved": {
+    "message": "Title saved",
+    "description": "titleSaved"
+  },
+  "changeTitleError": {
+    "message": "We couldn't change the title.",
+    "description": "changeTitleError"
+  },
+  "orderUpdated": {
+    "message": "Order updated",
+    "description": "orderUpdated"
+  },
+  "movePageError": {
+    "message": "We couldn't move this page.",
+    "description": "movePageError"
+  },
+  "dragToReorder": {
+    "message": "Drag to reorder",
+    "description": "dragToReorder"
+  },
+  "dragItemHelp": {
+    "message": "Drag to reorder $name$. Use arrow keys to move it.",
+    "description": "dragItemHelp",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageTitle": {
+    "message": "Page title",
+    "description": "pageTitle"
+  },
+  "saveTitle": {
+    "message": "Save title",
+    "description": "saveTitle"
+  },
+  "cancelEditing": {
+    "message": "Cancel editing",
+    "description": "cancelEditing"
+  },
+  "editTitle": {
+    "message": "Edit title",
+    "description": "editTitle"
+  },
+  "editItem": {
+    "message": "Edit $name$",
+    "description": "editItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "copyUrl": {
+    "message": "Copy URL",
+    "description": "copyUrl"
+  },
+  "copyUrlForItem": {
+    "message": "Copy URL for $name$",
+    "description": "copyUrlForItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "delete": {
+    "message": "Delete",
+    "description": "delete"
+  },
+  "deleteItem": {
+    "message": "Delete $name$",
+    "description": "deleteItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsLead": {
+    "message": "Set up your list and save a backup.",
+    "description": "optionsLead"
+  },
+  "loadingSettings": {
+    "message": "Loading settings…",
+    "description": "loadingSettings"
+  },
+  "backups": {
+    "message": "Backups",
+    "description": "backups"
+  },
+  "savedHereOne": {
+    "message": "$count$ page is saved here.",
+    "description": "savedHereOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedHereOther": {
+    "message": "$count$ pages are saved here.",
+    "description": "savedHereOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "otherDevicesLater": {
+    "message": "They may show up on your other devices later.",
+    "description": "otherDevicesLater"
+  },
+  "conflictOne": {
+    "message": "We found two copies of a page. Both are safe. Download a backup to keep them.",
+    "description": "conflictOne"
+  },
+  "conflictOther": {
+    "message": "We found more than one copy of some pages. They are safe. Download a backup to keep them.",
+    "description": "conflictOther"
+  },
+  "downloadBackup": {
+    "message": "Download backup",
+    "description": "downloadBackup"
+  },
+  "addFromBackup": {
+    "message": "Add from backup",
+    "description": "addFromBackup"
+  },
+  "checkBackup": {
+    "message": "Check backup",
+    "description": "checkBackup"
+  },
+  "readyToAddOne": {
+    "message": "$count$ page is ready to add.",
+    "description": "readyToAddOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "readyToAddOther": {
+    "message": "$count$ pages are ready to add.",
+    "description": "readyToAddOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "skippedCount": {
+    "message": "$count$ could not be used.",
+    "description": "skippedCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "existingPagesStay": {
+    "message": "Pages already here will stay.",
+    "description": "existingPagesStay"
+  },
+  "useBackupSettings": {
+    "message": "Use settings from backup",
+    "description": "useBackupSettings"
+  },
+  "importPages": {
+    "message": "Import pages",
+    "description": "importPages"
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "cancel"
+  },
+  "backupDownloaded": {
+    "message": "Backup downloaded.",
+    "description": "backupDownloaded"
+  },
+  "backupDownloadedPartial": {
+    "message": "Backup downloaded. Some sync data was not available.",
+    "description": "backupDownloadedPartial"
+  },
+  "backupError": {
+    "message": "We couldn't make a backup.",
+    "description": "backupError"
+  },
+  "chooseFile": {
+    "message": "Choose file",
+    "description": "chooseFile"
+  },
+  "readBackupError": {
+    "message": "We couldn't read this backup.",
+    "description": "readBackupError"
+  },
+  "settingsAdded": {
+    "message": "Settings added.",
+    "description": "settingsAdded"
+  },
+  "useSettingsError": {
+    "message": "We couldn't use these settings.",
+    "description": "useSettingsError"
+  },
+  "importResultOne": {
+    "message": "$count$ page added. $existing$ already here.",
+    "description": "importResultOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importResultOther": {
+    "message": "$count$ pages added. $existing$ already here.",
+    "description": "importResultOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importError": {
+    "message": "We couldn't add these pages. Your list is safe.",
+    "description": "importError"
+  },
+  "trying": {
+    "message": "Trying…",
+    "description": "trying"
+  },
+  "closeNotice": {
+    "message": "Close notice",
+    "description": "closeNotice"
+  },
+  "themeLabel": {
+    "message": "Theme",
+    "description": "Settings field label."
   }
 }

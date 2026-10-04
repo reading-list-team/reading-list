@@ -4,6 +4,7 @@ import { Check, Copy, Pencil, Trash, X, GripVertical } from 'lucide';
 import { icon } from '../lib/icon.js';
 import { rl } from '../lib/rl.js';
 import { designTokens } from '../lib/design-tokens.js';
+import { i18n } from '../lib/i18n.js';
 
 @customElement('reading-list-item')
 export class ReadingListItemElement extends LitElement {
@@ -235,9 +236,9 @@ export class ReadingListItemElement extends LitElement {
         ? html`<button
             class="drag-handle"
             .draggable=${true}
-            aria-label=${`Drag to reorder ${this.name}. Use arrow keys to move it.`}
+            aria-label=${i18n.getMessage('dragItemHelp', this.name)}
             aria-keyshortcuts="ArrowUp ArrowDown"
-            title="Drag to reorder"
+            title=${i18n.getMessage('dragToReorder')}
             @dragstart=${this.onDragStart}
             @dragend=${this.onDragEnd}
             @keydown=${this.onHandleKeydown}
@@ -259,7 +260,7 @@ export class ReadingListItemElement extends LitElement {
         ${this.editing
           ? html`<div class="editor">
               <input
-                aria-label="Page title"
+                aria-label=${i18n.getMessage('pageTitle')}
                 .value=${this.draft}
                 @input=${(event: Event) =>
                   (this.draft = (event.target as HTMLInputElement).value)}
@@ -267,16 +268,16 @@ export class ReadingListItemElement extends LitElement {
               />
               <button
                 class="icon-button"
-                aria-label="Save title"
-                title="Save title"
+                aria-label=${i18n.getMessage('saveTitle')}
+                title=${i18n.getMessage('saveTitle')}
                 @click=${this.saveTitle}
               >
                 ${icon(Check, 17)}
               </button>
               <button
                 class="icon-button"
-                aria-label="Cancel editing"
-                title="Cancel editing"
+                aria-label=${i18n.getMessage('cancelEditing')}
+                title=${i18n.getMessage('cancelEditing')}
                 @click=${this.cancelEdit}
               >
                 ${icon(X, 17)}
@@ -296,24 +297,24 @@ export class ReadingListItemElement extends LitElement {
         : html`<div class="actions">
             <button
               class="icon-button"
-              aria-label=${`Edit ${this.name}`}
-              title="Edit title"
+              aria-label=${i18n.getMessage('editItem', this.name)}
+              title=${i18n.getMessage('editTitle')}
               @click=${this.startEdit}
             >
               ${icon(Pencil, 16)}
             </button>
             <button
               class="icon-button"
-              aria-label=${`Copy URL for ${this.name}`}
-              title="Copy URL"
+              aria-label=${i18n.getMessage('copyUrlForItem', this.name)}
+              title=${i18n.getMessage('copyUrl')}
               @click=${this.copyUrl}
             >
               ${icon(Copy, 16)}
             </button>
             <button
               class="icon-button delete"
-              aria-label=${`Delete ${this.name}`}
-              title="Delete"
+              aria-label=${i18n.getMessage('deleteItem', this.name)}
+              title=${i18n.getMessage('delete')}
               @click=${this.deleteItem}
             >
               ${icon(Trash, 16)}
@@ -339,7 +340,7 @@ export class ReadingListItemElement extends LitElement {
   private restoreEditFocus() {
     void this.updateComplete.then(() =>
       this.shadowRoot
-        ?.querySelector<HTMLButtonElement>('[title="Edit title"]')
+        ?.querySelector<HTMLButtonElement>('.actions button:first-child')
         ?.focus(),
     );
   }
@@ -369,9 +370,9 @@ export class ReadingListItemElement extends LitElement {
   private async copyUrl() {
     try {
       await navigator.clipboard.writeText(this.href);
-      this.dispatch('item-message', 'URL copied.');
+      this.dispatch('item-message', i18n.getMessage('urlCopied'));
     } catch {
-      this.dispatch('item-message', 'Could not copy the URL.');
+      this.dispatch('item-message', i18n.getMessage('copyUrlError'));
     }
   }
   private deleteItem() {

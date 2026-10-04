@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { Download, Upload } from 'lucide';
 import { icon } from '../lib/icon.js';
 import { designTokens, resolvedTheme } from '../lib/design-tokens.js';
+import { i18n } from '../lib/i18n.js';
 import { parseBackup, ImportPreview } from '../lib/backup.js';
 import { rl } from '../lib/rl.js';
 import { DEFAULT_SETTINGS, ReadingListSettings } from '../lib/settings.js';
@@ -135,6 +136,8 @@ export class ReadingListOptionsElement extends LitElement {
   private media = window.matchMedia('(prefers-color-scheme: dark)');
   override connectedCallback() {
     super.connectedCallback();
+    document.documentElement.lang = i18n.language();
+    document.title = i18n.getMessage('optionsTitle');
     this.media.addEventListener('change', this.applyTheme);
     void this.load();
   }
@@ -161,8 +164,10 @@ export class ReadingListOptionsElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.loadError = true;
-      this.showError("We couldn't open your list.", 'Try again', () =>
-        this.load(),
+      this.showError(
+        i18n.getMessage('openListError'),
+        i18n.getMessage('tryAgain'),
+        () => this.load(),
       );
     } finally {
       this.loading = false;
@@ -170,8 +175,8 @@ export class ReadingListOptionsElement extends LitElement {
   }
   override render() {
     return html`<main>
-      <h1>Reading List</h1>
-      <p class="lead">Set up your list and save a backup.</p>
+      <h1>${i18n.getMessage('appName')}</h1>
+      <p class="lead">${i18n.getMessage('optionsLead')}</p>
       ${this.errorNotice
         ? html`<reading-list-notice
             data-theme=${resolvedTheme(this.settings.theme)}
@@ -183,13 +188,13 @@ export class ReadingListOptionsElement extends LitElement {
           ></reading-list-notice>`
         : ''}
       ${this.loading
-        ? html`<p>Loading settings…</p>`
+        ? html`<p>${i18n.getMessage('loadingSettings')}</p>`
         : this.loadError
           ? ''
           : html` <section>
-                <h2>Settings</h2>
+                <h2>${i18n.getMessage('settings')}</h2>
                 <label class="row"
-                  ><span>Theme</span
+                  ><span>${i18n.getMessage('themeLabel')}</span
                   ><select
                     .value=${this.settings.theme}
                     @change=${(event: Event) =>
@@ -199,13 +204,13 @@ export class ReadingListOptionsElement extends LitElement {
                           .value as ReadingListSettings['theme'],
                       )}
                   >
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
+                    <option value="system">${i18n.getMessage('system')}</option>
+                    <option value="light">${i18n.getMessage('light')}</option>
+                    <option value="dark">${i18n.getMessage('dark')}</option>
                   </select></label
                 >
                 <label class="row"
-                  ><span>Open links in a new tab</span
+                  ><span>${i18n.getMessage('openLinksNewTab')}</span
                   ><input
                     type="checkbox"
                     role="switch"
@@ -218,7 +223,7 @@ export class ReadingListOptionsElement extends LitElement {
                       )}
                 /></label>
                 <label class="row"
-                  ><span>Show viewed pages</span
+                  ><span>${i18n.getMessage('showViewedPages')}</span
                   ><input
                     type="checkbox"
                     role="switch"
@@ -231,7 +236,7 @@ export class ReadingListOptionsElement extends LitElement {
                       )}
                 /></label>
                 <label class="row"
-                  ><span>Sort by</span
+                  ><span>${i18n.getMessage('sortBy')}</span
                   ><select
                     .value=${this.settings.sortOption}
                     @change=${(event: Event) =>
@@ -241,15 +246,21 @@ export class ReadingListOptionsElement extends LitElement {
                           .value as ReadingListSettings['sortOption'],
                       )}
                   >
-                    <option value="manual">Manual order</option>
-                    <option value="date">Date added</option>
-                    <option value="title">Title</option>
+                    <option value="manual">
+                      ${i18n.getMessage('manualOrder')}
+                    </option>
+                    <option value="date">
+                      ${i18n.getMessage('dateAdded')}
+                    </option>
+                    <option value="title">
+                      ${i18n.getMessage('sortTitle')}
+                    </option>
                   </select></label
                 >
                 ${this.settings.sortOption === 'manual'
                   ? ''
                   : html`<label class="row"
-                      ><span>Order</span
+                      ><span>${i18n.getMessage('order')}</span
                       ><select
                         .value=${this.settings.sortOrder}
                         @change=${(event: Event) =>
@@ -260,21 +271,31 @@ export class ReadingListOptionsElement extends LitElement {
                           )}
                       >
                         ${this.settings.sortOption === 'date'
-                          ? html`<option value="down">Newest first</option>
-                              <option value="up">Oldest first</option>`
-                          : html`<option value="up">A to Z</option>
-                              <option value="down">Z to A</option>`}
+                          ? html`<option value="down">
+                                ${i18n.getMessage('newestFirst')}
+                              </option>
+                              <option value="up">
+                                ${i18n.getMessage('oldestFirst')}
+                              </option>`
+                          : html`<option value="up">
+                                ${i18n.getMessage('aToZ')}
+                              </option>
+                              <option value="down">
+                                ${i18n.getMessage('zToA')}
+                              </option>`}
                       </select></label
                     >`}
               </section>
               <section>
-                <h2>Backups</h2>
+                <h2>${i18n.getMessage('backups')}</h2>
                 <p class="muted">
-                  ${this.count} page${this.count === 1 ? '' : 's'} are saved
-                  here.
+                  ${i18n.getMessage(
+                    this.count === 1 ? 'savedHereOne' : 'savedHereOther',
+                    i18n.number(this.count),
+                  )}
                   ${this.localOnly || this.syncUnavailable
                     ? ''
-                    : 'They may show up on your other devices later.'}
+                    : i18n.getMessage('otherDevicesLater')}
                 </p>
                 ${!this.errorNotice &&
                 (this.localOnly || this.syncUnavailable) &&
@@ -282,9 +303,14 @@ export class ReadingListOptionsElement extends LitElement {
                   ? html`<reading-list-notice
                       data-theme=${resolvedTheme(this.settings.theme)}
                       .message=${this.localOnly
-                        ? `${this.localOnly} page${this.localOnly === 1 ? ' is' : 's are'} only on this device.`
-                        : "Chrome can't sync right now. Your pages are safe here."}
-                      action-label="Try again"
+                        ? i18n.getMessage(
+                            this.localOnly === 1
+                              ? 'localOnlyOne'
+                              : 'localOnlyOther',
+                            i18n.number(this.localOnly),
+                          )
+                        : i18n.getMessage('syncUnavailable')}
+                      .actionLabel=${i18n.getMessage('tryAgain')}
                       @notice-action=${this.retry}
                       @notice-dismiss=${() =>
                         (this.dismissedStorageWarning = true)}
@@ -293,19 +319,19 @@ export class ReadingListOptionsElement extends LitElement {
                 ${this.conflicts && !this.dismissedConflict
                   ? html`<reading-list-notice
                       data-theme=${resolvedTheme(this.settings.theme)}
-                      .message=${this.conflicts === 1
-                        ? 'We found two copies of a page. Both are safe. Download a backup to keep them.'
-                        : 'We found more than one copy of some pages. They are safe. Download a backup to keep them.'}
-                      action-label="Download backup"
+                      .message=${i18n.getMessage(
+                        this.conflicts === 1 ? 'conflictOne' : 'conflictOther',
+                      )}
+                      .actionLabel=${i18n.getMessage('downloadBackup')}
                       @notice-action=${this.exportBackup}
                       @notice-dismiss=${() => (this.dismissedConflict = true)}
                     ></reading-list-notice>`
                   : ''}
                 <div class="actions">
                   <button class="text-button" @click=${this.exportBackup}>
-                    ${icon(Download, 16)} Download backup</button
+                    ${icon(Download, 16)} ${i18n.getMessage('downloadBackup')}</button
                   ><button class="text-button" @click=${this.chooseImport}>
-                    ${icon(Upload, 16)} Add from backup
+                    ${icon(Upload, 16)} ${i18n.getMessage('addFromBackup')}
                   </button>
                 </div>
                 ${this.message
@@ -320,15 +346,21 @@ export class ReadingListOptionsElement extends LitElement {
                 />
                 ${this.preview
                   ? html`<div class="preview">
-                      <p><strong>Check backup</strong></p>
+                      <p><strong>${i18n.getMessage('checkBackup')}</strong></p>
                       <p>
-                        ${this.preview.items.length}
-                        page${this.preview.items.length === 1 ? ' is' : 's are'}
-                        ready to add.
+                        ${i18n.getMessage(
+                          this.preview.items.length === 1
+                            ? 'readyToAddOne'
+                            : 'readyToAddOther',
+                          i18n.number(this.preview.items.length),
+                        )}
                         ${this.preview.skipped
-                          ? `${this.preview.skipped} could not be used.`
+                          ? i18n.getMessage(
+                              'skippedCount',
+                              i18n.number(this.preview.skipped),
+                            )
                           : ''}
-                        Pages already here will stay.
+                        ${i18n.getMessage('existingPagesStay')}
                       </p>
                       ${this.preview.settings
                         ? html`<label
@@ -342,7 +374,7 @@ export class ReadingListOptionsElement extends LitElement {
                                   event.target as HTMLInputElement
                                 ).checked)}
                             />
-                            Use settings from backup</label
+                            ${i18n.getMessage('useBackupSettings')}</label
                           >`
                         : ''}
                       <div class="actions">
@@ -350,26 +382,26 @@ export class ReadingListOptionsElement extends LitElement {
                           class="text-button text-button--primary"
                           @click=${this.confirmImport}
                         >
-                          Import pages</button
+                          ${i18n.getMessage('importPages')}</button
                         ><button
                           class="text-button"
                           @click=${() => (this.preview = null)}
                         >
-                          Cancel
+                          ${i18n.getMessage('cancel')}
                         </button>
                       </div>
                     </div>`
                   : ''}
               </section>
               <section>
-                <h2>Feedback</h2>
-                <p class="muted">Found a bug or have an idea? Tell us.</p>
+                <h2>${i18n.getMessage('feedback')}</h2>
+                <p class="muted">${i18n.getMessage('feedbackHelp')}</p>
                 <a
                   class="feedback-link text-button"
                   href="https://forms.gle/faEkwySqvE3ebfev6"
                   target="_blank"
                   rel="noopener noreferrer"
-                  >Send feedback</a
+                  >${i18n.getMessage('sendFeedback')}</a
                 >
               </section>`}
     </main>`;
@@ -391,7 +423,7 @@ export class ReadingListOptionsElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.showError(
-        "We couldn't try again.",
+        i18n.getMessage('retryError'),
         notice.actionLabel,
         notice.action,
       );
@@ -406,12 +438,14 @@ export class ReadingListOptionsElement extends LitElement {
       const synced = await rl.saveSettings(next);
       this.settings = next;
       this.applyTheme();
-      this.message = synced ? '' : 'Setting saved here.';
+      this.message = synced ? '' : i18n.getMessage('settingSavedHere');
       this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't save this change.", 'Try again', () =>
-        this.updateSetting(key, value),
+      this.showError(
+        i18n.getMessage('saveSettingError'),
+        i18n.getMessage('tryAgain'),
+        () => this.updateSetting(key, value),
       );
     }
   }
@@ -427,8 +461,10 @@ export class ReadingListOptionsElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.syncUnavailable = true;
-      this.showError("We couldn't sync your pages.", 'Try again', () =>
-        this.retry(),
+      this.showError(
+        i18n.getMessage('syncPagesError'),
+        i18n.getMessage('tryAgain'),
+        () => this.retry(),
       );
     }
   }
@@ -448,13 +484,15 @@ export class ReadingListOptionsElement extends LitElement {
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 60000);
       this.message = backup.rawSync
-        ? 'Backup downloaded.'
-        : 'Backup downloaded. Some sync data was not available.';
+        ? i18n.getMessage('backupDownloaded')
+        : i18n.getMessage('backupDownloadedPartial');
       this.errorNotice = null;
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't make a backup.", 'Try again', () =>
-        this.exportBackup(),
+      this.showError(
+        i18n.getMessage('backupError'),
+        i18n.getMessage('tryAgain'),
+        () => this.exportBackup(),
       );
     }
   }
@@ -473,8 +511,10 @@ export class ReadingListOptionsElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.preview = null;
-      this.showError("We couldn't read this backup.", 'Choose file', () =>
-        this.chooseImport(),
+      this.showError(
+        i18n.getMessage('readBackupError'),
+        i18n.getMessage('chooseFile'),
+        () => this.chooseImport(),
       );
     } finally {
       input.value = '';
@@ -494,31 +534,41 @@ export class ReadingListOptionsElement extends LitElement {
           const synced = await rl.saveSettings(desiredSettings);
           this.settings = desiredSettings;
           this.applyTheme();
-          settingsMessage = synced
-            ? ' Settings added.'
-            : ' Setting saved here.';
+          settingsMessage = i18n.getMessage(
+            synced ? 'settingsAdded' : 'settingSavedHere',
+          );
         } catch (error) {
           console.error(error);
           settingsError = {
-            message: "We couldn't use these settings.",
-            actionLabel: 'Try again',
+            message: i18n.getMessage('useSettingsError'),
+            actionLabel: i18n.getMessage('tryAgain'),
             action: async () => {
               const synced = await rl.saveSettings(desiredSettings);
               this.settings = desiredSettings;
               this.applyTheme();
-              this.message = synced ? 'Settings added.' : 'Setting saved here.';
+              this.message = i18n.getMessage(
+                synced ? 'settingsAdded' : 'settingSavedHere',
+              );
             },
           };
         }
       }
-      this.message = `${result.imported} page${result.imported === 1 ? '' : 's'} added. ${result.alreadyPresent} already here.${settingsMessage}`;
+      this.message = [
+        i18n.getMessage(
+          result.imported === 1 ? 'importResultOne' : 'importResultOther',
+          [i18n.number(result.imported), i18n.number(result.alreadyPresent)],
+        ),
+        settingsMessage,
+      ]
+        .filter(Boolean)
+        .join(' ');
       this.errorNotice = settingsError;
       this.preview = null;
     } catch (error) {
       console.error(error);
       this.showError(
-        "We couldn't add these pages. Your list is safe.",
-        'Try again',
+        i18n.getMessage('importError'),
+        i18n.getMessage('tryAgain'),
         () => this.confirmImport(),
       );
     }

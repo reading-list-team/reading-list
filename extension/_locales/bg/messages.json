@@ -33,7 +33,7 @@
     "message": "Показване в контекстното меню:"
   },
   "dark": {
-    "message": "тъмна"
+    "message": "Тъмна"
   },
   "dateButton": {
     "message": "дата"
@@ -51,7 +51,7 @@
     "message": "Внасяне"
   },
   "light": {
-    "message": "светла"
+    "message": "Светла"
   },
   "openNewTab": {
     "message": "Отваряне на връзка в нов раздел:"
@@ -73,5 +73,594 @@
   },
   "unreadButton": {
     "message": "непрочетен"
+  },
+  "pageSaved": {
+    "message": "Страницата е запазена",
+    "description": "pageSaved"
+  },
+  "saveCurrentPage": {
+    "message": "Запазване на текущата страница",
+    "description": "saveCurrentPage"
+  },
+  "saveCurrentPageShortcut": {
+    "message": "Запазване на текущата страница (A)",
+    "description": "saveCurrentPageShortcut"
+  },
+  "myList": {
+    "message": "Моят списък",
+    "description": "myList"
+  },
+  "sortPages": {
+    "message": "Сортиране на страниците",
+    "description": "sortPages"
+  },
+  "sortBy": {
+    "message": "Сортиране по",
+    "description": "sortBy"
+  },
+  "sortManual": {
+    "message": "Ръчно",
+    "description": "sortManual"
+  },
+  "sortDate": {
+    "message": "Дата",
+    "description": "sortDate"
+  },
+  "sortTitle": {
+    "message": "Заглавие",
+    "description": "sortTitle"
+  },
+  "manualOrder": {
+    "message": "Ръчен ред",
+    "description": "manualOrder"
+  },
+  "dateAdded": {
+    "message": "Дата на добавяне",
+    "description": "dateAdded"
+  },
+  "order": {
+    "message": "Ред",
+    "description": "order"
+  },
+  "newestFirst": {
+    "message": "Първо най-новите",
+    "description": "newestFirst"
+  },
+  "oldestFirst": {
+    "message": "Първо най-старите",
+    "description": "oldestFirst"
+  },
+  "aToZ": {
+    "message": "От А до Я",
+    "description": "aToZ"
+  },
+  "zToA": {
+    "message": "От Я до А",
+    "description": "zToA"
+  },
+  "sortManualLabel": {
+    "message": "Сортиране: Ръчно",
+    "description": "sortManualLabel"
+  },
+  "sortDateNewestLabel": {
+    "message": "Сортиране: Дата, първо най-новите",
+    "description": "sortDateNewestLabel"
+  },
+  "sortDateOldestLabel": {
+    "message": "Сортиране: Дата, първо най-старите",
+    "description": "sortDateOldestLabel"
+  },
+  "sortTitleAZLabel": {
+    "message": "Сортиране: Заглавие, от А до Я",
+    "description": "sortTitleAZLabel"
+  },
+  "sortTitleZALabel": {
+    "message": "Сортиране: Заглавие, от Я до А",
+    "description": "sortTitleZALabel"
+  },
+  "loadingPages": {
+    "message": "Зареждане на страниците",
+    "description": "loadingPages"
+  },
+  "saveFirstPage": {
+    "message": "Запазете първата си страница",
+    "description": "saveFirstPage"
+  },
+  "saveFirstPageHelp": {
+    "message": "Натиснете +, за да запазите първата си страница.",
+    "description": "saveFirstPageHelp"
+  },
+  "noUnreadPages": {
+    "message": "Няма непрегледани страници",
+    "description": "noUnreadPages"
+  },
+  "noPagesFound": {
+    "message": "Няма намерени страници",
+    "description": "noPagesFound"
+  },
+  "viewedPagesBelow": {
+    "message": "Отворените страници са в „Прегледани“ по-долу.",
+    "description": "viewedPagesBelow"
+  },
+  "searchNoResultsHelp": {
+    "message": "Опитайте друго търсене или покажете всички страници от настройките.",
+    "description": "searchNoResultsHelp"
+  },
+  "viewedPages": {
+    "message": "Прегледани",
+    "description": "viewedPages"
+  },
+  "viewedPagesCount": {
+    "message": "Прегледани ($count$)",
+    "description": "viewedPagesCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "openSearch": {
+    "message": "Отваряне на търсенето",
+    "description": "openSearch"
+  },
+  "searchPages": {
+    "message": "Търсене на страници",
+    "description": "searchPages"
+  },
+  "searchSavedPages": {
+    "message": "Търсене в запазените страници",
+    "description": "searchSavedPages"
+  },
+  "findPage": {
+    "message": "Намиране на страница",
+    "description": "findPage"
+  },
+  "openSettings": {
+    "message": "Отваряне на настройките",
+    "description": "openSettings"
+  },
+  "closeSearch": {
+    "message": "Затваряне на търсенето",
+    "description": "closeSearch"
+  },
+  "dismissNotification": {
+    "message": "Затваряне на известието",
+    "description": "dismissNotification"
+  },
+  "dismiss": {
+    "message": "Затвори",
+    "description": "dismiss"
+  },
+  "deletedSite": {
+    "message": "$site$ е изтрит",
+    "description": "deletedSite",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "undo": {
+    "message": "Отмяна",
+    "description": "undo"
+  },
+  "dismissUndo": {
+    "message": "Затваряне на известието за отмяна",
+    "description": "dismissUndo"
+  },
+  "settings": {
+    "message": "Настройки",
+    "description": "settings"
+  },
+  "closeSettings": {
+    "message": "Затваряне на настройките",
+    "description": "closeSettings"
+  },
+  "themeWithMode": {
+    "message": "Тема ($mode$)",
+    "description": "themeWithMode",
+    "placeholders": {
+      "mode": {
+        "content": "$1"
+      }
+    }
+  },
+  "system": {
+    "message": "Системна",
+    "description": "system"
+  },
+  "systemTheme": {
+    "message": "Системна тема",
+    "description": "systemTheme"
+  },
+  "lightTheme": {
+    "message": "Светла тема",
+    "description": "lightTheme"
+  },
+  "darkTheme": {
+    "message": "Тъмна тема",
+    "description": "darkTheme"
+  },
+  "openLinksNewTab": {
+    "message": "Отваряне на връзките в нов раздел",
+    "description": "openLinksNewTab"
+  },
+  "showViewedPages": {
+    "message": "Показване на прегледаните страници",
+    "description": "showViewedPages"
+  },
+  "feedback": {
+    "message": "Обратна връзка",
+    "description": "feedback"
+  },
+  "feedbackHelp": {
+    "message": "Открихте грешка или имате идея? Кажете ни.",
+    "description": "feedbackHelp"
+  },
+  "sendFeedback": {
+    "message": "Изпращане на отзив",
+    "description": "sendFeedback"
+  },
+  "additionalSettings": {
+    "message": "Допълнителни настройки",
+    "description": "additionalSettings"
+  },
+  "additionalSettingsHelp": {
+    "message": "Запазете копие на списъка си или добавете такова от файл.",
+    "description": "additionalSettingsHelp"
+  },
+  "openSettingsButton": {
+    "message": "Отвори настройки",
+    "description": "openSettingsButton"
+  },
+  "versionLabel": {
+    "message": "Версия $version$",
+    "description": "versionLabel",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "tryAgain": {
+    "message": "Опитай отново",
+    "description": "tryAgain"
+  },
+  "localOnlyOne": {
+    "message": "$count$ страница е само на това устройство.",
+    "description": "localOnlyOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyOther": {
+    "message": "$count$ страници са само на това устройство.",
+    "description": "localOnlyOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOne": {
+    "message": "$count$ страница е само на това устройство. Отворете настройките, за да запазите резервно копие.",
+    "description": "localOnlyBackupOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "localOnlyBackupOther": {
+    "message": "$count$ страници са само на това устройство. Отворете настройките, за да запазите резервно копие.",
+    "description": "localOnlyBackupOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncUnavailable": {
+    "message": "Chrome не може да синхронизира сега. Страниците ви са запазени тук.",
+    "description": "syncUnavailable"
+  },
+  "openListError": {
+    "message": "Не успяхме да отворим списъка ви.",
+    "description": "openListError"
+  },
+  "updateListError": {
+    "message": "Не успяхме да обновим списъка ви.",
+    "description": "updateListError"
+  },
+  "retryError": {
+    "message": "Не успяхме да опитаме отново.",
+    "description": "retryError"
+  },
+  "saveSettingError": {
+    "message": "Не успяхме да запазим тази промяна.",
+    "description": "saveSettingError"
+  },
+  "settingSavedHere": {
+    "message": "Настройката е запазена тук.",
+    "description": "settingSavedHere"
+  },
+  "pageCannotSave": {
+    "message": "Тази страница не може да бъде запазена. Отворете уебсайт и опитайте отново.",
+    "description": "pageCannotSave"
+  },
+  "alreadySaved": {
+    "message": "Вече е запазена",
+    "description": "alreadySaved"
+  },
+  "savePageError": {
+    "message": "Не успяхме да запазим тази страница.",
+    "description": "savePageError"
+  },
+  "syncPagesError": {
+    "message": "Не успяхме да синхронизираме страниците ви.",
+    "description": "syncPagesError"
+  },
+  "urlCopied": {
+    "message": "Адресът е копиран",
+    "description": "urlCopied"
+  },
+  "copyUrlError": {
+    "message": "Не успяхме да копираме адреса.",
+    "description": "copyUrlError"
+  },
+  "deletePageError": {
+    "message": "Не успяхме да изтрием тази страница.",
+    "description": "deletePageError"
+  },
+  "restorePageError": {
+    "message": "Не успяхме да върнем тази страница.",
+    "description": "restorePageError"
+  },
+  "titleSaved": {
+    "message": "Заглавието е запазено",
+    "description": "titleSaved"
+  },
+  "changeTitleError": {
+    "message": "Не успяхме да променим заглавието.",
+    "description": "changeTitleError"
+  },
+  "orderUpdated": {
+    "message": "Редът е обновен",
+    "description": "orderUpdated"
+  },
+  "movePageError": {
+    "message": "Не успяхме да преместим тази страница.",
+    "description": "movePageError"
+  },
+  "dragToReorder": {
+    "message": "Плъзнете за пренареждане",
+    "description": "dragToReorder"
+  },
+  "dragItemHelp": {
+    "message": "Плъзнете $name$, за да пренаредите. Използвайте стрелките за преместване.",
+    "description": "dragItemHelp",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageTitle": {
+    "message": "Заглавие на страницата",
+    "description": "pageTitle"
+  },
+  "saveTitle": {
+    "message": "Запазване на заглавието",
+    "description": "saveTitle"
+  },
+  "cancelEditing": {
+    "message": "Отказ от редактиране",
+    "description": "cancelEditing"
+  },
+  "editTitle": {
+    "message": "Редактиране на заглавието",
+    "description": "editTitle"
+  },
+  "editItem": {
+    "message": "Редактиране на $name$",
+    "description": "editItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "copyUrl": {
+    "message": "Копиране на адреса",
+    "description": "copyUrl"
+  },
+  "copyUrlForItem": {
+    "message": "Копиране на адреса за $name$",
+    "description": "copyUrlForItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "delete": {
+    "message": "Изтриване",
+    "description": "delete"
+  },
+  "deleteItem": {
+    "message": "Изтриване на $name$",
+    "description": "deleteItem",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "optionsLead": {
+    "message": "Настройте списъка си и запазете резервно копие.",
+    "description": "optionsLead"
+  },
+  "loadingSettings": {
+    "message": "Зареждане на настройките…",
+    "description": "loadingSettings"
+  },
+  "backups": {
+    "message": "Резервни копия",
+    "description": "backups"
+  },
+  "savedHereOne": {
+    "message": "Тук е запазена $count$ страница.",
+    "description": "savedHereOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "savedHereOther": {
+    "message": "Тук са запазени $count$ страници.",
+    "description": "savedHereOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "otherDevicesLater": {
+    "message": "Може да се появят на другите ви устройства по-късно.",
+    "description": "otherDevicesLater"
+  },
+  "conflictOne": {
+    "message": "Намерихме две копия на страница. И двете са запазени. Изтеглете резервно копие, за да ги запазите.",
+    "description": "conflictOne"
+  },
+  "conflictOther": {
+    "message": "Намерихме няколко копия на някои страници. Те са запазени. Изтеглете резервно копие, за да ги запазите.",
+    "description": "conflictOther"
+  },
+  "downloadBackup": {
+    "message": "Изтегляне на резервно копие",
+    "description": "downloadBackup"
+  },
+  "addFromBackup": {
+    "message": "Добавяне от резервно копие",
+    "description": "addFromBackup"
+  },
+  "checkBackup": {
+    "message": "Проверка на резервното копие",
+    "description": "checkBackup"
+  },
+  "readyToAddOne": {
+    "message": "$count$ страница е готова за добавяне.",
+    "description": "readyToAddOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "readyToAddOther": {
+    "message": "$count$ страници са готови за добавяне.",
+    "description": "readyToAddOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "skippedCount": {
+    "message": "Неуспешни записи: $count$.",
+    "description": "skippedCount",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "existingPagesStay": {
+    "message": "Съществуващите страници ще останат.",
+    "description": "existingPagesStay"
+  },
+  "useBackupSettings": {
+    "message": "Използване на настройките от резервното копие",
+    "description": "useBackupSettings"
+  },
+  "importPages": {
+    "message": "Импортиране на страници",
+    "description": "importPages"
+  },
+  "cancel": {
+    "message": "Отказ",
+    "description": "cancel"
+  },
+  "backupDownloaded": {
+    "message": "Резервното копие е изтеглено.",
+    "description": "backupDownloaded"
+  },
+  "backupDownloadedPartial": {
+    "message": "Резервното копие е изтеглено. Някои данни за синхронизация не бяха достъпни.",
+    "description": "backupDownloadedPartial"
+  },
+  "backupError": {
+    "message": "Не успяхме да създадем резервно копие.",
+    "description": "backupError"
+  },
+  "chooseFile": {
+    "message": "Избор на файл",
+    "description": "chooseFile"
+  },
+  "readBackupError": {
+    "message": "Не успяхме да прочетем това резервно копие.",
+    "description": "readBackupError"
+  },
+  "settingsAdded": {
+    "message": "Настройките са добавени.",
+    "description": "settingsAdded"
+  },
+  "useSettingsError": {
+    "message": "Не успяхме да използваме тези настройки.",
+    "description": "useSettingsError"
+  },
+  "importResultOne": {
+    "message": "Добавена е $count$ страница. Вече тук: $existing$.",
+    "description": "importResultOne",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importResultOther": {
+    "message": "Добавени са $count$ страници. Вече тук: $existing$.",
+    "description": "importResultOther",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "existing": {
+        "content": "$2"
+      }
+    }
+  },
+  "importError": {
+    "message": "Не успяхме да добавим тези страници. Списъкът ви е запазен.",
+    "description": "importError"
+  },
+  "trying": {
+    "message": "Опитваме отново…",
+    "description": "trying"
+  },
+  "closeNotice": {
+    "message": "Затваряне на известието",
+    "description": "closeNotice"
+  },
+  "themeLabel": {
+    "message": "Тема",
+    "description": "Settings field label."
   }
 }

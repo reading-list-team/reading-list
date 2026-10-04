@@ -40,8 +40,6 @@ type TopNotice = {
   key?: string;
 };
 
-const countFormatter = new Intl.NumberFormat('en-US');
-
 @customElement('reading-list-app')
 export class ReadingListAppElement extends LitElement {
   static override styles = [
@@ -696,7 +694,8 @@ export class ReadingListAppElement extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    document.title = i18n.getMessage('appName', 'Reading List');
+    document.documentElement.lang = i18n.language();
+    document.title = i18n.getMessage('appName');
     chrome.storage.onChanged.addListener(this.onStorageChanged);
     this.addEventListener('keydown', this.onKeydown);
     document.addEventListener('keydown', this.onSaveShortcut);
@@ -800,7 +799,7 @@ export class ReadingListAppElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.loadError = true;
-      this.showError("We couldn't open your list.", () => this.load());
+      this.showError(i18n.getMessage('openListError'), () => this.load());
     }
   }
   private onStorageChanged = (
@@ -816,7 +815,7 @@ export class ReadingListAppElement extends LitElement {
         .then(() => this.load())
         .catch((error) => {
           console.error(error);
-          this.showError("We couldn't update your list.", async () => {
+          this.showError(i18n.getMessage('updateListError'), async () => {
             await rl.refresh();
             await this.load();
           });
@@ -874,10 +873,19 @@ export class ReadingListAppElement extends LitElement {
       notices.push({
         variant: 'warning',
         key: `${this.conflictNeedsBackup ? 'backup' : 'pages'}:${count}`,
-        message: this.conflictNeedsBackup
-          ? `${countFormatter.format(count)} page${count === 1 ? ' is' : 's are'} only on this device. Open settings to save a backup.`
-          : `${countFormatter.format(count)} page${count === 1 ? ' is' : 's are'} only on this device.`,
-        actionLabel: this.conflictNeedsBackup ? 'Open settings' : 'Try again',
+        message: i18n.getMessage(
+          this.conflictNeedsBackup
+            ? count === 1
+              ? 'localOnlyBackupOne'
+              : 'localOnlyBackupOther'
+            : count === 1
+              ? 'localOnlyOne'
+              : 'localOnlyOther',
+          i18n.number(count),
+        ),
+        actionLabel: i18n.getMessage(
+          this.conflictNeedsBackup ? 'openSettings' : 'tryAgain',
+        ),
         action: this.conflictNeedsBackup
           ? () => chrome.runtime.openOptionsPage()
           : () => this.retrySync(),
@@ -886,7 +894,7 @@ export class ReadingListAppElement extends LitElement {
       notices.push({
         variant: 'warning',
         key: 'sync-unavailable',
-        message: "Chrome can't sync right now. Your pages are safe here.",
+        message: i18n.getMessage('syncUnavailable'),
         action: () => this.retrySync(),
       });
     }
@@ -911,7 +919,7 @@ export class ReadingListAppElement extends LitElement {
       if (this.topNotice === notice) this.topNotice = null;
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't try again.", notice.action);
+      this.showError(i18n.getMessage('retryError'), notice.action);
     } finally {
       this.noticeBusy = false;
     }
@@ -922,20 +930,19 @@ export class ReadingListAppElement extends LitElement {
       this.dismissedWarningKeys = [...this.dismissedWarningKeys, notice.key];
   }
   private get sortLabel() {
-    const mode = { manual: 'Manual', date: 'Date', title: 'Title' }[
-      this.settings.sortOption
-    ];
-    const direction =
-      this.settings.sortOption === 'date'
-        ? this.settings.sortOrder === 'up'
-          ? ', oldest first'
-          : ', newest first'
-        : this.settings.sortOption === 'title'
-          ? this.settings.sortOrder === 'up'
-            ? ', A to Z'
-            : ', Z to A'
-          : '';
-    return `Sort: ${mode}${direction}`;
+    if (this.settings.sortOption === 'manual')
+      return i18n.getMessage('sortManualLabel');
+    if (this.settings.sortOption === 'date')
+      return i18n.getMessage(
+        this.settings.sortOrder === 'up'
+          ? 'sortDateOldestLabel'
+          : 'sortDateNewestLabel',
+      );
+    return i18n.getMessage(
+      this.settings.sortOrder === 'up'
+        ? 'sortTitleAZLabel'
+        : 'sortTitleZALabel',
+    );
   }
   private renderItem(
     item: ListItemData,
@@ -974,12 +981,12 @@ export class ReadingListAppElement extends LitElement {
     const notice = this.activeNotice;
     return html`
       <header>
-        <h1>Reading List</h1>
+        <h1>${i18n.getMessage('appName')}</h1>
         <button
           class=${`save ${this.justSaved ? 'saved' : ''}`}
-          aria-label="Save current page"
+          aria-label=${i18n.getMessage('saveCurrentPage')}
           aria-keyshortcuts="A"
-          title="Save current page (A)"
+          title=${i18n.getMessage('saveCurrentPageShortcut')}
           ?disabled=${this.items === null}
           @click=${this.saveCurrent}
         >
@@ -987,7 +994,7 @@ export class ReadingListAppElement extends LitElement {
         </button>
       </header>
       <div class="visually-hidden" role="status">
-        ${this.justSaved ? 'Page saved' : ''}
+        ${this.justSaved ? i18n.getMessage('pageSaved') : ''}
       </div>
       ${notice
         ? html`<reading-list-notice
@@ -995,7 +1002,7 @@ export class ReadingListAppElement extends LitElement {
             .variant=${notice.variant}
             .message=${notice.message}
             .actionLabel=${notice.action
-              ? (notice.actionLabel ?? 'Try again')
+              ? (notice.actionLabel ?? i18n.getMessage('tryAgain'))
               : ''}
             .busy=${this.noticeBusy}
             @notice-action=${() => this.onNoticeAction(notice)}
@@ -1005,7 +1012,8 @@ export class ReadingListAppElement extends LitElement {
       ${this.items !== null && this.items.length
         ? html`<div class="list-head">
             <span class="list-label"
-              >My List <span class="count">${countFormatter.format(this.items.length)}</span></span
+              >${i18n.getMessage('myList')}
+              <span class="count">${i18n.number(this.items.length)}</span></span
             >
             <div class="sort-wrap">
               <button
@@ -1031,11 +1039,11 @@ export class ReadingListAppElement extends LitElement {
                 ? html`<div
                     class=${`sort-menu ${this.sortClosing ? 'closing' : ''}`}
                     role="menu"
-                    aria-label="Sort pages"
+                    aria-label=${i18n.getMessage('sortPages')}
                     ?inert=${this.sortClosing}
                     @keydown=${this.onSortMenuKeydown}
                   >
-                    <div class="menu-label">Sort by</div>
+                    <div class="menu-label">${i18n.getMessage('sortBy')}</div>
                     ${(['manual', 'date', 'title'] as const).map(
                       (mode) =>
                         html`<button
@@ -1045,9 +1053,9 @@ export class ReadingListAppElement extends LitElement {
                           @click=${() => this.changeSort(mode)}
                         >
                           ${{
-                            manual: 'Manual order',
-                            date: 'Date added',
-                            title: 'Title',
+                            manual: i18n.getMessage('manualOrder'),
+                            date: i18n.getMessage('dateAdded'),
+                            title: i18n.getMessage('sortTitle'),
                           }[mode]}${this.settings.sortOption === mode
                             ? icon(Check, 15)
                             : ''}
@@ -1056,7 +1064,9 @@ export class ReadingListAppElement extends LitElement {
                     ${this.settings.sortOption === 'manual'
                       ? ''
                       : html` <div class="divider"></div>
-                          <div class="menu-label">Order</div>
+                          <div class="menu-label">
+                            ${i18n.getMessage('order')}
+                          </div>
                           ${(this.settings.sortOption === 'title'
                             ? (['up', 'down'] as const)
                             : (['down', 'up'] as const)
@@ -1071,12 +1081,12 @@ export class ReadingListAppElement extends LitElement {
                               >
                                 ${this.settings.sortOption === 'date'
                                   ? order === 'down'
-                                    ? 'Newest first'
-                                    : 'Oldest first'
+                                    ? i18n.getMessage('newestFirst')
+                                    : i18n.getMessage('oldestFirst')
                                   : order === 'down'
-                                    ? 'Z to A'
-                                    : 'A to Z'}${this.settings.sortOrder ===
-                                order
+                                    ? i18n.getMessage('zToA')
+                                    : i18n.getMessage('aToZ')}${this.settings
+                                  .sortOrder === order
                                   ? icon(Check, 15)
                                   : ''}
                               </button>`,
@@ -1098,14 +1108,14 @@ export class ReadingListAppElement extends LitElement {
             ? html`<div
                 class="loading"
                 role="status"
-                aria-label="Loading your pages"
+                aria-label=${i18n.getMessage('loadingPages')}
               >
                 ${icon(LoaderCircle, 24)}
               </div>`
             : !this.items.length
               ? html`<div class="empty">
-                  <h2>Save your first page</h2>
-                  <p>Click the + button to save your first page.</p>
+                  <h2>${i18n.getMessage('saveFirstPage')}</h2>
+                  <p>${i18n.getMessage('saveFirstPageHelp')}</p>
                 </div>`
               : html`
                   ${!visible.length
@@ -1114,13 +1124,13 @@ export class ReadingListAppElement extends LitElement {
                       >
                         <h2>
                           ${viewed.length
-                            ? 'No unread pages'
-                            : 'No pages found'}
+                            ? i18n.getMessage('noUnreadPages')
+                            : i18n.getMessage('noPagesFound')}
                         </h2>
                         <p>
                           ${viewed.length
-                            ? 'Pages you opened are in Viewed below.'
-                            : 'Try another search or show all pages in settings.'}
+                            ? i18n.getMessage('viewedPagesBelow')
+                            : i18n.getMessage('searchNoResultsHelp')}
                         </p>
                       </div>`
                     : repeat(
@@ -1139,7 +1149,7 @@ export class ReadingListAppElement extends LitElement {
                   ${viewed.length
                     ? html`<section
                         class="viewed-section"
-                        aria-label="Viewed pages"
+                        aria-label=${i18n.getMessage('viewedPages')}
                       >
                         <button
                           class="viewed-toggle"
@@ -1147,7 +1157,11 @@ export class ReadingListAppElement extends LitElement {
                           aria-controls="viewed-list"
                           @click=${() => (this.viewedOpen = !this.viewedOpen)}
                         >
-                          ${icon(ChevronRight, 16)} Viewed (${countFormatter.format(viewed.length)})
+                          ${icon(ChevronRight, 16)}
+                          ${i18n.getMessage(
+                            'viewedPagesCount',
+                            i18n.number(viewed.length),
+                          )}
                         </button>
                         <div id="viewed-list" ?hidden=${!this.viewedOpen}>
                           ${this.viewedOpen
@@ -1182,8 +1196,10 @@ export class ReadingListAppElement extends LitElement {
         >
           <button
             class="footer-button search-toggle"
-            aria-label=${this.searchOpen ? 'Search pages' : 'Open search'}
-            title="Search"
+            aria-label=${i18n.getMessage(
+              this.searchOpen ? 'searchPages' : 'openSearch',
+            )}
+            title=${i18n.getMessage('search')}
             @click=${this.openSearch}
           >
             ${icon(Search, 20)}
@@ -1192,8 +1208,8 @@ export class ReadingListAppElement extends LitElement {
             ? html`<input
                 class="search-field"
                 type="search"
-                aria-label="Search saved pages"
-                placeholder="Find a page"
+                aria-label=${i18n.getMessage('searchSavedPages')}
+                placeholder=${i18n.getMessage('findPage')}
                 .value=${this.query}
                 @input=${(event: Event) =>
                   (this.query = (event.target as HTMLInputElement).value)}
@@ -1204,10 +1220,10 @@ export class ReadingListAppElement extends LitElement {
         <div class="footer-end">
           <button
             class="footer-button settings-toggle"
-            aria-label="Open settings"
+            aria-label=${i18n.getMessage('openSettings')}
             aria-hidden=${this.searchOpen || this.searchClosing}
             tabindex=${this.searchOpen || this.searchClosing ? -1 : 0}
-            title="Settings"
+            title=${i18n.getMessage('settings')}
             @click=${this.openSettings}
           >
             ${icon(Settings, 20)}
@@ -1215,8 +1231,8 @@ export class ReadingListAppElement extends LitElement {
           ${this.searchOpen || this.searchClosing
             ? html`<button
                 class="footer-button close-search"
-                aria-label="Close search"
-                title="Close search"
+                aria-label=${i18n.getMessage('closeSearch')}
+                title=${i18n.getMessage('closeSearch')}
                 @click=${() => this.closeSearch()}
               >
                 ${icon(X, 18)}
@@ -1235,8 +1251,8 @@ export class ReadingListAppElement extends LitElement {
                   <span class="toast-label">${this.infoToast}</span>
                   <button
                     class="dismiss"
-                    aria-label="Dismiss notification"
-                    title="Dismiss"
+                    aria-label=${i18n.getMessage('dismissNotification')}
+                    title=${i18n.getMessage('dismiss')}
                     @click=${this.dismissInfoToast}
                   >
                     ${icon(X, 16)}
@@ -1254,14 +1270,18 @@ export class ReadingListAppElement extends LitElement {
                   @focusout=${this.resumeUndoDismiss}
                 >
                   <span class="toast-label" title=${this.deleted.url}
-                    >${this.hostname(this.deleted.url)} deleted</span
+                    >${i18n.getMessage(
+                      'deletedSite',
+                      this.hostname(this.deleted.url),
+                    )}</span
                   >
                   <div class="toast-actions">
-                    <button @click=${this.undoDelete}>Undo</button
+                    <button @click=${this.undoDelete}>
+                      ${i18n.getMessage('undo')}</button
                     ><button
                       class="dismiss"
-                      aria-label="Dismiss Undo"
-                      title="Dismiss"
+                      aria-label=${i18n.getMessage('dismissUndo')}
+                      title=${i18n.getMessage('dismiss')}
                       @click=${this.dismissUndo}
                     >
                       ${icon(X, 16)}
@@ -1277,10 +1297,10 @@ export class ReadingListAppElement extends LitElement {
         @click=${this.onDialogClick}
       >
         <div class="sheet-head">
-          <h2>Settings</h2>
+          <h2>${i18n.getMessage('settings')}</h2>
           <button
             class="footer-button"
-            aria-label="Close settings"
+            aria-label=${i18n.getMessage('closeSettings')}
             @click=${this.closeSettings}
           >
             ${icon(X, 20)}
@@ -1289,28 +1309,29 @@ export class ReadingListAppElement extends LitElement {
         <div class="sheet-body">
           <div class="setting-row">
             <span
-              >Theme
-              (${this.settings.theme.charAt(0).toUpperCase() +
-              this.settings.theme.slice(1)})</span
+              >${i18n.getMessage(
+                'themeWithMode',
+                i18n.getMessage(this.settings.theme),
+              )}</span
             >
             <div class="theme-options">
               <button
-                aria-label="System theme"
-                title="System"
+                aria-label=${i18n.getMessage('systemTheme')}
+                title=${i18n.getMessage('system')}
                 aria-pressed=${this.settings.theme === 'system'}
                 @click=${() => this.changeTheme('system')}
               >
                 ${icon(Monitor, 17)}</button
               ><button
-                aria-label="Light theme"
-                title="Light"
+                aria-label=${i18n.getMessage('lightTheme')}
+                title=${i18n.getMessage('light')}
                 aria-pressed=${this.settings.theme === 'light'}
                 @click=${() => this.changeTheme('light')}
               >
                 ${icon(Sun, 17)}</button
               ><button
-                aria-label="Dark theme"
-                title="Dark"
+                aria-label=${i18n.getMessage('darkTheme')}
+                title=${i18n.getMessage('dark')}
                 aria-pressed=${this.settings.theme === 'dark'}
                 @click=${() => this.changeTheme('dark')}
               >
@@ -1319,7 +1340,7 @@ export class ReadingListAppElement extends LitElement {
             </div>
           </div>
           <label class="setting-row"
-            ><span>Open links in a new tab</span
+            ><span>${i18n.getMessage('openLinksNewTab')}</span
             ><input
               type="checkbox"
               role="switch"
@@ -1332,7 +1353,7 @@ export class ReadingListAppElement extends LitElement {
                 })}
           /></label>
           <label class="setting-row"
-            ><span>Show viewed pages</span
+            ><span>${i18n.getMessage('showViewedPages')}</span
             ><input
               type="checkbox"
               role="switch"
@@ -1346,32 +1367,35 @@ export class ReadingListAppElement extends LitElement {
           /></label>
           <div class="setting-row">
             <div class="setting-copy">
-              <span>Feedback</span>
-              <p>Found a bug or have an idea? Tell us.</p>
+              <span>${i18n.getMessage('feedback')}</span>
+              <p>${i18n.getMessage('feedbackHelp')}</p>
             </div>
             <a
               class="text-button"
               href="https://forms.gle/faEkwySqvE3ebfev6"
               target="_blank"
               rel="noopener noreferrer"
-              >Send feedback</a
+              >${i18n.getMessage('sendFeedback')}</a
             >
           </div>
           <div class="setting-row">
             <div class="setting-copy">
-              <span>Additional Settings</span>
-              <p>Save a copy of your list or add one from a file.</p>
+              <span>${i18n.getMessage('additionalSettings')}</span>
+              <p>${i18n.getMessage('additionalSettingsHelp')}</p>
             </div>
             <a
               class="text-button"
               href="options.html"
               target="_blank"
               rel="noopener"
-              >Open Settings</a
+              >${i18n.getMessage('openSettingsButton')}</a
             >
           </div>
           <div class="sheet-foot">
-            Version ${chrome.runtime.getManifest?.().version ?? ''}
+            ${i18n.getMessage(
+              'versionLabel',
+              chrome.runtime.getManifest?.().version ?? '',
+            )}
           </div>
         </div>
       </dialog>
@@ -1535,10 +1559,10 @@ export class ReadingListAppElement extends LitElement {
       this.settings = settings;
       this.applyTheme();
       this.topNotice = null;
-      if (!synced) this.showInfoToast('Setting saved here');
+      if (!synced) this.showInfoToast(i18n.getMessage('settingSavedHere'));
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't save this change.", () =>
+      this.showError(i18n.getMessage('saveSettingError'), () =>
         this.saveSettings(settings),
       );
     }
@@ -1581,9 +1605,7 @@ export class ReadingListAppElement extends LitElement {
         currentWindow: true,
       });
       if (!tab?.url || !tab.title) {
-        this.showError(
-          "This page can't be saved. Open a website and try again.",
-        );
+        this.showError(i18n.getMessage('pageCannotSave'));
         return;
       }
       const result = await rl.saveCurrentPage({
@@ -1600,7 +1622,7 @@ export class ReadingListAppElement extends LitElement {
         this.localOnly = rl.localOnlyCount;
         if (result.item.viewed && !this.settings.viewAll)
           this.viewedOpen = true;
-        this.showInfoToast('Already saved');
+        this.showInfoToast(i18n.getMessage('alreadySaved'));
         await this.highlightItem(result.item.url);
         return;
       }
@@ -1617,7 +1639,9 @@ export class ReadingListAppElement extends LitElement {
       await this.highlightItem(result.item.url);
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't save this page.", () => this.saveCurrent());
+      this.showError(i18n.getMessage('savePageError'), () =>
+        this.saveCurrent(),
+      );
     }
   }
   private async retrySync() {
@@ -1631,7 +1655,7 @@ export class ReadingListAppElement extends LitElement {
     } catch (error) {
       console.error(error);
       this.syncUnavailable = true;
-      this.showError("We couldn't sync your pages.", () => this.retrySync());
+      this.showError(i18n.getMessage('syncPagesError'), () => this.retrySync());
     }
   }
   private hostname(url: string): string {
@@ -1643,9 +1667,7 @@ export class ReadingListAppElement extends LitElement {
   }
   private onItemMessage(event: CustomEvent<string>) {
     this.topNotice = null;
-    this.showInfoToast(
-      event.detail === 'URL copied.' ? 'URL copied' : event.detail,
-    );
+    this.showInfoToast(event.detail);
   }
   private showInfoToast(message: string) {
     this.clearInfoToast();
@@ -1730,7 +1752,7 @@ export class ReadingListAppElement extends LitElement {
       });
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't delete this page.", () =>
+      this.showError(i18n.getMessage('deletePageError'), () =>
         this.deleteItem(event),
       );
     }
@@ -1756,7 +1778,7 @@ export class ReadingListAppElement extends LitElement {
       );
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't bring back this page.", () =>
+      this.showError(i18n.getMessage('restorePageError'), () =>
         this.undoDelete(),
       );
     }
@@ -1771,10 +1793,10 @@ export class ReadingListAppElement extends LitElement {
       );
       this.localOnly = rl.localOnlyCount;
       this.topNotice = null;
-      this.showInfoToast('Title saved');
+      this.showInfoToast(i18n.getMessage('titleSaved'));
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't change the title.", () =>
+      this.showError(i18n.getMessage('changeTitleError'), () =>
         this.updateTitle(event),
       );
     }
@@ -1789,10 +1811,12 @@ export class ReadingListAppElement extends LitElement {
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
       this.topNotice = null;
-      this.showInfoToast('Order updated');
+      this.showInfoToast(i18n.getMessage('orderUpdated'));
     } catch (error) {
       console.error(error);
-      this.showError("We couldn't move this page.", () => this.moveItem(event));
+      this.showError(i18n.getMessage('movePageError'), () =>
+        this.moveItem(event),
+      );
     } finally {
       this.reordering = false;
     }
@@ -2001,11 +2025,11 @@ export class ReadingListAppElement extends LitElement {
       this.items = await rl.getListItems();
       this.localOnly = rl.localOnlyCount;
       this.topNotice = null;
-      this.showInfoToast('Order updated');
+      this.showInfoToast(i18n.getMessage('orderUpdated'));
     } catch (error) {
       console.error(error);
       this.items = previous;
-      this.showError("We couldn't move this page.", () =>
+      this.showError(i18n.getMessage('movePageError'), () =>
         this.reorderDrop(
           new CustomEvent('reorder-drop', {
             detail: {
