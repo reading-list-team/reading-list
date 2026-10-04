@@ -8,3 +8,4 @@ dist
 /extension/scripts/
 *.zip
 /docs/
+/qa/
