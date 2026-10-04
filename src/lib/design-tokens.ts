@@ -78,6 +78,37 @@ export const designTokens = css`
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
   }
+  .text-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    flex: none;
+    min-height: 36px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: var(--text-md);
+    font-weight: var(--weight-medium);
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--motion-fast) ease;
+  }
+  .text-button:hover {
+    background: var(--color-surface);
+  }
+  .text-button--primary {
+    border-color: var(--color-accent-strong);
+    background: var(--color-accent-strong);
+    color: #fff;
+  }
+  .text-button--primary:hover {
+    background: var(--color-accent-strong-hover);
+  }
   .switch {
     appearance: none;
     position: relative;

@@ -84,32 +84,6 @@ export class ReadingListOptionsElement extends LitElement {
       :host([data-theme='dark']) select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       }
-      button,
-      .feedback-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border: 1px solid var(--color-line);
-        border-radius: var(--radius-sm);
-        background: var(--color-bg);
-        color: var(--color-text);
-        padding: 8px 12px;
-      }
-      .feedback-link {
-        text-decoration: none;
-      }
-      button:hover,
-      .feedback-link:hover {
-        background: var(--color-surface);
-      }
-      .primary {
-        background: var(--color-accent-strong);
-        color: #fff;
-        border-color: var(--color-accent-strong);
-      }
-      .primary:hover {
-        background: var(--color-accent-strong-hover);
-      }
       .actions {
         display: flex;
         flex-wrap: wrap;
@@ -296,7 +270,8 @@ export class ReadingListOptionsElement extends LitElement {
               <section>
                 <h2>Backups</h2>
                 <p class="muted">
-                  ${this.count} page${this.count === 1 ? '' : 's'} are saved here.
+                  ${this.count} page${this.count === 1 ? '' : 's'} are saved
+                  here.
                   ${this.localOnly || this.syncUnavailable
                     ? ''
                     : 'They may show up on your other devices later.'}
@@ -327,9 +302,9 @@ export class ReadingListOptionsElement extends LitElement {
                     ></reading-list-notice>`
                   : ''}
                 <div class="actions">
-                  <button @click=${this.exportBackup}>
+                  <button class="text-button" @click=${this.exportBackup}>
                     ${icon(Download, 16)} Download backup</button
-                  ><button @click=${this.chooseImport}>
+                  ><button class="text-button" @click=${this.chooseImport}>
                     ${icon(Upload, 16)} Add from backup
                   </button>
                 </div>
@@ -371,9 +346,15 @@ export class ReadingListOptionsElement extends LitElement {
                           >`
                         : ''}
                       <div class="actions">
-                        <button class="primary" @click=${this.confirmImport}>
+                        <button
+                          class="text-button text-button--primary"
+                          @click=${this.confirmImport}
+                        >
                           Import pages</button
-                        ><button @click=${() => (this.preview = null)}>
+                        ><button
+                          class="text-button"
+                          @click=${() => (this.preview = null)}
+                        >
                           Cancel
                         </button>
                       </div>
@@ -384,7 +365,7 @@ export class ReadingListOptionsElement extends LitElement {
                 <h2>Feedback</h2>
                 <p class="muted">Found a bug or have an idea? Tell us.</p>
                 <a
-                  class="feedback-link"
+                  class="feedback-link text-button"
                   href="https://forms.gle/faEkwySqvE3ebfev6"
                   target="_blank"
                   rel="noopener noreferrer"

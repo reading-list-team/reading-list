@@ -635,24 +635,6 @@ export class ReadingListAppElement extends LitElement {
         background: var(--color-text);
         color: var(--color-bg);
       }
-      .details {
-        flex: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 32px;
-        padding: 6px var(--space-2);
-        border: 1px solid var(--color-line);
-        border-radius: var(--radius-sm);
-        background: var(--color-surface);
-        font-size: var(--text-sm);
-        font-weight: var(--weight-medium);
-        color: var(--color-accent-text);
-        text-decoration: none;
-      }
-      .details:hover {
-        background: var(--color-highlight);
-      }
       .setting-copy {
         min-width: 0;
         flex: 1;
@@ -842,8 +824,7 @@ export class ReadingListAppElement extends LitElement {
   private get visibleItems() {
     return sortList(this.items ?? [], this.settings).filter(
       (item) =>
-        (this.settings.viewAll || !item.viewed) &&
-        this.matchesQuery(item),
+        (this.settings.viewAll || !item.viewed) && this.matchesQuery(item),
     );
   }
   private get viewedItems() {
@@ -853,10 +834,12 @@ export class ReadingListAppElement extends LitElement {
     );
   }
   private matchesQuery(item: ListItemData) {
-    return !this.query ||
+    return (
+      !this.query ||
       `${item.title} ${item.url}`
         .toLocaleLowerCase()
-        .includes(this.query.toLocaleLowerCase());
+        .includes(this.query.toLocaleLowerCase())
+    );
   }
   private dragOffset(url: string, visible: ListItemData[]): number {
     if (
@@ -1122,55 +1105,68 @@ export class ReadingListAppElement extends LitElement {
                   <h2>Save your first page</h2>
                   <p>Click the + button to save your first page.</p>
                 </div>`
-            : html`
-                ${!visible.length
-                  ? html`<div class=${`empty ${viewed.length ? 'viewed-empty' : ''}`}>
-                      <h2>${viewed.length ? 'No unread pages' : 'No pages found'}</h2>
-                      <p>${viewed.length
-                        ? 'Pages you opened are in Viewed below.'
-                        : 'Try another search or show all pages in settings.'}</p>
-                    </div>`
-                  : repeat(
-                      visible,
-                      (item) => item.url,
-                      (item, index) => this.renderItem(
-                        item,
-                        index,
-                        visible.length,
-                        this.settings.sortOption === 'manual',
-                        'main',
-                        visible,
-                      ),
-                    )}
-                ${viewed.length
-                  ? html`<section class="viewed-section" aria-label="Viewed pages">
-                      <button
-                        class="viewed-toggle"
-                        aria-expanded=${this.viewedOpen}
-                        aria-controls="viewed-list"
-                        @click=${() => (this.viewedOpen = !this.viewedOpen)}
+              : html`
+                  ${!visible.length
+                    ? html`<div
+                        class=${`empty ${viewed.length ? 'viewed-empty' : ''}`}
                       >
-                        ${icon(ChevronRight, 16)} Viewed (${viewed.length})
-                      </button>
-                      <div id="viewed-list" ?hidden=${!this.viewedOpen}>
-                        ${this.viewedOpen
-                          ? repeat(
-                              viewed,
-                              (item) => item.url,
-                              (item, index) => this.renderItem(
-                                item,
-                                index,
-                                viewed.length,
-                                false,
-                                'viewed',
-                                visible,
-                              ),
-                            )
-                          : ''}
-                      </div>
-                    </section>`
-                  : ''}
-              `}
+                        <h2>
+                          ${viewed.length
+                            ? 'No unread pages'
+                            : 'No pages found'}
+                        </h2>
+                        <p>
+                          ${viewed.length
+                            ? 'Pages you opened are in Viewed below.'
+                            : 'Try another search or show all pages in settings.'}
+                        </p>
+                      </div>`
+                    : repeat(
+                        visible,
+                        (item) => item.url,
+                        (item, index) =>
+                          this.renderItem(
+                            item,
+                            index,
+                            visible.length,
+                            this.settings.sortOption === 'manual',
+                            'main',
+                            visible,
+                          ),
+                      )}
+                  ${viewed.length
+                    ? html`<section
+                        class="viewed-section"
+                        aria-label="Viewed pages"
+                      >
+                        <button
+                          class="viewed-toggle"
+                          aria-expanded=${this.viewedOpen}
+                          aria-controls="viewed-list"
+                          @click=${() => (this.viewedOpen = !this.viewedOpen)}
+                        >
+                          ${icon(ChevronRight, 16)} Viewed (${viewed.length})
+                        </button>
+                        <div id="viewed-list" ?hidden=${!this.viewedOpen}>
+                          ${this.viewedOpen
+                            ? repeat(
+                                viewed,
+                                (item) => item.url,
+                                (item, index) =>
+                                  this.renderItem(
+                                    item,
+                                    index,
+                                    viewed.length,
+                                    false,
+                                    'viewed',
+                                    visible,
+                                  ),
+                              )
+                            : ''}
+                        </div>
+                      </section>`
+                    : ''}
+                `}
       </div>
       <footer
         class=${this.searchOpen
@@ -1331,7 +1327,8 @@ export class ReadingListAppElement extends LitElement {
                 this.saveSettings({
                   ...this.settings,
                   openNewTab: (event.target as HTMLInputElement).checked,
-                })} /></label>
+                })}
+          /></label>
           <label class="setting-row"
             ><span>Show viewed pages</span
             ><input
@@ -1343,15 +1340,32 @@ export class ReadingListAppElement extends LitElement {
                 this.saveSettings({
                   ...this.settings,
                   viewAll: (event.target as HTMLInputElement).checked,
-                })} /></label
-          >
+                })}
+          /></label>
           <div class="setting-row">
             <div class="setting-copy">
-              <span>More settings</span>
+              <span>Feedback</span>
+              <p>Found a bug or have an idea? Tell us.</p>
+            </div>
+            <a
+              class="text-button"
+              href="https://forms.gle/faEkwySqvE3ebfev6"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Send feedback</a
+            >
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <span>Additional Settings</span>
               <p>Save a copy of your list or add one from a file.</p>
             </div>
-            <a class="details" href="options.html" target="_blank" rel="noopener"
-              >Open settings</a
+            <a
+              class="text-button"
+              href="options.html"
+              target="_blank"
+              rel="noopener"
+              >Open Settings</a
             >
           </div>
           <div class="sheet-foot">
@@ -1565,7 +1579,9 @@ export class ReadingListAppElement extends LitElement {
         currentWindow: true,
       });
       if (!tab?.url || !tab.title) {
-        this.showError("This page can't be saved. Open a website and try again.");
+        this.showError(
+          "This page can't be saved. Open a website and try again.",
+        );
         return;
       }
       const result = await rl.saveCurrentPage({
@@ -1580,7 +1596,8 @@ export class ReadingListAppElement extends LitElement {
             )
           : [...(this.items ?? []), result.item];
         this.localOnly = rl.localOnlyCount;
-        if (result.item.viewed && !this.settings.viewAll) this.viewedOpen = true;
+        if (result.item.viewed && !this.settings.viewAll)
+          this.viewedOpen = true;
         this.showInfoToast('Already saved');
         await this.highlightItem(result.item.url);
         return;

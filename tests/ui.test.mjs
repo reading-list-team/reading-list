@@ -53,7 +53,9 @@ const area = (records) => ({
 globalThis.chrome = {
   runtime: {
     async openOptionsPage() {},
-    getManifest() { return { version: '3.1.0' }; },
+    getManifest() {
+      return { version: '3.1.0' };
+    },
   },
   i18n: {
     getMessage() {
@@ -297,14 +299,43 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   assert.equal(dialog.open, true);
   assert.equal(dialog.querySelectorAll('.theme-options button').length, 3);
   assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 2);
-  assert.equal(dialog.querySelector('.sheet-foot').parentElement.className, 'sheet-body');
-  assert.match(dialog.querySelector('.sheet-foot').textContent, /Version 3\.1\.0/);
-  assert.match(dialog.querySelector('.setting-copy').textContent, /More settings/);
-  assert.match(dialog.querySelector('.setting-copy').textContent, /Save a copy of your list/);
-  const moreSettings = dialog.querySelector('.details');
-  assert.equal(moreSettings.tagName, 'A');
-  assert.equal(moreSettings.textContent.trim(), 'Open settings');
-  assert.equal(moreSettings.getAttribute('href'), 'options.html');
+  assert.equal(
+    dialog.querySelector('.sheet-foot').parentElement.className,
+    'sheet-body',
+  );
+  assert.match(
+    dialog.querySelector('.sheet-foot').textContent,
+    /Version 3\.1\.0/,
+  );
+  const settingRows = [...dialog.querySelectorAll('.setting-row')];
+  const feedbackRow = settingRows.at(-2);
+  const additionalSettingsRow = settingRows.at(-1);
+  assert.match(feedbackRow.textContent, /Send feedback/);
+  const feedbackLink = feedbackRow.querySelector('a.text-button');
+  assert.equal(
+    feedbackLink.getAttribute('href'),
+    'https://forms.gle/faEkwySqvE3ebfev6',
+  );
+  assert.equal(feedbackLink.getAttribute('target'), '_blank');
+  assert.match(
+    additionalSettingsRow.querySelector('.setting-copy').textContent,
+    /Additional Settings/,
+  );
+  assert.match(
+    additionalSettingsRow.querySelector('.setting-copy').textContent,
+    /Save a copy of your list/,
+  );
+  const openSettings = additionalSettingsRow.querySelector('a.text-button');
+  assert.equal(openSettings.textContent.trim(), 'Open Settings');
+  assert.equal(openSettings.getAttribute('href'), 'options.html');
+  assert.match(
+    app.constructor.styles[0].cssText,
+    /\.text-button\s*\{[^}]*border-radius: var\(--radius-pill\)/,
+  );
+  assert.match(
+    app.constructor.styles[0].cssText,
+    /\.text-button\s*\{[^}]*font-weight: var\(--weight-medium\)/,
+  );
   dialog.querySelector('.sheet-head button').click();
   await update();
   assert.equal(dialog.open, true);
@@ -401,9 +432,9 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
   // dragend follows drop in the browser and must not move the row again.
   const listBounds = root.querySelector('.list').getBoundingClientRect();
   root.querySelector('.list').dispatchEvent(dragEvent('drop', 1));
-  rows[0].shadowRoot.querySelector('.drag-handle').dispatchEvent(
-    dragEvent('dragend', listBounds.top, listBounds.left),
-  );
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragend', listBounds.top, listBounds.left));
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   rows = [...root.querySelectorAll('reading-list-item')];
@@ -484,9 +515,9 @@ test('manual drag and keyboard movement persist and expose one grip per row', as
   rows[1].shadowRoot
     .querySelector('.row')
     .dispatchEvent(dragEvent('dragover', 1));
-  rows[0].shadowRoot.querySelector('.drag-handle').dispatchEvent(
-    dragEvent('dragend', listBounds.top, listBounds.left),
-  );
+  rows[0].shadowRoot
+    .querySelector('.drag-handle')
+    .dispatchEvent(dragEvent('dragend', listBounds.top, listBounds.left));
   await new Promise((resolve) => setTimeout(resolve, 15));
   await update();
   rows = [...root.querySelectorAll('reading-list-item')];
@@ -503,10 +534,18 @@ test('options page uses switches and hides manual direction', async () => {
   const optionsRoot = options.shadowRoot;
   assert.equal(optionsRoot.querySelectorAll('input[role="switch"]').length, 2);
   const feedback = optionsRoot.querySelector('.feedback-link');
+  assert.ok(feedback.classList.contains('text-button'));
   assert.equal(feedback.textContent.trim(), 'Send feedback');
-  assert.equal(feedback.getAttribute('href'), 'https://forms.gle/faEkwySqvE3ebfev6');
+  assert.equal(
+    feedback.getAttribute('href'),
+    'https://forms.gle/faEkwySqvE3ebfev6',
+  );
   assert.equal(feedback.getAttribute('target'), '_blank');
   assert.match(feedback.getAttribute('rel'), /noopener noreferrer/);
+  assert.equal(
+    optionsRoot.querySelectorAll('.actions button.text-button').length,
+    2,
+  );
   assert.equal(optionsRoot.textContent.includes('Order'), false);
   const sort = [...optionsRoot.querySelectorAll('select')].find(
     (select) => select.value === 'manual',
@@ -521,7 +560,8 @@ test('options page uses switches and hides manual direction', async () => {
   await new Promise((resolve) => setTimeout(resolve, 15));
   await options.updateComplete;
   const orderSelect = [...optionsRoot.querySelectorAll('label')]
-    .find((label) => label.textContent.includes('Order'))?.querySelector('select');
+    .find((label) => label.textContent.includes('Order'))
+    ?.querySelector('select');
   assert.deepEqual(
     [...orderSelect.options].map((option) => option.textContent.trim()),
     ['A to Z', 'Z to A'],
@@ -665,7 +705,10 @@ test('saving an existing page shows Already saved and keeps its edited title', a
   await new Promise((resolve) => setTimeout(resolve, 20));
   await update();
   assert.equal(app.items.length, count);
-  assert.deepEqual(app.items.find((item) => item.url === url), before);
+  assert.deepEqual(
+    app.items.find((item) => item.url === url),
+    before,
+  );
   assert.match(root.querySelector('.info')?.textContent ?? '', /Already saved/);
 });
 
@@ -696,7 +739,8 @@ test('Viewed disclosure appears only while viewed pages are hidden', async () =>
   assert.equal(disclosure.getAttribute('aria-expanded'), 'true');
   assert.equal(root.querySelectorAll('reading-list-item').length, 2);
   assert.equal(
-    root.querySelector('reading-list-item[data-list-group="viewed"]').reorderable,
+    root.querySelector('reading-list-item[data-list-group="viewed"]')
+      .reorderable,
     false,
   );
 
@@ -724,7 +768,10 @@ test('Title sort uses the matching downward Lucide icons and A-to-Z comes first'
   app.sortClosing = false;
   await update();
   let sort = root.querySelector('.sort-button');
-  assert.equal(sort.querySelector('svg').innerHTML, icon(ArrowDownAZ, 18).innerHTML);
+  assert.equal(
+    sort.querySelector('svg').innerHTML,
+    icon(ArrowDownAZ, 18).innerHTML,
+  );
 
   sort.click();
   await update();
@@ -736,7 +783,10 @@ test('Title sort uses the matching downward Lucide icons and A-to-Z comes first'
   app.settings = { ...app.settings, sortOrder: 'down' };
   await update();
   sort = root.querySelector('.sort-button');
-  assert.equal(sort.querySelector('svg').innerHTML, icon(ArrowDownZA, 18).innerHTML);
+  assert.equal(
+    sort.querySelector('svg').innerHTML,
+    icon(ArrowDownZA, 18).innerHTML,
+  );
   app.sortOpen = false;
   app.sortClosing = false;
   app.settings = previousSettings;
