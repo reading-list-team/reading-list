@@ -72,6 +72,8 @@ globalThis.chrome = {
 };
 await import('../extension/scripts/components/reading-list-app.js');
 const { rl } = await import('../extension/scripts/lib/rl.js');
+const { icon } = await import('../extension/scripts/lib/icon.js');
+const { ArrowDownAZ, ArrowDownZA } = await import('lucide');
 
 const app = document.createElement('reading-list-app');
 document.body.append(app);
@@ -498,6 +500,16 @@ test('options page uses switches and hides manual direction', async () => {
   await new Promise((resolve) => setTimeout(resolve, 15));
   await options.updateComplete;
   assert.equal(optionsRoot.textContent.includes('Order'), true);
+  sort.value = 'title';
+  sort.dispatchEvent(new window.Event('change', { bubbles: true }));
+  await new Promise((resolve) => setTimeout(resolve, 15));
+  await options.updateComplete;
+  const orderSelect = [...optionsRoot.querySelectorAll('label')]
+    .find((label) => label.textContent.includes('Order'))?.querySelector('select');
+  assert.deepEqual(
+    [...orderSelect.options].map((option) => option.textContent.trim()),
+    ['A to Z', 'Z to A'],
+  );
   options.conflicts = 1;
   await options.updateComplete;
   const recovery = [
@@ -686,5 +698,31 @@ test('Viewed disclosure appears only while viewed pages are hidden', async () =>
   app.settings = originalSettings;
   app.query = originalQuery;
   app.viewedOpen = false;
+  await update();
+});
+
+test('Title sort uses the matching downward Lucide icons and A-to-Z comes first', async () => {
+  const previousSettings = app.settings;
+  app.settings = { ...app.settings, sortOption: 'title', sortOrder: 'up' };
+  app.sortOpen = false;
+  app.sortClosing = false;
+  await update();
+  let sort = root.querySelector('.sort-button');
+  assert.equal(sort.querySelector('svg').innerHTML, icon(ArrowDownAZ, 18).innerHTML);
+
+  sort.click();
+  await update();
+  const orderLabels = [...root.querySelectorAll('.sort-menu .menu-item')]
+    .map((button) => button.textContent.trim())
+    .filter((label) => label === 'A to Z' || label === 'Z to A');
+  assert.deepEqual(orderLabels, ['A to Z', 'Z to A']);
+
+  app.settings = { ...app.settings, sortOrder: 'down' };
+  await update();
+  sort = root.querySelector('.sort-button');
+  assert.equal(sort.querySelector('svg').innerHTML, icon(ArrowDownZA, 18).innerHTML);
+  app.sortOpen = false;
+  app.sortClosing = false;
+  app.settings = previousSettings;
   await update();
 });

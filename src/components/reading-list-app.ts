@@ -3,7 +3,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { customElement, state } from 'lit/decorators.js';
 import {
   ArrowDownAZ,
-  ArrowUpAZ,
+  ArrowDownZA,
   ArrowDownUp,
   CalendarArrowDown,
   CalendarArrowUp,
@@ -640,7 +640,7 @@ export class ReadingListAppElement extends LitElement {
         margin-top: 22px;
         font-size: var(--text-sm);
         font-weight: var(--weight-medium);
-        color: var(--color-accent);
+        color: var(--color-accent-text);
       }
       .sheet-foot {
         padding: 0 var(--content-gutter) 20px;
@@ -1010,8 +1010,8 @@ export class ReadingListAppElement extends LitElement {
                 ${icon(
                   this.settings.sortOption === 'title'
                     ? this.settings.sortOrder === 'up'
-                      ? ArrowUpAZ
-                      : ArrowDownAZ
+                      ? ArrowDownAZ
+                      : ArrowDownZA
                     : this.settings.sortOption === 'date'
                       ? this.settings.sortOrder === 'up'
                         ? CalendarArrowUp
@@ -1049,7 +1049,10 @@ export class ReadingListAppElement extends LitElement {
                       ? ''
                       : html` <div class="divider"></div>
                           <div class="menu-label">Order</div>
-                          ${(['down', 'up'] as const).map(
+                          ${(this.settings.sortOption === 'title'
+                            ? (['up', 'down'] as const)
+                            : (['down', 'up'] as const)
+                          ).map(
                             (order) =>
                               html`<button
                                 class="menu-item"

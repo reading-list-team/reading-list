@@ -117,7 +117,7 @@ export class ReadingListItemElement extends LitElement {
         font-weight: 400;
       }
       .link:hover {
-        color: var(--color-accent);
+        color: var(--color-accent-text);
       }
       .host {
         margin-top: 4px;

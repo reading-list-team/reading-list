@@ -4,6 +4,8 @@ Visual direction: the supplied three-frame wireframe. The popup uses a compact 3
 
 List rows use a narrow outer gutter and inner row padding. This keeps favicon/text alignment with the 20 px content gutter while giving the full-width save highlight breathing room around the favicon.
 
+The primary mint is `#219D78`, with `#187F61` for hover and white-text controls. Highlights use pale mint in light mode and muted deep green in dark mode. Warning remains amber and danger remains red so their meanings are clear; both use softer surfaces and readable text. Title sort uses Lucide's downward A–Z and Z–A icons, and A to Z appears first in the menu.
+
 ## Flows
 
 - **Popup load:** a centered, reduced-motion-aware Lucide spinner → empty, populated, or error. Local-only and sync-unavailable notices appear below the header. Retry attempts another Chrome sync storage write; it does not claim cross-device delivery.

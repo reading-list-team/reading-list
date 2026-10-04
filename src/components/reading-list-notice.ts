@@ -7,24 +7,24 @@ import { icon } from '../lib/icon.js';
 export class ReadingListNoticeElement extends LitElement {
   static override styles = css`
     :host {
-      --notice-bg: #fef7e0;
-      --notice-text: #67480c;
-      --notice-edge: #fbbc05;
+      --notice-bg: #fff5df;
+      --notice-text: #6e4b0b;
+      --notice-edge: var(--color-warning, #c48a2f);
       display: block;
       font-family: var(--font-ui);
     }
     :host([variant='error']) {
-      --notice-bg: #fce8e6;
-      --notice-text: #9f1c12;
-      --notice-edge: #ea4335;
+      --notice-bg: #fff0ef;
+      --notice-text: #7e2a2d;
+      --notice-edge: var(--color-danger, #c65b5e);
     }
     :host([data-theme='dark']) {
-      --notice-bg: #3a321f;
-      --notice-text: #ffe4a8;
+      --notice-bg: #352a18;
+      --notice-text: #ffd996;
     }
     :host([data-theme='dark'][variant='error']) {
-      --notice-bg: #3a2422;
-      --notice-text: #ffd1cc;
+      --notice-bg: #3b2225;
+      --notice-text: #ffc3c4;
     }
     *,
     *::before,
@@ -63,7 +63,7 @@ export class ReadingListNoticeElement extends LitElement {
       text-decoration: underline;
     }
     button:focus-visible {
-      outline: 2px solid var(--color-focus, #4285f4);
+      outline: 2px solid var(--color-focus, #187f61);
       outline-offset: 2px;
     }
     .dismiss {

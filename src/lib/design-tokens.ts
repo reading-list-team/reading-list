@@ -7,14 +7,17 @@ export const designTokens = css`
     --color-muted: #77808d;
     --color-line: #e9edf2;
     --color-surface: #f5f7fa;
-    --color-highlight: #e8f0fe;
-    --color-highlight-hover: #d9e7ff;
-    --color-accent: #4285f4;
-    --color-accent-hover: #3367d6;
-    --color-danger: #ea4335;
-    --color-success: #34a853;
-    --color-warning: #fbbc05;
-    --color-focus: #4285f4;
+    --color-highlight: #e7f6f0;
+    --color-highlight-hover: #d8efe5;
+    --color-accent: #219d78;
+    --color-accent-hover: #187f61;
+    --color-accent-strong: #187f61;
+    --color-accent-strong-hover: #126b50;
+    --color-accent-text: #187f61;
+    --color-danger: #c65b5e;
+    --color-success: #19865f;
+    --color-warning: #c48a2f;
+    --color-focus: #187f61;
     --font-ui: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI',
       sans-serif;
     --text-xs: 11px;
@@ -34,7 +37,7 @@ export const designTokens = css`
     --radius-pill: 999px;
     --motion-fast: 150ms;
     --motion-smooth: 220ms;
-    --focus-ring: 0 0 0 3px rgba(66, 133, 244, 0.25);
+    --focus-ring: 0 0 0 3px rgba(33, 157, 120, 0.28);
     font-family: var(--font-ui);
     color: var(--color-text);
     background: var(--color-bg);
@@ -45,15 +48,18 @@ export const designTokens = css`
     --color-muted: #a3a3a3;
     --color-line: #333333;
     --color-surface: #262626;
-    --color-highlight: #1c2432;
-    --color-highlight-hover: #263650;
-    --color-accent: #4285f4;
-    --color-accent-hover: #3367d6;
-    --color-danger: #ea4335;
-    --color-success: #34a853;
-    --color-warning: #fbbc05;
-    --color-focus: #4285f4;
-    --focus-ring: 0 0 0 3px rgba(66, 133, 244, 0.35);
+    --color-highlight: #19382e;
+    --color-highlight-hover: #23503f;
+    --color-accent: #219d78;
+    --color-accent-hover: #187f61;
+    --color-accent-strong: #187f61;
+    --color-accent-strong-hover: #126b50;
+    --color-accent-text: #71d6aa;
+    --color-danger: #e08083;
+    --color-success: #66cda1;
+    --color-warning: #e4ac57;
+    --color-focus: #71d6aa;
+    --focus-ring: 0 0 0 3px rgba(113, 214, 170, 0.35);
   }
   *,
   *::before,

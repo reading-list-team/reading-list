@@ -98,12 +98,12 @@ export class ReadingListOptionsElement extends LitElement {
         background: var(--color-surface);
       }
       .primary {
-        background: var(--color-accent);
+        background: var(--color-accent-strong);
         color: #fff;
-        border-color: var(--color-accent);
+        border-color: var(--color-accent-strong);
       }
       .primary:hover {
-        background: var(--color-accent-hover);
+        background: var(--color-accent-strong-hover);
       }
       .actions {
         display: flex;
@@ -280,16 +280,11 @@ export class ReadingListOptionsElement extends LitElement {
                               .value as ReadingListSettings['sortOrder'],
                           )}
                       >
-                        <option value="down">
-                          ${this.settings.sortOption === 'date'
-                            ? 'Newest first'
-                            : 'Z to A'}
-                        </option>
-                        <option value="up">
-                          ${this.settings.sortOption === 'date'
-                            ? 'Oldest first'
-                            : 'A to Z'}
-                        </option>
+                        ${this.settings.sortOption === 'date'
+                          ? html`<option value="down">Newest first</option>
+                              <option value="up">Oldest first</option>`
+                          : html`<option value="up">A to Z</option>
+                              <option value="down">Z to A</option>`}
                       </select></label
                     >`}
               </section>
