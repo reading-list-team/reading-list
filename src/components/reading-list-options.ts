@@ -84,7 +84,8 @@ export class ReadingListOptionsElement extends LitElement {
       :host([data-theme='dark']) select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       }
-      button {
+      button,
+      .feedback-link {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -94,7 +95,11 @@ export class ReadingListOptionsElement extends LitElement {
         color: var(--color-text);
         padding: 8px 12px;
       }
-      button:hover {
+      .feedback-link {
+        text-decoration: none;
+      }
+      button:hover,
+      .feedback-link:hover {
         background: var(--color-surface);
       }
       .primary {
@@ -374,6 +379,17 @@ export class ReadingListOptionsElement extends LitElement {
                       </div>
                     </div>`
                   : ''}
+              </section>
+              <section>
+                <h2>Feedback</h2>
+                <p class="muted">Found a bug or have an idea? Tell us.</p>
+                <a
+                  class="feedback-link"
+                  href="https://forms.gle/faEkwySqvE3ebfev6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Send feedback</a
+                >
               </section>`}
     </main>`;
   }

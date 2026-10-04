@@ -502,6 +502,11 @@ test('options page uses switches and hides manual direction', async () => {
   await options.updateComplete;
   const optionsRoot = options.shadowRoot;
   assert.equal(optionsRoot.querySelectorAll('input[role="switch"]').length, 2);
+  const feedback = optionsRoot.querySelector('.feedback-link');
+  assert.equal(feedback.textContent.trim(), 'Send feedback');
+  assert.equal(feedback.getAttribute('href'), 'https://forms.gle/faEkwySqvE3ebfev6');
+  assert.equal(feedback.getAttribute('target'), '_blank');
+  assert.match(feedback.getAttribute('rel'), /noopener noreferrer/);
   assert.equal(optionsRoot.textContent.includes('Order'), false);
   const sort = [...optionsRoot.querySelectorAll('select')].find(
     (select) => select.value === 'manual',
