@@ -584,11 +584,8 @@ export class ReadingListAppElement extends LitElement {
           opacity: 0;
         }
       }
-      .sheet-head,
-      .sheet-foot {
-        flex: none;
-      }
       .sheet-head {
+        flex: none;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -604,11 +601,14 @@ export class ReadingListAppElement extends LitElement {
         padding: 8px var(--content-gutter) 20px;
         flex: 1;
         min-height: 0;
+        display: flex;
+        flex-direction: column;
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
       .setting-row {
+        flex: none;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -664,7 +664,9 @@ export class ReadingListAppElement extends LitElement {
         line-height: 1.4;
       }
       .sheet-foot {
-        padding: 0 var(--content-gutter) 20px;
+        flex: none;
+        margin-top: auto;
+        padding-top: var(--space-6);
         color: var(--color-muted);
         font-size: var(--text-xs);
       }
@@ -1330,6 +1332,19 @@ export class ReadingListAppElement extends LitElement {
                   ...this.settings,
                   openNewTab: (event.target as HTMLInputElement).checked,
                 })} /></label>
+          <label class="setting-row"
+            ><span>Show viewed pages</span
+            ><input
+              type="checkbox"
+              role="switch"
+              class="switch"
+              .checked=${this.settings.viewAll}
+              @change=${(event: Event) =>
+                this.saveSettings({
+                  ...this.settings,
+                  viewAll: (event.target as HTMLInputElement).checked,
+                })} /></label
+          >
           <div class="setting-row">
             <div class="setting-copy">
               <span>More settings</span>
@@ -1339,8 +1354,10 @@ export class ReadingListAppElement extends LitElement {
               >Open settings</a
             >
           </div>
+          <div class="sheet-foot">
+            Version ${chrome.runtime.getManifest?.().version ?? ''}
+          </div>
         </div>
-        <div class="sheet-foot">Version 3.1.0</div>
       </dialog>
     `;
   }

@@ -51,7 +51,10 @@ const area = (records) => ({
   },
 });
 globalThis.chrome = {
-  runtime: { async openOptionsPage() {} },
+  runtime: {
+    async openOptionsPage() {},
+    getManifest() { return { version: '3.1.0' }; },
+  },
   i18n: {
     getMessage() {
       return '';
@@ -293,7 +296,9 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   const dialog = root.querySelector('dialog');
   assert.equal(dialog.open, true);
   assert.equal(dialog.querySelectorAll('.theme-options button').length, 3);
-  assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 1);
+  assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 2);
+  assert.equal(dialog.querySelector('.sheet-foot').parentElement.className, 'sheet-body');
+  assert.match(dialog.querySelector('.sheet-foot').textContent, /Version 3\.1\.0/);
   assert.match(dialog.querySelector('.setting-copy').textContent, /More settings/);
   assert.match(dialog.querySelector('.setting-copy').textContent, /Save a copy of your list/);
   const moreSettings = dialog.querySelector('.details');
