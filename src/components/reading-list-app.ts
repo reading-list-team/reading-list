@@ -636,11 +636,32 @@ export class ReadingListAppElement extends LitElement {
         color: var(--color-bg);
       }
       .details {
-        display: block;
-        margin-top: 22px;
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 6px var(--space-2);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface);
         font-size: var(--text-sm);
         font-weight: var(--weight-medium);
         color: var(--color-accent-text);
+        text-decoration: none;
+      }
+      .details:hover {
+        background: var(--color-highlight);
+      }
+      .setting-copy {
+        min-width: 0;
+        flex: 1;
+      }
+      .setting-copy p {
+        margin: var(--space-1) 0 0;
+        color: var(--color-muted);
+        font-size: var(--text-sm);
+        line-height: 1.4;
       }
       .sheet-foot {
         padding: 0 var(--content-gutter) 20px;
@@ -1308,22 +1329,16 @@ export class ReadingListAppElement extends LitElement {
                 this.saveSettings({
                   ...this.settings,
                   openNewTab: (event.target as HTMLInputElement).checked,
-                })} /></label
-          ><label class="setting-row"
-            ><span>Show viewed pages</span
-            ><input
-              type="checkbox"
-              role="switch"
-              class="switch"
-              .checked=${this.settings.viewAll}
-              @change=${(event: Event) =>
-                this.saveSettings({
-                  ...this.settings,
-                  viewAll: (event.target as HTMLInputElement).checked,
-                })} /></label
-          ><a class="details" href="options.html" target="_blank" rel="noopener"
-            >Backups, import, and detailed settings →</a
-          >
+                })} /></label>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <span>More settings</span>
+              <p>Save a copy of your list or add one from a file.</p>
+            </div>
+            <a class="details" href="options.html" target="_blank" rel="noopener"
+              >Open settings</a
+            >
+          </div>
         </div>
         <div class="sheet-foot">Version 3.1.0</div>
       </dialog>

@@ -293,7 +293,13 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   const dialog = root.querySelector('dialog');
   assert.equal(dialog.open, true);
   assert.equal(dialog.querySelectorAll('.theme-options button').length, 3);
-  assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 2);
+  assert.equal(dialog.querySelectorAll('input[role="switch"]').length, 1);
+  assert.match(dialog.querySelector('.setting-copy').textContent, /More settings/);
+  assert.match(dialog.querySelector('.setting-copy').textContent, /Save a copy of your list/);
+  const moreSettings = dialog.querySelector('.details');
+  assert.equal(moreSettings.tagName, 'A');
+  assert.equal(moreSettings.textContent.trim(), 'Open settings');
+  assert.equal(moreSettings.getAttribute('href'), 'options.html');
   dialog.querySelector('.sheet-head button').click();
   await update();
   assert.equal(dialog.open, true);
