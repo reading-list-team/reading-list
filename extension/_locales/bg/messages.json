@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Намиране на страница",
+    "message": "Търсене",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Обратна връзка",
+    "message": "Помощ и обратна връзка",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "Открихте грешка или имате идея? Кажете ни.",
+    "message": "Нуждаете се от помощ? Открихте проблем или имате идея? Кажете ни чрез този формуляр.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Изпращане на отзив",
+    "message": "Отвори формуляра",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Допълнителни настройки",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Запазете копие на списъка си или добавете такова от файл.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Отвори настройки",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Версия $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "Тук е запазена $count$ страница.",
+    "message": "Имате $count$ запазена страница.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "Тук са запазени $count$ страници.",
+    "message": "Имате $count$ запазени страници.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "Може да се появят на другите ви устройства по-късно.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "Намерихме две копия на страница. И двете са запазени. Изтеглете резервно копие, за да ги запазите.",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "Тема",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Изпратете отзив",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Отвори",
+    "description": "Short action label in the Settings sheet."
   }
 }

@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Seite finden",
+    "message": "Suche",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Feedback",
+    "message": "Hilfe und Feedback",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "Fehler gefunden oder eine Idee? Schreiben Sie uns.",
+    "message": "Brauchen Sie Hilfe? Haben Sie ein Problem oder eine Idee? Schreiben Sie uns über dieses Formular.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Feedback senden",
+    "message": "Formular öffnen",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Weitere Einstellungen",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Speichern Sie eine Kopie Ihrer Liste oder fügen Sie eine aus einer Datei hinzu.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Einstellungen öffnen",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Version $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "$count$ Seite ist hier gespeichert.",
+    "message": "Sie haben $count$ gespeicherte Seite.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "$count$ Seiten sind hier gespeichert.",
+    "message": "Sie haben $count$ gespeicherte Seiten.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "Sie können später auf Ihren anderen Geräten erscheinen.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "Wir haben zwei Kopien einer Seite gefunden. Beide sind sicher. Laden Sie eine Sicherung herunter, um beide zu behalten.",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "Design",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Feedback geben",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Öffnen",
+    "description": "Short action label in the Settings sheet."
   }
 }

@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "查找页面",
+    "message": "搜索",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "反馈",
+    "message": "帮助与反馈",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "发现问题或有新想法？请告诉我们。",
+    "message": "需要帮助？发现问题？有新想法？请用此表单告诉我们。",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "发送反馈",
+    "message": "打开表单",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "其他设置",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "保存列表副本，或从文件中添加列表。",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "打开设置",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "版本 $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "此处保存了 $count$ 个页面。",
+    "message": "您保存了 $count$ 个页面。",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "此处保存了 $count$ 个页面。",
+    "message": "您保存了 $count$ 个页面。",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "它们稍后可能会出现在您的其他设备上。",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "发现同一页面的两个副本。两个副本均安全。请下载备份以保留它们。",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "主题",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "提供反馈",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "打开",
+    "description": "Short action label in the Settings sheet."
   }
 }

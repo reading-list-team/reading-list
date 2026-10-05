@@ -293,9 +293,6 @@ export class ReadingListOptionsElement extends LitElement {
                     this.count === 1 ? 'savedHereOne' : 'savedHereOther',
                     i18n.number(this.count),
                   )}
-                  ${this.localOnly || this.syncUnavailable
-                    ? ''
-                    : i18n.getMessage('otherDevicesLater')}
                 </p>
                 ${!this.errorNotice &&
                 (this.localOnly || this.syncUnavailable) &&

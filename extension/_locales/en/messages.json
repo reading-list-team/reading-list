@@ -237,7 +237,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Find a page",
+    "message": "Search",
     "description": "findPage"
   },
   "openSettings": {
@@ -315,28 +315,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Feedback",
+    "message": "Help and feedback",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "Found a bug or have an idea? Tell us.",
+    "message": "Need help? Found a problem? Have an idea? Use this form to tell us.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Send feedback",
+    "message": "Open form",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Additional Settings",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Save a copy of your list or add one from a file.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Open Settings",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Version $version$",
@@ -536,7 +528,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "$count$ page is saved here.",
+    "message": "You have $count$ saved page.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -545,17 +537,13 @@
     }
   },
   "savedHereOther": {
-    "message": "$count$ pages are saved here.",
+    "message": "You have $count$ saved pages.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "They may show up on your other devices later.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "We found two copies of a page. Both are safe. Download a backup to keep them.",
@@ -687,5 +675,13 @@
   "themeLabel": {
     "message": "Theme",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Provide Feedback",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Open",
+    "description": "Short action label in the Settings sheet."
   }
 }

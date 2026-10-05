@@ -215,6 +215,7 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   search.click();
   await update();
   const field = root.querySelector('.search-field');
+  assert.equal(field.getAttribute('placeholder'), 'Search');
   assert.equal(root.activeElement, field);
   assert.equal(
     root.querySelector('.close-search').parentElement,
@@ -349,8 +350,13 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
   const settingRows = [...dialog.querySelectorAll('.setting-row')];
   const feedbackRow = settingRows.at(-2);
   const additionalSettingsRow = settingRows.at(-1);
-  assert.match(feedbackRow.textContent, /Send feedback/);
+  assert.equal(
+    feedbackRow.querySelector('.setting-copy').textContent.trim(),
+    'Provide Feedback',
+  );
   const feedbackLink = feedbackRow.querySelector('a.text-button');
+  assert.equal(feedbackLink.textContent.trim(), 'Open');
+  assert.equal(feedbackLink.getAttribute('aria-label'), 'Provide Feedback');
   assert.equal(
     feedbackLink.getAttribute('href'),
     'https://forms.gle/faEkwySqvE3ebfev6',
@@ -360,12 +366,13 @@ test('search, editing, sort, and settings expose keyboard reachable controls and
     additionalSettingsRow.querySelector('.setting-copy').textContent,
     /Additional Settings/,
   );
-  assert.match(
-    additionalSettingsRow.querySelector('.setting-copy').textContent,
-    /Save a copy of your list/,
+  assert.equal(
+    additionalSettingsRow.querySelector('.setting-copy').textContent.trim(),
+    'Additional Settings',
   );
   const openSettings = additionalSettingsRow.querySelector('a.text-button');
-  assert.equal(openSettings.textContent.trim(), 'Open Settings');
+  assert.equal(openSettings.textContent.trim(), 'Open');
+  assert.equal(openSettings.getAttribute('aria-label'), 'Additional Settings');
   assert.equal(openSettings.getAttribute('href'), 'options.html');
   assert.match(
     app.constructor.styles[0].cssText,
@@ -574,7 +581,13 @@ test('options page uses switches and hides manual direction', async () => {
   assert.equal(optionsRoot.querySelectorAll('input[role="switch"]').length, 2);
   const feedback = optionsRoot.querySelector('.feedback-link');
   assert.ok(feedback.classList.contains('text-button'));
-  assert.equal(feedback.textContent.trim(), 'Send feedback');
+  assert.equal(feedback.textContent.trim(), 'Open form');
+  assert.match(optionsRoot.textContent, /You have \d+ saved pages?\./);
+  assert.match(
+    optionsRoot.textContent,
+    /Need help\? Found a problem\? Have an idea\?/,
+  );
+  assert.equal(optionsRoot.textContent.includes('other devices'), false);
   assert.equal(
     feedback.getAttribute('href'),
     'https://forms.gle/faEkwySqvE3ebfev6',
@@ -873,7 +886,7 @@ test('every listed language covers the interface and renders its translated cont
     assert.equal(
       root
         .querySelector('.setting-copy')
-        .textContent.includes(catalog.feedback.message),
+        .textContent.includes(catalog.provideFeedback.message),
       true,
     );
     assert.equal(

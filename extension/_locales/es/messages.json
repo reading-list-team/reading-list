@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Buscar una página",
+    "message": "Buscar",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Comentarios",
+    "message": "Ayuda y comentarios",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "¿Encontraste un error o tienes una idea? Cuéntanos.",
+    "message": "¿Necesitas ayuda? ¿Encontraste un problema? ¿Tienes una idea? Cuéntanoslo en este formulario.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Enviar comentarios",
+    "message": "Abrir formulario",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Ajustes adicionales",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Guarda una copia de tu lista o agrega una desde un archivo.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Abrir ajustes",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Versión $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "Hay $count$ página guardada aquí.",
+    "message": "Tienes $count$ página guardada.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "Hay $count$ páginas guardadas aquí.",
+    "message": "Tienes $count$ páginas guardadas.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "Podrían aparecer más tarde en tus otros dispositivos.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "Encontramos dos copias de una página. Ambas están a salvo. Descarga una copia de seguridad para conservarlas.",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "Tema",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Enviar comentarios",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Abrir",
+    "description": "Short action label in the Settings sheet."
   }
 }

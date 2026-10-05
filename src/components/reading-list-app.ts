@@ -1367,28 +1367,28 @@ export class ReadingListAppElement extends LitElement {
           /></label>
           <div class="setting-row">
             <div class="setting-copy">
-              <span>${i18n.getMessage('feedback')}</span>
-              <p>${i18n.getMessage('feedbackHelp')}</p>
+              <span>${i18n.getMessage('provideFeedback')}</span>
             </div>
             <a
               class="text-button"
+              aria-label=${i18n.getMessage('provideFeedback')}
               href="https://forms.gle/faEkwySqvE3ebfev6"
               target="_blank"
               rel="noopener noreferrer"
-              >${i18n.getMessage('sendFeedback')}</a
+              >${i18n.getMessage('openAction')}</a
             >
           </div>
           <div class="setting-row">
             <div class="setting-copy">
               <span>${i18n.getMessage('additionalSettings')}</span>
-              <p>${i18n.getMessage('additionalSettingsHelp')}</p>
             </div>
             <a
               class="text-button"
+              aria-label=${i18n.getMessage('additionalSettings')}
               href="options.html"
               target="_blank"
               rel="noopener"
-              >${i18n.getMessage('openSettingsButton')}</a
+              >${i18n.getMessage('openAction')}</a
             >
           </div>
           <div class="sheet-foot">

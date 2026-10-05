@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Rechercher une page",
+    "message": "Rechercher",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Commentaires",
+    "message": "Aide et commentaires",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "Un bug ou une idée ? Dites-le-nous.",
+    "message": "Besoin d’aide ? Un problème ou une idée ? Dites-le-nous avec ce formulaire.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Envoyer un commentaire",
+    "message": "Ouvrir le formulaire",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Autres paramètres",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Enregistrez une copie de votre liste ou ajoutez-en une depuis un fichier.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Ouvrir les paramètres",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Version $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "$count$ page est enregistrée ici.",
+    "message": "Vous avez $count$ page enregistrée.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "$count$ pages sont enregistrées ici.",
+    "message": "Vous avez $count$ pages enregistrées.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "Elles pourront apparaître plus tard sur vos autres appareils.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "Nous avons trouvé deux copies d'une page. Les deux sont en sécurité. Téléchargez une sauvegarde pour les conserver.",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "Thème",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Donner son avis",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Ouvrir",
+    "description": "Short action label in the Settings sheet."
   }
 }

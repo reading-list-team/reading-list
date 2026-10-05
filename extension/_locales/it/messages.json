@@ -212,7 +212,7 @@
     "description": "searchSavedPages"
   },
   "findPage": {
-    "message": "Trova una pagina",
+    "message": "Cerca",
     "description": "findPage"
   },
   "openSettings": {
@@ -290,28 +290,20 @@
     "description": "showViewedPages"
   },
   "feedback": {
-    "message": "Feedback",
+    "message": "Aiuto e feedback",
     "description": "feedback"
   },
   "feedbackHelp": {
-    "message": "Hai trovato un problema o hai un'idea? Scrivici.",
+    "message": "Hai bisogno di aiuto? Hai trovato un problema o hai un’idea? Usa questo modulo per dircelo.",
     "description": "feedbackHelp"
   },
   "sendFeedback": {
-    "message": "Invia feedback",
+    "message": "Apri il modulo",
     "description": "sendFeedback"
   },
   "additionalSettings": {
     "message": "Altre impostazioni",
     "description": "additionalSettings"
-  },
-  "additionalSettingsHelp": {
-    "message": "Salva una copia della lista o aggiungine una da un file.",
-    "description": "additionalSettingsHelp"
-  },
-  "openSettingsButton": {
-    "message": "Apri le impostazioni",
-    "description": "openSettingsButton"
   },
   "versionLabel": {
     "message": "Versione $version$",
@@ -511,7 +503,7 @@
     "description": "backups"
   },
   "savedHereOne": {
-    "message": "$count$ pagina è salvata qui.",
+    "message": "Hai $count$ pagina salvata.",
     "description": "savedHereOne",
     "placeholders": {
       "count": {
@@ -520,17 +512,13 @@
     }
   },
   "savedHereOther": {
-    "message": "$count$ pagine sono salvate qui.",
+    "message": "Hai $count$ pagine salvate.",
     "description": "savedHereOther",
     "placeholders": {
       "count": {
         "content": "$1"
       }
     }
-  },
-  "otherDevicesLater": {
-    "message": "Potrebbero apparire più tardi sugli altri dispositivi.",
-    "description": "otherDevicesLater"
   },
   "conflictOne": {
     "message": "Abbiamo trovato due copie di una pagina. Entrambe sono al sicuro. Scarica un backup per conservarle.",
@@ -662,5 +650,13 @@
   "themeLabel": {
     "message": "Tema",
     "description": "Settings field label."
+  },
+  "provideFeedback": {
+    "message": "Invia feedback",
+    "description": "Settings sheet link to the feedback form."
+  },
+  "openAction": {
+    "message": "Apri",
+    "description": "Short action label in the Settings sheet."
   }
 }
